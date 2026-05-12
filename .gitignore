@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+workspaces/*/gather_evidence/round_*_trajectories/
+workspaces/*/gather_evidence/round_*_trajectory_features/
+.current_workspace

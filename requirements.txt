@@ -1,0 +1,6 @@
+numpy
+gymnasium
+
+# Per-workspace deps (install only the ones you use):
+# highway-env  # workspaces/merge
+

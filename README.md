@@ -4,9 +4,9 @@ A Claude-Code-driven workflow for surfacing **evidence of reward
 misspecification** in gym/gymnasium environments. You bring an env and a
 hand-written reward function; the system rolls out diverse policies,
 scores trajectories with both your reward and a set of
-stakeholder-perspective performance metrics, and shows you the trajectory
-pairs where the two disagree most strongly. You read the pairs and
-decide how to edit the reward.
+stakeholder-perspective performance metrics, and shows you trajectory
+pairs where the two disagree. You read the pairs and decide how to edit
+the reward.
 
 The pairs are the end product. There is no automated reward learning —
 this is a debugger for reward functions.
@@ -16,8 +16,8 @@ this is a debugger for reward functions.
 - Python 3.10+
 - `numpy`, `gymnasium` (see `requirements.txt`)
 - Claude Code (the skills below are invoked as slash commands)
-- Optional per-workspace dependencies (e.g. `highway-env` for the
-  `merge` workspace)
+- Optional per-workspace dependencies (declared in each workspace's
+  own `requirements.txt`)
 
 ```bash
 pip install -r requirements.txt
@@ -26,13 +26,13 @@ pip install -r requirements.txt
 ## Quickstart
 
 All commands are slash commands run inside Claude Code, from the repo
-root. `<name>` is the workspace name (e.g. `merge`).
+root. `<name>` is the workspace name (e.g. `hopper`).
 
 ```
 /repair-setup <name>     # author env_config.py + designed_reward_fn.py
 /repair-init             # author feature extractor + performance metrics
 /repair-round            # roll out policies, score them, surface disagreements
-/repair-preferences      # re-show the top-5 disagreement pairs
+/repair-preferences      # re-show the most informative disagreement pairs
 /repair-verify           # after editing the reward, recheck snapshotted pairs
 ```
 
@@ -50,21 +50,41 @@ follow the prompts.
    ("the safety reviewer", "the highway-operations view", ...).
 3. **`/repair-round`** — authors data-collection policies, rolls them
    out in the env, computes features, and checks whether the evidence
-   is sufficient. May run up to 3 rounds per invocation, then hands off
-   to `/repair-preferences`.
-4. **`/repair-preferences`** — prints the 5 most informative trajectory
-   pairs as preference labels: feature key, A vs B identifying info,
-   reward + metric scores with explicit A≻B / B≻A labels, a feature
-   delta table, and a "why they disagree" summary per pair plus an
-   overall pattern interpretation. Snapshots the pairs to disk.
+   is sufficient. Every round includes a policy that maximizes the
+   *current* designed reward, plus additional policies that probe
+   reward terms the prior evidence didn't exercise. May run up to 3
+   rounds per invocation, then hands off to `/repair-preferences`.
+4. **`/repair-preferences`** — prints up to 15 trajectory pairs as
+   preference labels: feature key, anonymized Trajectory A vs
+   Trajectory B, reward + metric scores with explicit A≻B / B≻A
+   labels, and a feature delta table. Each pair is followed by two
+   summary lines — *why they disagree* and *what you might change in
+   the reward function to flip this preference* — and the run ends
+   with an overall pattern interpretation. Pairs are snapshotted to
+   disk so `/repair-verify` can recheck them later.
 5. **You edit the reward.** Then either:
    - **`/repair-verify`** — recomputes the designed reward on the
      snapshotted pairs and reports which disagreements are now resolved.
-   - **`/repair-round`** — collects new evidence under the updated
-     reward; later rounds target the current reward's remaining flaws.
+   - **`/repair-round`** — skips verification and collects fresh
+     evidence under the updated reward; later rounds target the
+     current reward's remaining flaws.
 
 `/repair-preferences` can be re-run any time — it reloads from disk and
 re-scores under whatever reward is currently in the workspace.
+
+### How pairs are selected
+
+The pool of disagreeing pairs is all unordered trajectory pairs where
+the designed reward and at least one performance metric rank the two
+trajectories in opposite orders (rank-product check with an optional
+`--margin` threshold). From that pool, pairs are picked greedily to
+maximize `xᵀ V⁻¹ x` over the feature delta `x = φ(B) − φ(A)`, where
+`V` starts as `κλ · I` and accumulates `x xᵀ` from each prior pick.
+Each new pick prefers a direction in feature-delta space that the
+prior picks haven't already covered, so the surfaced pairs span
+different reward terms, different stakeholders, and different
+trade-off axes rather than re-showing variants of the loudest single
+disagreement.
 
 ## Workspaces
 
@@ -95,7 +115,8 @@ The skills do this for you, but you can also drive the Python directly:
 
 ```bash
 python -m runtime.run_round --workspace workspaces/<name> --round K
-python find_informative_pairs.py --workspace workspaces/<name> --top-k 5
+python find_informative_pairs.py --workspace workspaces/<name> \
+       --top-overall 15 --format preference-labels
 ```
 
 If `.current_workspace` is set, `--workspace` may be omitted.

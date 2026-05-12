@@ -22,7 +22,7 @@ Every environment-specific file lives in a **workspace** under
 env-agnostic — it is selected at runtime via `--workspace workspaces/<name>`.
 
 Each `/repair-*` skill takes the workspace name as `args`
-(e.g. `/repair-setup merge`). The active workspace is persisted to
+(e.g. `/repair-setup hopper`). The active workspace is persisted to
 `.current_workspace` at the repo root, so subsequent skill calls default
 to it. To switch workspaces, pass `args` explicitly again.
 
@@ -73,7 +73,7 @@ Skills follow these tone rules in every message they send the user:
 - **Never name a candidate performance metric by its internal id**
   (e.g. `performance_metric_safety`). Either say "the candidate
   performance metric" or describe the stakeholder perspective from the
-  docstring ("the safety reviewer's view", "the highway-operations view").
+  docstring ("the safety reviewer's view", "the operations stakeholder").
 
 ## Skill chaining — always tell the user what to run next
 
@@ -123,7 +123,7 @@ automated_reward_repairer/
 ├── .claude/skills/{repair-setup,repair-init,repair-round,repair-preferences,repair-verify}/SKILL.md
 │
 └── workspaces/
-    └── <name>/                          # one directory per env (e.g. merge)
+    └── <name>/                          # one directory per env (e.g. hopper)
         ├── env_config.py               # authored in /repair-setup
         ├── designed_reward_fn.py       # authored or stubbed in /repair-setup
         ├── requirements.txt            # optional, env-specific deps

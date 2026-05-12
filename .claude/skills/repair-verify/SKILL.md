@@ -1,16 +1,16 @@
 ---
 name: repair-verify
-description: Check whether the updated reward function resolves the disagreements surfaced by past /repair-preferences runs. For every saved top-5 pair, recompute the designed reward and report whether the reward now agrees with the stakeholder. Prints any pairs that still disagree. Use after the user edits the reward and wants to confirm the fix.
+description: Check whether the updated reward function resolves the disagreements surfaced by past /repair-preferences runs. For every saved pair, recompute the designed reward and report whether the reward now agrees with the stakeholder. Prints any pairs that still disagree. Use after the user edits the reward and wants to confirm the fix.
 ---
 
 # /repair-verify — confirm the reward fix addresses past disagreements
 
-Whenever `/repair-preferences` runs, it saves a snapshot of the top-5
-trajectory pairs (which trajectories, which stakeholder, which side the
-stakeholder preferred). This skill loads every past snapshot, recomputes
-the designed reward on each pair under the **current** reward function,
-and reports which pairs the new reward now agrees with — and which still
-disagree.
+Whenever `/repair-preferences` runs, it saves a snapshot of the
+surfaced trajectory pairs (which trajectories, which stakeholder, which
+side the stakeholder preferred). This skill loads every past snapshot,
+recomputes the designed reward on each pair under the **current**
+reward function, and reports which pairs the new reward now agrees
+with — and which still disagree.
 
 ## Tone for messages to the user
 
@@ -30,7 +30,7 @@ Whether the reward is actually right is the user's call. (See
 
 ## Resolve the workspace
 
-The skill takes the workspace name as `args` (e.g. `/repair-verify merge`).
+The skill takes the workspace name as `args` (e.g. `/repair-verify hopper`).
 If `args` is empty, read `.current_workspace` at the repo root; if that
 doesn't exist, tell the user to run `/repair-setup` first.
 
@@ -59,7 +59,9 @@ they look for disagreements first.
 Reprint each unresolved pair verbatim inside its own fenced code block,
 with a 1–2 sentence "why they disagree" summary printed **directly
 under that pair** (interleaved — not collected at the end). Follow the
-same format as `/repair-preferences` Step 2.
+same format as `/repair-preferences` Step 2. The script anonymizes
+trajectory identity entirely (just "Trajectory A" / "Trajectory B");
+do not re-introduce round, step count, or policy class.
 
 After all unresolved pairs (each followed by its own "why" summary),
 add a short (≤ 4 lines) overall interpretation that names the pattern

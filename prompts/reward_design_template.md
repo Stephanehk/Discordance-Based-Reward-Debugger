@@ -40,7 +40,7 @@ Describe when it is acceptable to prioritize one objective over another.
 > Example:
 > - Reaching the goal is more important than minimizing control effort —
 >   it's fine to use lots of energy if it means succeeding.
-> - But never trade safety for speed: a single collision should outweigh
->   any speed benefit.
+> - But never trade safety for performance: a single safety-critical
+>   failure should outweigh any task-completion benefit.
 
 (your trade-off rules here)

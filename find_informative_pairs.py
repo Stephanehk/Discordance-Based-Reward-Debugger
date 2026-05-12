@@ -1,9 +1,25 @@
 """Find trajectory pairs where designed_reward_fn disagrees with a performance metric.
 
+Selection algorithm (--top-overall mode):
+  1. Build the *disagreeing-pair set*: all unordered trajectory pairs (i, j)
+     for which the designed reward and at least one performance metric rank
+     the two trajectories in opposite orders (rank-product check, with
+     optional --margin threshold per metric).
+  2. Greedy informative selection on that set. Each pair contributes a
+     feature delta x = φ(B) − φ(A), where A is the reward-preferred side.
+     Pick pairs one at a time, each time choosing
+         argmax_x  x^T V_t^{-1} x
+     where  V_1 = κλ · I_d  and  V_{t+1} = V_t + x_t x_t^T.
+     This is the elliptic-potential / G-optimal active-query criterion
+     (cf. arxiv 2111.04850): each new pick prefers a direction in
+     feature-delta space that the prior picks have not yet covered.
+
 Usage:
     python find_informative_pairs.py --workspace workspaces/<name>
-    python find_informative_pairs.py --workspace workspaces/<name> --top-k 5 --margin 0.0
+    python find_informative_pairs.py --workspace workspaces/<name> --top-overall 5
     python find_informative_pairs.py --workspace workspaces/<name> --rounds 1,2
+    python find_informative_pairs.py --workspace workspaces/<name> \
+           --top-overall 5 --kappa-lambda 0.5
 """
 from __future__ import annotations
 
@@ -17,6 +33,8 @@ import re
 import sys
 from dataclasses import dataclass
 from datetime import datetime
+
+import numpy as np
 
 from runtime.workspace import add_workspace_arg, activate
 from runtime.trajectory_io import (
@@ -37,6 +55,15 @@ class TrajRecord:
     metric_values: dict        # name -> float
     features: list[float]
     feature_names: list
+
+
+@dataclass
+class PairCandidate:
+    """A disagreeing trajectory pair. A is the reward-preferred side."""
+    a_idx: int                  # index into records (reward prefers a_idx)
+    b_idx: int
+    delta: np.ndarray           # φ(B) − φ(A)
+    disagreements: list[dict]   # [{perspective, metric_a, metric_b}, ...]
 
 
 def _load_designed_reward_fn():
@@ -119,7 +146,114 @@ def _ranks(values: list[float]) -> list[float]:
     return ranks
 
 
+def _build_disagreeing_candidates(
+    records: list[TrajRecord],
+    metrics: list[tuple[str, callable, str]],
+    margin: float,
+) -> list[PairCandidate]:
+    """All pairs where the reward and ≥1 metric disagree on the ranking.
+
+    Pair orientation: A is the side the reward prefers (higher reward rank).
+    Tied-reward pairs are skipped. Pairs missing features on either side
+    are skipped (no φ → no Mahalanobis score).
+
+    `margin` is the geometric-mean rank-gap threshold per metric: a metric
+    is counted as disagreeing only if |Δrank_reward| · |Δrank_metric| ≥ margin².
+    """
+    n = len(records)
+    if n < 2:
+        return []
+    metric_names = [m[0] for m in metrics]
+    metric_docs_by_name = {m[0]: m[2] for m in metrics}
+    reward_ranks = _ranks([r.designed_reward for r in records])
+    metric_ranks_by_name = {
+        name: _ranks([r.metric_values[name] for r in records])
+        for name in metric_names
+    }
+    inv_n = 1.0 / max(n - 1, 1)
+    margin_sq = margin * margin
+
+    out: list[PairCandidate] = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            dr = (reward_ranks[i] - reward_ranks[j]) * inv_n
+            if dr == 0:
+                continue
+            if dr > 0:
+                a_idx, b_idx, dr_ab = i, j, dr
+            else:
+                a_idx, b_idx, dr_ab = j, i, -dr
+            # dr_ab > 0; reward prefers A over B.
+
+            disagreements: list[dict] = []
+            for name in metric_names:
+                m_rank = metric_ranks_by_name[name]
+                dm_ab = (m_rank[a_idx] - m_rank[b_idx]) * inv_n
+                if dm_ab >= 0:
+                    continue  # metric agrees with reward, or ties
+                if dr_ab * (-dm_ab) < margin_sq:
+                    continue  # disagreement too small to count
+                disagreements.append({
+                    "perspective": metric_docs_by_name[name],
+                    "metric_a": float(records[a_idx].metric_values[name]),
+                    "metric_b": float(records[b_idx].metric_values[name]),
+                })
+            if not disagreements:
+                continue
+
+            rec_a = records[a_idx]
+            rec_b = records[b_idx]
+            if not rec_a.features or not rec_b.features:
+                continue
+            delta = (np.asarray(rec_b.features, dtype=float)
+                     - np.asarray(rec_a.features, dtype=float))
+            out.append(PairCandidate(
+                a_idx=a_idx, b_idx=b_idx,
+                delta=delta, disagreements=disagreements,
+            ))
+    return out
+
+
+def _greedy_mahalanobis_select(
+    deltas: np.ndarray, n: int, kappa_lambda: float,
+) -> list[tuple[float, int]]:
+    """Greedy selection of up to n rows of `deltas` maximizing x^T V_t^{-1} x.
+
+    V_1 = kappa_lambda * I_d. At each step the row with the highest score is
+    chosen; V_{t+1} = V_t + x_t x_t^T. Returns [(score_at_pick, row_index), …]
+    in selection order.
+    """
+    m = deltas.shape[0]
+    if m == 0:
+        return []
+    d = deltas.shape[1]
+    V = float(kappa_lambda) * np.eye(d)
+    available = np.ones(m, dtype=bool)
+    selected: list[tuple[float, int]] = []
+    pick_n = min(n, m)
+    for _ in range(pick_n):
+        V_inv = np.linalg.inv(V)
+        proj = deltas @ V_inv
+        scores = np.einsum('ij,ij->i', proj, deltas)
+        scores_masked = np.where(available, scores, -np.inf)
+        idx = int(np.argmax(scores_masked))
+        score = float(scores_masked[idx])
+        if not np.isfinite(score):
+            break
+        selected.append((score, idx))
+        available[idx] = False
+        x = deltas[idx]
+        V = V + np.outer(x, x)
+    return selected
+
+
 class FindDisagreeingPairs:
+    """Legacy per-metric rank-product disagreement finder.
+
+    Used only by the default (non --top-overall) output mode below. The
+    primary selection algorithm is _build_disagreeing_candidates +
+    _greedy_mahalanobis_select.
+    """
     def __init__(self, records: list[TrajRecord], metric_docs: dict[str, str]):
         self.records = records
         self.metric_docs = metric_docs
@@ -138,7 +272,6 @@ class FindDisagreeingPairs:
         candidates = []
         for i in range(n):
             for j in range(i + 1, n):
-                # disagreement score in normalized rank units
                 dr = (r_rank[i] - r_rank[j]) / (n - 1)
                 dm = (m_rank[i] - m_rank[j]) / (n - 1)
                 if dr * dm >= 0:
@@ -155,22 +288,20 @@ class FindDisagreeingPairs:
         return candidates[:top_k]
 
 
-def _print_pair(rec_pref_reward: TrajRecord, rec_pref_metric: TrajRecord,
-                metric_name: str, metric_doc: str,
+def _print_pair(rec_a: TrajRecord, rec_b: TrajRecord,
+                disagreements: list[dict],
                 rank: int | None = None, total: int | None = None,
                 score: float | None = None):
-    """Print one disagreeing pair, side-by-side, with a feature delta column.
+    """Full per-trajectory feature dump format.
 
-    The feature key is printed once at the top of the run (see
-    `_print_feature_key`), so per-feature rows here intentionally omit
-    the inline description.
+    A is the reward-preferred trajectory; `disagreements` is the list of
+    stakeholder perspectives whose ranking prefers B over A. The feature
+    key is printed once at the top of the run (see `_print_feature_key`).
     """
-    a_r = rec_pref_reward.designed_reward
-    b_r = rec_pref_metric.designed_reward
-    a_m = rec_pref_reward.metric_values[metric_name]
-    b_m = rec_pref_metric.metric_values[metric_name]
-    a_meta = rec_pref_reward.metadata
-    b_meta = rec_pref_metric.metadata
+    a_r = rec_a.designed_reward
+    b_r = rec_b.designed_reward
+    a_meta = rec_a.metadata
+    b_meta = rec_b.metadata
 
     print()
     print("═" * 78)
@@ -178,32 +309,28 @@ def _print_pair(rec_pref_reward: TrajRecord, rec_pref_metric: TrajRecord,
     if rank is not None and total is not None:
         header = f"PAIR {rank}/{total}"
     print(header)
-    print(f"Stakeholder: {metric_doc}")
     print("═" * 78)
     print()
-    print(f"  Trajectory A:  {a_meta.get('policy_class', '?')}"
-          f"   (round {a_meta.get('round', '?')}, "
-          f"{a_meta.get('n_steps', len(rec_pref_reward.trajectory))} steps)")
-    print(f"  Trajectory B:  {b_meta.get('policy_class', '?')}"
-          f"   (round {b_meta.get('round', '?')}, "
-          f"{b_meta.get('n_steps', len(rec_pref_metric.trajectory))} steps)")
+    print(f"  Trajectory A")
+    print(f"  Trajectory B")
     print()
     print(f"                                         {'Trajectory A':>14s}   {'Trajectory B':>14s}")
-    print(f"  designed reward (rewards A ≻ B)        {a_r:>+14.3f}   {b_r:>+14.3f}")
-    print(f"  stakeholder metric (prefers B ≻ A)     {a_m:>+14.3f}   {b_m:>+14.3f}")
+    print(f"  designed reward (prefers A ≻ B)        {a_r:>+14.3f}   {b_r:>+14.3f}")
     print()
-    print(f"  → preference disagrees   "
-          f"(reward says A ≻ B; stakeholder says B ≻ A)")
+    print(f"  Stakeholder perspectives that disagree (prefer B ≻ A):")
+    for d in disagreements:
+        print(f"    • {d['perspective']}")
+        print(f"        A={d['metric_a']:+10.3f}   B={d['metric_b']:+10.3f}")
     print()
-    if rec_pref_reward.features and rec_pref_metric.features and rec_pref_reward.feature_names:
+    if rec_a.features and rec_b.features and rec_a.feature_names:
         print(f"  Trajectory features (Δ = B − A; see feature key above):")
         print(f"    {'feature':28s}  {'A':>10s}   {'B':>10s}   {'Δ (B−A)':>10s}")
         print(f"    {'─' * 64}")
-        for (short, _desc), va, vb in zip(rec_pref_reward.feature_names,
-                                          rec_pref_reward.features,
-                                          rec_pref_metric.features):
-            d = vb - va
-            print(f"    {short:28s}  {va:>+10.2f}   {vb:>+10.2f}   {d:>+10.2f}")
+        for (short, _desc), va, vb in zip(rec_a.feature_names,
+                                          rec_a.features,
+                                          rec_b.features):
+            d_v = vb - va
+            print(f"    {short:28s}  {va:>+10.2f}   {vb:>+10.2f}   {d_v:>+10.2f}")
     else:
         print("  (no features on disk for one of these trajectories)")
 
@@ -226,51 +353,45 @@ def _strip_policy_prefix(name: str) -> str:
 
 
 def _print_pair_preference_labels(rank: int, total: int,
-                                  rec_pref_reward: TrajRecord,
-                                  rec_pref_metric: TrajRecord,
-                                  metric_name: str, metric_doc: str,
+                                  rec_a: TrajRecord, rec_b: TrajRecord,
+                                  disagreements: list[dict],
                                   score: float | None = None) -> None:
-    """Compact preference-label view: explicit A≻B labels, side-by-side features.
+    """Compact preference-label view; A is reward-preferred.
 
-    Metric short-names are intentionally anonymized as "candidate
-    performance metric" — only the stakeholder docstring is shown — so
-    the user reads the perspective in plain language.
+    Stakeholder perspectives are printed by their docstring (e.g. "the
+    safety reviewer's view") rather than internal metric ids.
     """
-    a_r = rec_pref_reward.designed_reward
-    b_r = rec_pref_metric.designed_reward
-    a_m = rec_pref_reward.metric_values[metric_name]
-    b_m = rec_pref_metric.metric_values[metric_name]
-    a_meta = rec_pref_reward.metadata
-    b_meta = rec_pref_metric.metadata
+    a_r = rec_a.designed_reward
+    b_r = rec_b.designed_reward
+    a_meta = rec_a.metadata
+    b_meta = rec_b.metadata
 
     print()
     print("═" * 78)
     print(f"PAIR {rank}/{total}")
-    print(f"Stakeholder: {metric_doc}")
     print("─" * 78)
-    a_name = _strip_policy_prefix(a_meta.get('policy_class', '?'))
-    b_name = _strip_policy_prefix(b_meta.get('policy_class', '?'))
-    print(f"  Trajectory A:  {a_name}   (round {a_meta.get('round', '?')}, "
-          f"{a_meta.get('n_steps', len(rec_pref_reward.trajectory))} steps)")
-    print(f"  Trajectory B:  {b_name}   (round {b_meta.get('round', '?')}, "
-          f"{b_meta.get('n_steps', len(rec_pref_metric.trajectory))} steps)")
+    print(f"  Trajectory A")
+    print(f"  Trajectory B")
     print()
     print(f"                                  {'Trajectory A':>14s}   {'Trajectory B':>14s}")
     print(f"  designed reward                 {a_r:>+14.3f}   {b_r:>+14.3f}")
-    print(f"  {'candidate performance metric':30s}  {a_m:>+14.3f}   {b_m:>+14.3f}")
     print()
     print(f"  preference by designed reward         →   A ≻ B")
-    print(f"  preference by candidate metric        →   B ≻ A   ✗ disagrees")
     print()
-    if rec_pref_reward.features and rec_pref_metric.features:
+    print(f"  Stakeholder perspectives that disagree (prefer B ≻ A):")
+    for d in disagreements:
+        print(f"    • {d['perspective']}")
+        print(f"        A={d['metric_a']:+10.3f}   B={d['metric_b']:+10.3f}")
+    print()
+    if rec_a.features and rec_b.features:
         print(f"  Trajectory features:")
         print(f"    {'feature':24s}   {'A':>10s}   {'B':>10s}   {'Δ (B−A)':>10s}")
         print(f"    {'─' * 60}")
-        for (short, _desc), va, vb in zip(rec_pref_reward.feature_names,
-                                          rec_pref_reward.features,
-                                          rec_pref_metric.features):
-            d = vb - va
-            print(f"    {short:24s}   {va:>+10.2f}   {vb:>+10.2f}   {d:>+10.2f}")
+        for (short, _desc), va, vb in zip(rec_a.feature_names,
+                                          rec_a.features,
+                                          rec_b.features):
+            d_v = vb - va
+            print(f"    {short:24s}   {va:>+10.2f}   {vb:>+10.2f}   {d_v:>+10.2f}")
     else:
         print("  (no features on disk for these trajectories)")
 
@@ -287,40 +408,56 @@ def _next_snapshot_id() -> int:
 
 
 def _save_snapshot(records: list[TrajRecord],
-                   pairs: list[tuple]) -> str:
-    """Save the top-N preference-labels pairs to a JSON snapshot.
+                   selected: list[tuple[float, PairCandidate]],
+                   kappa_lambda: float) -> str:
+    """Save the selected pairs to a JSON snapshot.
 
-    Each pair is (score, metric_name, metric_doc, i_pref_reward, j_pref_metric)
-    in the convention used by --top-overall: i is the reward-preferring side
-    (printed as "A"), j is the metric-preferring side (printed as "B").
+    Convention: pair["traj_a_path"] is the reward-preferred trajectory and
+    pair["disagreements"] is the list of stakeholder perspectives that
+    prefer B over A on this pair. /repair-verify rechecks resolution by
+    reward direction alone.
     """
     os.makedirs(HISTORY_DIR, exist_ok=True)
     snap_id = _next_snapshot_id()
     snap = {
         "snapshot_id": snap_id,
         "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "selection_method": "mahalanobis_greedy_vt_inv",
+        "kappa_lambda": float(kappa_lambda),
         "pairs": [],
     }
-    for rank, (score, name, doc, i, j) in enumerate(pairs, 1):
-        rec_a = records[i]
-        rec_b = records[j]
+    for rank, (score, cand) in enumerate(selected, 1):
+        rec_a = records[cand.a_idx]
+        rec_b = records[cand.b_idx]
         snap["pairs"].append({
             "rank": rank,
             "score": float(score),
-            "metric_name": name,
-            "metric_doc": doc,
             "traj_a_path": rec_a.path,
             "traj_b_path": rec_b.path,
-            "stakeholder_prefers": "B",
             "snapshot_reward_a": float(rec_a.designed_reward),
             "snapshot_reward_b": float(rec_b.designed_reward),
-            "snapshot_metric_a": float(rec_a.metric_values[name]),
-            "snapshot_metric_b": float(rec_b.metric_values[name]),
+            "disagreements": cand.disagreements,
         })
     out_path = os.path.join(HISTORY_DIR, f"pref_round_{snap_id:03d}.json")
     with open(out_path, "w") as f:
         json.dump(snap, f, indent=2)
     return out_path
+
+
+def _pair_disagreements_from_snapshot(pair: dict) -> list[dict]:
+    """Schema-tolerant extraction of disagreements from a snapshot pair.
+
+    New schema stores `disagreements`; legacy snapshots stored a single
+    metric_doc + per-metric scores. Either way return a list[dict] with
+    `perspective`, `metric_a`, `metric_b` keys.
+    """
+    if "disagreements" in pair:
+        return pair["disagreements"]
+    return [{
+        "perspective": pair.get("metric_doc") or pair.get("metric_name") or "",
+        "metric_a": float(pair.get("snapshot_metric_a", 0.0)),
+        "metric_b": float(pair.get("snapshot_metric_b", 0.0)),
+    }]
 
 
 def _check_snapshots(records: list[TrajRecord]) -> int:
@@ -358,9 +495,9 @@ def _check_snapshots(records: list[TrajRecord]) -> int:
             if r_a > r_b:
                 unresolved.append({
                     "snapshot_id": snap["snapshot_id"],
-                    "pair": pair,
                     "rec_a": rec_a,
                     "rec_b": rec_b,
+                    "disagreements": _pair_disagreements_from_snapshot(pair),
                 })
 
     checked = total - missing
@@ -381,8 +518,7 @@ def _check_snapshots(records: list[TrajRecord]) -> int:
     for idx, u in enumerate(unresolved, 1):
         _print_pair_preference_labels(idx, total_u,
                                        u["rec_a"], u["rec_b"],
-                                       u["pair"]["metric_name"],
-                                       u["pair"]["metric_doc"])
+                                       u["disagreements"])
     return 1
 
 
@@ -390,17 +526,23 @@ def main():
     p = argparse.ArgumentParser()
     add_workspace_arg(p)
     p.add_argument("--top-k", type=int, default=5,
-                   help="Pairs per metric. Ignored when --top-overall is set.")
+                   help="Pairs per metric (legacy per-metric mode). "
+                        "Ignored when --top-overall is set.")
     p.add_argument("--top-overall", type=int, default=None,
-                   help="If set, print the top N disagreements across all "
-                        "metrics. Overrides --top-k.")
+                   help="Number of pairs to surface via Mahalanobis-greedy "
+                        "selection across all stakeholders. Overrides --top-k.")
     p.add_argument("--format", choices=["default", "preference-labels"],
                    default="default",
                    help="default: full per-trajectory feature dumps. "
-                        "preference-labels: compact A≻B / B≻A view with a "
+                        "preference-labels: compact A≻B view with a "
                         "side-by-side feature delta table.")
     p.add_argument("--margin", type=float, default=0.0,
-                   help="Minimum normalized rank-gap geometric mean (0..1).")
+                   help="Minimum |Δrank_reward|·|Δrank_metric| (geometric-mean "
+                        "rank-gap squared) for a metric to count as "
+                        "disagreeing on a pair. 0..1.")
+    p.add_argument("--kappa-lambda", type=float, default=1.0,
+                   help="Ridge scalar κλ for V_1 = κλ·I in the "
+                        "Mahalanobis-greedy selection.")
     p.add_argument("--rounds", type=str, default=None,
                    help="Comma-separated round numbers; default = all.")
     p.add_argument("--check-snapshots", action="store_true",
@@ -429,61 +571,51 @@ def main():
     if args.check_snapshots:
         return _check_snapshots(records)
 
-    finder = FindDisagreeingPairs(records, metric_docs)
-
     if args.top_overall is not None:
-        all_pairs: list[tuple[float, str, str, int, int]] = []  # (score, metric, doc, i, j)
-        per_metric_top = max(args.top_overall * 3, 30)
-        for (name, _fn, doc) in metrics:
-            for score, i, j in finder.disagreeing_for(name, top_k=per_metric_top,
-                                                      margin=args.margin):
-                all_pairs.append((score, name, doc, i, j))
-        all_pairs.sort(key=lambda x: x[0], reverse=True)
-
-        if not all_pairs:
-            print("\nNo disagreements found across any metric.")
+        candidates = _build_disagreeing_candidates(records, metrics, args.margin)
+        if not candidates:
+            print("\nNo disagreeing pairs found (no pair has a stakeholder whose "
+                  "ranking opposes the reward at the requested margin).")
+            return 0
+        deltas = np.stack([c.delta for c in candidates], axis=0)
+        picks = _greedy_mahalanobis_select(deltas, args.top_overall,
+                                           args.kappa_lambda)
+        if not picks:
+            print("\nNo pairs selected.")
             return 0
 
-        # Dedup by (stakeholder, policy_class_A, policy_class_B): keep the
-        # highest-scoring rollout pair per triple, so the top-N covers
-        # genuinely different stakeholders / policy-pair comparisons
-        # instead of 5 copies of the loudest one.
-        seen_triples: set[tuple[str, str, str]] = set()
-        deduped: list[tuple[float, str, str, int, int]] = []
-        for entry in all_pairs:
-            _score, name, _doc, i, j = entry
-            triple = (
-                name,
-                records[i].metadata.get("policy_class", "?"),
-                records[j].metadata.get("policy_class", "?"),
-            )
-            if triple in seen_triples:
-                continue
-            seen_triples.add(triple)
-            deduped.append(entry)
-        all_pairs = deduped
+        selected: list[tuple[float, PairCandidate]] = [
+            (score, candidates[idx]) for (score, idx) in picks
+        ]
+        total = len(selected)
+        feature_names = records[0].feature_names if records else []
+        _print_feature_key(feature_names)
 
-        kept = all_pairs[:args.top_overall]
-        total = len(kept)
         if args.format == "preference-labels":
-            print(f"\nTop {total} preference-label disagreements across all stakeholders:")
-            feature_names = records[0].feature_names if records else []
-            _print_feature_key(feature_names)
-            for rank, (_score, name, doc, i, j) in enumerate(kept, 1):
-                _print_pair_preference_labels(rank, total, records[i], records[j],
-                                              name, doc, score=_score)
-            if not args.no_save_snapshot and kept:
-                snap_path = _save_snapshot(records, kept)
+            print(f"\nTop {total} preference-label disagreements "
+                  f"(Mahalanobis-greedy, κλ={args.kappa_lambda}):")
+            for rank, (score, cand) in enumerate(selected, 1):
+                _print_pair_preference_labels(
+                    rank, total,
+                    records[cand.a_idx], records[cand.b_idx],
+                    cand.disagreements, score=score,
+                )
+            if not args.no_save_snapshot:
+                snap_path = _save_snapshot(records, selected, args.kappa_lambda)
                 print(f"\n[snapshot saved: {snap_path}]")
         else:
-            print(f"\nTop {total} disagreements across all metrics.")
-            feature_names = records[0].feature_names if records else []
-            _print_feature_key(feature_names)
-            for rank, (score, name, doc, i, j) in enumerate(kept, 1):
-                _print_pair(records[i], records[j], name, doc,
-                            rank=rank, total=total, score=score)
+            print(f"\nTop {total} disagreements "
+                  f"(Mahalanobis-greedy, κλ={args.kappa_lambda}).")
+            for rank, (score, cand) in enumerate(selected, 1):
+                _print_pair(
+                    records[cand.a_idx], records[cand.b_idx],
+                    cand.disagreements,
+                    rank=rank, total=total, score=score,
+                )
         return 0
 
+    # ─── Legacy per-metric mode (kept for back-compat / debugging) ──────
+    finder = FindDisagreeingPairs(records, metric_docs)
     any_printed = False
     feature_names = records[0].feature_names if records else []
     _print_feature_key(feature_names)
@@ -499,7 +631,14 @@ def main():
             continue
         any_printed = True
         for rank, (score, i, j) in enumerate(pairs, 1):
-            _print_pair(records[i], records[j], name, doc,
+            rec_a = records[i]
+            rec_b = records[j]
+            disag = [{
+                "perspective": doc,
+                "metric_a": float(rec_a.metric_values[name]),
+                "metric_b": float(rec_b.metric_values[name]),
+            }]
+            _print_pair(rec_a, rec_b, disag,
                         rank=rank, total=len(pairs), score=score)
 
     if not any_printed:

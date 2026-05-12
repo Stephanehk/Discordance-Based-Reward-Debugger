@@ -71,9 +71,9 @@ under `designed_reward_fn`. Two flavors:
 
 Name and document such policies by the
 metric they target and the direction of disagreement, e.g.
-`DataCollectionPolicyExploitForwardVelocity` with docstring
-*"High designed reward, low safety_metric — drives forward as fast as
-possible while ignoring jerk."*
+`DataCollectionPolicyExploitPrimaryObjective` with docstring
+*"High designed reward, low smoothness metric — maximises the primary
+objective while ignoring control-smoothness."*
 
 ### Strategy B — Directly target flaws in the designed reward
 

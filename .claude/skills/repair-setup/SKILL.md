@@ -29,11 +29,11 @@ boilerplate in `runtime/` and `find_informative_pairs.py` is env-agnostic
 and is selected at runtime via `--workspace workspaces/<name>`.
 
 This skill (and every other `/repair-*` skill) takes the workspace name as
-`args` (e.g. `/repair-setup merge`). After it runs it writes the name to
+`args` (e.g. `/repair-setup hopper`). After it runs it writes the name to
 `.current_workspace` at the repo root so subsequent skills can default.
 
 If the user didn't pass `args`, ask them for a workspace name before doing
-anything else. Use kebab-case (e.g. `merge`, `hopper`, `lunar-lander`).
+anything else. Use kebab-case (e.g. `hopper`, `lunar-lander`, `my-task`).
 
 ## What to do
 
@@ -82,9 +82,17 @@ names.
 > reward function, or (b) write it yourself?"
 
 #### Branch 1a — "describe it"
-Read `prompts/reward_design_template.md` aloud (or display it inline) and
-ask the user to fill it in. Once they reply, write
-`<WORKSPACE_DIR>/designed_reward_fn.py` with:
+Display `prompts/reward_design_template.md` inline. **Above the
+template**, give the user a plain-language summary of what the
+observation and action spaces measure — one short paragraph for each.
+No technical jargon, no array indices, no normalisation details, no
+internal flags or wrapper conventions. Just *what the agent perceives*
+and *what it can do*, in everyday terms. Derive the summary from
+`OBS_DESCRIPTION` and `ACTION_DESCRIPTION` in `env_config.py`, but
+rewrite into plain English the user can read without prior context.
+Ask the user to fill the template in.
+
+Once they reply, write `<WORKSPACE_DIR>/designed_reward_fn.py` with:
 
 ```python
 def designed_reward_fn(obs, act, next_obs) -> float:
@@ -99,13 +107,21 @@ The function must:
   negatively, with the trade-offs the user described.
 - Have a top-of-file comment containing the filled template verbatim, so
   the reward design is auditable from the source file.
+- **Be commented inline.** Every weight constant and every intermediate
+  variable that has a physical or semantic meaning gets a one-line
+  comment giving its **units** (m/s, fraction of steps, normalised
+  position, normalised velocity, dimensionless, etc.) and what it
+  represents. Each term that contributes to the returned sum gets a
+  brief comment naming the outcome it credits or penalizes — so the
+  user can audit the reward by reading the source without re-deriving
+  the semantics.
 
 **Show the reward function back to the user.** After writing the file,
 print its contents inline (wrap in a fenced code block, language = python)
 and add a one-line note explaining the key knobs you chose (e.g.,
-"I capped the speed term at 30 m/s and used a weight of −20 on the crash
-proxy"). Ask the user to skim it and confirm before proceeding. If they
-push back, edit and re-show.
+"I capped the primary-objective bonus and used a weight of −20 on the
+failure-state penalty"). Ask the user to skim it and confirm before
+proceeding. If they push back, edit and re-show.
 
 #### Branch 1b — "I'll write it myself"
 Write a stub `<WORKSPACE_DIR>/designed_reward_fn.py`:

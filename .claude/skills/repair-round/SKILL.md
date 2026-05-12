@@ -17,8 +17,8 @@ skills.
 Treat the user as someone who will never read the codebase. Don't list
 file names, directories, internal scripts, or rollout counts. Talk about
 what the system is **doing** in plain language ("collecting trajectories
-that probe the speed term", "checking whether the evidence is rich
-enough"). Save filenames for tool calls.
+that probe a particular reward term", "checking whether the evidence is
+rich enough"). Save filenames for tool calls.
 
 **Never call any behavior, reward, or trajectory "correct" or
 "incorrect."** At most, frame things as *possibly* correct/incorrect or
@@ -28,7 +28,7 @@ the full tone rules.)
 
 ## Resolve the workspace
 
-The skill takes the workspace name as `args` (e.g. `/repair-round merge`).
+The skill takes the workspace name as `args` (e.g. `/repair-round hopper`).
 If `args` is empty, read `.current_workspace` at the repo root; if that
 doesn't exist, tell the user to run `/repair-setup` first.
 
@@ -99,8 +99,14 @@ class DataCollectionPolicy<Name>:
 Add a module-level `POLICIES = [Cls1, Cls2, ...]`. Each class's docstring
 states the *hypothesis* it tests.
 
-How many policies per round? 3-5 for round 1 (broad coverage); 1-3 for
-later rounds (focused on a specific gap).
+**Required policy in every round:** one of the classes in `POLICIES`
+must be a policy that maximizes the expected sum of rewards with
+respect to the *current* `designed_reward_fn`.
+
+How many policies per round? 3-5 for round 1 (broad coverage, including
+the required maximizer); 1-3 for later rounds (focused on a specific
+gap — but still re-include the maximizer under the current reward,
+since the reward may have changed since the prior round).
 
 ### Step 3 — roll out + featurize
 
@@ -124,12 +130,14 @@ rubric below.
 The evidence is **sufficient** when *all* of the following hold:
 
 1. **Every reward term has been exercised by at least one trajectory.**
-   Read `designed_reward_fn.py` to enumerate the terms (speed, proximity,
-   crash, jam, lane-change, etc.). For each, look in the feature
+   Read `designed_reward_fn.py` to enumerate the terms. For each, look in the feature
    aggregates for a trajectory where that term clearly fired. Examples:
-   - a `crash_proxy` term needs a trajectory with `crash_proxy == 1.0`
-   - a `jam` term needs `frac_in_jam > 0`
-   - a `too_slow` penalty needs `frac_too_slow > 0`
+   - a binary failure-state term needs a trajectory whose corresponding
+     feature equals 1.0
+   - a per-step penalty needs a trajectory whose fraction-of-steps-firing
+     feature is meaningfully above zero
+   - a sparse terminal-bonus term needs at least one trajectory that
+     reaches the bonus condition
    If a term is silent across **all** trajectories, the evidence is
    incomplete — design a round targeting it.
 
@@ -153,12 +161,15 @@ When designing round k > 1, look at *why* the rubric failed and bias the
 new policies accordingly:
 
 - Rubric (1) failed on a reward term → write a policy whose explicit goal
-  is to trigger that term. E.g., "always brake" to test the too-slow
-  penalty, "drive into the nearest vehicle" to test the crash term,
-  "stay on the on-ramp" to test the jam term.
+  is to trigger that term. E.g., a policy that applies maximum-magnitude
+  actions stresses a control-effort penalty; a policy that deliberately
+  fails the task (falls, stalls, leaves the goal region) stresses a
+  failure-state penalty; a policy that enters a forbidden region of the
+  state space stresses a boundary penalty.
 - Rubric (2) failed (everything collapses) → write policies along an
-  ignored axis (e.g., heavy lane-change use, max-speed-then-stop
-  oscillator, etc.).
+  ignored axis: extreme-then-zero oscillators, periodic perturbations,
+  biased exploration along a specific observation dimension, or a policy
+  that holds one action constant.
 - Rubric (3) failed (too few distinct disagreements) → write a policy
   that scores highly on one performance metric while being penalized by
   the designed reward (or vice versa). Pick the metric most likely to
@@ -175,25 +186,33 @@ user. `/repair-preferences` is a separate skill but you can execute its
 instructions inline. You must produce its **full deliverable** at the
 end of this turn. Follow `repair-preferences/SKILL.md` precisely:
 
-1. Pull a **candidate pool** of 15 disagreements with
+1. Pull up to 15 disagreements with
    `find_informative_pairs.py --workspace workspaces/<WORKSPACE> --top-overall 15 --format preference-labels`.
-2. **You** pick 5 maximally diverse pairs from that pool — different
-   stakeholders, different policy pairings, different feature deltas,
-   different reward terms. Pairs that highlight a *trade-off the reward
-   made* are most valuable. See `repair-preferences/SKILL.md` Step 2.
-3. Reprint those 5 pairs **verbatim** inside fenced code blocks
-   (feature key first, then each pair, renumbered `PAIR k/5`), with
-   per-pair `**Why they disagree:**` summaries directly under each
-   pair — framed as trade-offs, not as verdicts.
-4. A short overall-pattern paragraph + 1–2 possible reward tweaks
+2. Reprint **every** returned pair **verbatim** inside fenced code
+   blocks (feature key first, then each pair in the order the script
+   returned them), with **two summary lines directly under each pair**,
+   in this order:
+   - `**Why they disagree:**` — 1–2 sentences naming the trade-off
+     the reward made, framed as trade-offs, not as verdicts.
+   - `**What you might change in the reward function to flip this preference:**`
+     — 1–2 sentences proposing a concrete, specific edit (a weight to
+     bump, a term to add, a gating condition, etc., referencing the
+     actual variable/constant names from `designed_reward_fn.py`) that
+     would make the designed reward prefer the stakeholder's side on
+     that pair. Phrase as an option, not a directive.
+3. A short overall-pattern paragraph + 1–2 possible reward tweaks
    ("if you didn't intend X over Y, one option is …"), never framed
    as "the reward is wrong."
-5. **Always** close with an `AskUserQuestion` offering three options:
+4. **Always** close with an `AskUserQuestion` offering three options:
    (a) run another round of evidence, (b) modify the reward yourself,
    or (c) ask Claude to modify the reward to satisfy the surfaced
    preferences.
 
-Skipping the verbatim pairs, the per-pair interpretations, or the
+The script anonymizes trajectory identity — each is shown as just
+"Trajectory A" / "Trajectory B" with no round, step count, or policy
+class. Do not re-introduce any of that information in your text.
+
+Skipping the verbatim pairs, either per-pair summary line, or the
 closing `AskUserQuestion` is not optional — they are the core
 deliverable of this skill. The user should never have to ask for any
 of them separately.

@@ -24,7 +24,7 @@ not verdicts. (See `CLAUDE.md` for the full tone rules.)
 
 ## Resolve the workspace
 
-The skill takes the workspace name as `args` (e.g. `/repair-init merge`).
+The skill takes the workspace name as `args` (e.g. `/repair-init hopper`).
 If `args` is empty, read `.current_workspace` at the repo root; if that
 doesn't exist, tell the user to run `/repair-setup` first.
 

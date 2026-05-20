@@ -111,6 +111,7 @@ since the reward may have changed since the prior round).
 ### Step 3 — roll out + featurize
 
 ```
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python -m runtime.run_round --workspace workspaces/<WORKSPACE> --round K
 ```
 
@@ -146,11 +147,12 @@ The evidence is **sufficient** when *all* of the following hold:
    half the features. If every policy collapses to the same behavior, add
    policies that diverge.
 
-3. **`find_informative_pairs.py --top-overall 5 --margin 0.05`** returns
-   at least 3 distinct disagreeing pairs at margin ≥ 0.05 (you can
-   probe this without showing the user — count `PAIR ` headers in
-   stdout). If fewer than 3, the rollouts didn't generate enough
-   diverging behavior.
+3. **At least 3 distinct disagreeing pairs can be found** in the dumped
+   trajectory table (`select_pairs.py --mode dump`) — pairs where the
+   designed reward and a stakeholder metric rank the two trajectories
+   oppositely. Judge this directly from the table; do not run the legacy
+   `find_informative_pairs.py --top-overall` probe. If fewer than 3
+   exist, the rollouts didn't generate enough diverging behavior.
 
 If any of (1)/(2)/(3) fails AND we haven't hit the 3-round cap, run
 another round targeting the failing axis.
@@ -186,11 +188,14 @@ user. `/repair-preferences` is a separate skill but you can execute its
 instructions inline. You must produce its **full deliverable** at the
 end of this turn. Follow `repair-preferences/SKILL.md` precisely:
 
-1. Pull up to 15 disagreements with
-   `find_informative_pairs.py --workspace workspaces/<WORKSPACE> --top-overall 15 --format preference-labels`.
-2. Reprint **every** returned pair **verbatim** inside fenced code
-   blocks (feature key first, then each pair in the order the script
-   returned them), with **two summary lines directly under each pair**,
+1. Select the pairs to surface using the **Claude-driven** flow in
+   `repair-preferences/SKILL.md` Step 1: dump the trajectory table with
+   `select_pairs.py --mode dump`, read it, choose up to 15 useful pairs,
+   write the selection JSON, and render them with
+   `select_pairs.py --mode render`. You pick the pairs, not an algorithm.
+2. Reprint **every** rendered pair **verbatim** inside fenced code
+   blocks (feature key first, then each pair in the order it was
+   rendered), with **two summary lines directly under each pair**,
    in this order:
    - `**Why they disagree:**` — 1–2 sentences naming the trade-off
      the reward made, framed as trade-offs, not as verdicts.
@@ -203,10 +208,12 @@ end of this turn. Follow `repair-preferences/SKILL.md` precisely:
 3. A short overall-pattern paragraph + 1–2 possible reward tweaks
    ("if you didn't intend X over Y, one option is …"), never framed
    as "the reward is wrong."
-4. **Always** close with an `AskUserQuestion` offering three options:
+4. **Always** close with an `AskUserQuestion` offering four options:
    (a) run another round of evidence, (b) modify the reward yourself,
-   or (c) ask Claude to modify the reward to satisfy the surfaced
-   preferences.
+   (c) ask Claude to modify the reward to satisfy the surfaced
+   preferences, or (d) **Finish and submit (not reversible)**. If the
+   user picks (c), first print the reward-edit tip box; if (d), follow
+   "Finish and submit" — both are specified in `CLAUDE.md`.
 
 The script anonymizes trajectory identity — each is shown as just
 "Trajectory A" / "Trajectory B" with no round, step count, or policy

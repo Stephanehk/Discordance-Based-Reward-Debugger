@@ -41,14 +41,21 @@ You can have many workspaces side by side; they share zero state.
                           Claude decides how many rounds to run (cap: 3 per
                           invocation) based on the sufficiency rubric in
                           .claude/skills/repair-round/SKILL.md.
-/repair-preferences   →  prints the top 5 most-telling trajectory pairs as
-                          preference labels: feature key, A vs B identifying
-                          info (policy + round + steps), reward + metric
-                          scores side-by-side with explicit A≻B / B≻A labels,
-                          and a side-by-side feature delta table. Plus
+/repair-preferences   →  Claude reads every collected trajectory (as
+                          features, the same encoding the human sees) plus
+                          the designed reward and stakeholder metrics, and
+                          *itself selects* the most-telling pairs (up to
+                          15) — this is the Claude-driven selection step,
+                          not an algorithm. It renders each as a preference
+                          label: feature key, anonymized A vs B, reward +
+                          metric scores side-by-side with explicit A≻B /
+                          B≻A labels, and a feature delta table. Plus
                           per-pair "why they disagree" summaries and an
                           overall pattern interpretation. Also snapshots the
                           pairs so /repair-verify can later re-check them.
+                          (The legacy algorithmic selector still lives in
+                          find_informative_pairs.py for reference and for
+                          /repair-round's sufficiency probe.)
 ```
 
 `/repair-init` runs once after `/repair-setup`. `/repair-round` is
@@ -87,23 +94,135 @@ the relevant options. The expected chain is:
 - `/repair-round` → after surfacing disagreements, **ask** the user
   whether they want to (1) run `/repair-round` again because the
   surfaced pairs were not informative, (2) modify the reward themselves,
-  or (3) ask Claude to modify the reward to satisfy the shown
-  preferences. Use `AskUserQuestion`.
+  (3) ask Claude to modify the reward to satisfy the shown preferences,
+  or (4) **Finish and submit (not reversible)**. Use `AskUserQuestion`.
 - `/repair-preferences` → same closing question as `/repair-round`
-  (another round / modify yourself / Claude modifies). Use
+  (another round / modify yourself / Claude modifies / Finish and submit).
+  Use `AskUserQuestion`.
+- `/repair-verify` → ask whether to look for new disagreements, collect
+  more evidence first, or **Finish and submit (not reversible)**. Use
   `AskUserQuestion`.
-- `/repair-verify` → ask whether to look for new disagreements or
-  collect more evidence first. Use `AskUserQuestion`.
+
+### Finish and submit (not reversible)
+
+When the user picks **Finish and submit**, treat the current
+`designed_reward_fn.py` as the final answer: write
+`workspaces/<name>/.repair_history/SUBMISSION.md` containing a UTC
+timestamp and the full current reward source, tell the user the design
+is submitted and the session is complete, and stop — do not offer
+further steps, run more rounds, or edit the reward afterward. Because it
+is irreversible, only do this when the user explicitly selects it.
+
+### Reward-edit tips (print when asked to edit the reward)
+
+Whenever the user asks Claude to modify the reward (the "Modify the
+reward for me" path), print this tip box before requesting or applying
+the edit:
+
+> 💡 **Tips for guiding a reward edit**
+> - Be concrete: name the term to change, and — if you can — the
+>   preference label you want for each shown pair (e.g. "for pair 2,
+>   A ≻ B should become B ≻ A").
+> - You can pin an edit to an outcome: e.g. "increase the above-target
+>   speed penalty until the preference for pair 2 flips," and Claude will
+>   solve for the smallest change that produces it.
 
 These rules apply to every skill in `.claude/skills/`. If a skill's own
 `SKILL.md` doesn't repeat them, they still apply.
+
+## Evaluation workspaces
+
+Some workspaces are **evaluation workspaces**, used to evaluate the
+repairer system against a human stakeholder. They follow the same
+runtime invariants as any other workspace, but they hand the
+reward-design task to the human as a *fixed assignment* instead of
+eliciting it, and they constrain how Claude is allowed to edit the
+reward function.
+
+### Marker
+
+A workspace is in evaluation mode iff `workspaces/<name>/eval_spec.md`
+exists. That file contains the reward-design criteria the human is
+required to design toward, written in plain language. Any future
+evaluation workspace follows the same shape: a pre-authored
+`env_config.py`, a pre-authored (intentionally misaligned)
+`designed_reward_fn.py` as the human's starting point, a populated
+`eval_spec.md`, and a pre-authored `evaluate_against_spec.py` (the spec
+evaluator described below).
+
+### Spec evaluation harness
+
+`evaluate_against_spec.py` (repo root) scores the current
+`designed_reward_fn.py` against `eval_spec.md` for an evaluation
+workspace with a **ranking test**: the reward is aligned with the spec
+when every spec-satisfying trajectory out-scores every violating one
+(checkable criteria: no crash, nearest gap ≥ 10 m, average speed near
+25 m/s). Because real rollouts rarely satisfy the strict criteria, it
+synthesizes a guaranteed-compliant set by **ablating** each collected
+trajectory (forcing ego speed → 25 m/s, every observed gap → ≥ 10 m, no
+crash), then checks whether the reward ranks all compliant trajectories
+above all real violating ones and reports the inversion count plus a
+YES/NO. It lives **inside the eval workspace**
+(`workspaces/<name>/evaluate_against_spec.py`) as a persistent
+pre-authored eval artifact: a workspace reset must **keep it** (alongside
+`env_config.py`, `eval_spec.md`, and the starting `designed_reward_fn.py`),
+not treat it as authored/collected output. Run it from the repo root with
+`python workspaces/<name>/evaluate_against_spec.py`.
+
+### `/repair-setup` behavior in eval mode
+
+When `/repair-setup <name>` is invoked on an evaluation workspace:
+
+1. Skip env elicitation — `env_config.py` is pre-authored.
+2. Skip reward-design elicitation — `designed_reward_fn.py` is
+   pre-authored as the human's *starting point*, intentionally
+   misaligned with the criteria in `eval_spec.md`.
+3. Display the contents of `eval_spec.md` to the human as their
+   reward-design task.
+4. Display the contents of `designed_reward_fn.py` inline as
+   "the reward function you've been given to revise."
+5. Run the standard smoke test from the regular `/repair-setup` flow.
+6. Exit by telling the user to run `/repair-init` next, same as the
+   normal flow.
+
+### Reward-edit gate
+
+In an evaluation workspace, whenever the user asks Claude to modify
+`designed_reward_fn.py` (either via the post-`/repair-round` or
+post-`/repair-preferences` question, or organically mid-conversation),
+Claude must first check whether the request specifies a **concrete
+edit** — at least one of:
+
+- a particular term to add or remove,
+- a numerical weight or coefficient,
+- a threshold, condition, or feature to gate on,
+- a specific function shape (e.g. quadratic in distance, linear in
+  speed, clipped above some value).
+
+If the request is a **paraphrase of the criteria in `eval_spec.md`**
+(i.e. a restatement of the reward-design goal with no implementation
+detail) and does *not* contain any concrete edit, Claude must refuse to
+make the edit. The refusal must:
+
+1. Quote the relevant lines from `eval_spec.md` back to the user, so
+   the user can see Claude has read their request as a restatement of
+   the criteria they were given.
+2. Ask for more specific guidance, naming the kind of guidance Claude
+   needs — which term to change, what weight, under what condition,
+   what functional shape.
+
+Only after the user supplies a concrete edit may Claude modify
+`designed_reward_fn.py`. This gate exists because the evaluation is
+about whether the human can identify and articulate reward flaws —
+not whether Claude can infer fixes from a restated objective.
 
 ## File layout
 
 ```
 automated_reward_repairer/
 ├── CLAUDE.md
-├── find_informative_pairs.py           # boilerplate, workspace-agnostic
+├── select_pairs.py                     # Claude-driven pair selection (dump + render)
+├── find_informative_pairs.py           # legacy algorithmic selector; kept for reference + /repair-verify snapshot check
 ├── .current_workspace                  # name of the active workspace
 │
 ├── runtime/                             # env/reward-agnostic boilerplate
@@ -222,11 +341,29 @@ call `activate()` right after argparse. Run them from the repo root.
 
 ## How to run the Python boilerplate
 
+All Python in this repo runs in the `llm` conda env — `gymnasium`,
+`highway_env`, and the other env dependencies are not installed in the
+base interpreter. Activate it before any boilerplate script or smoke
+test (the `/repair-*` skills already prepend this to their commands):
+
 ```
-# from the repo root:
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm
+```
+
+```
+# from the repo root, with `llm` active:
 python -m runtime.run_round --workspace workspaces/<name> --round K
-python find_informative_pairs.py --workspace workspaces/<name>
-python find_informative_pairs.py --workspace workspaces/<name> --top-k 5
+
+# Claude-driven pair selection (the /repair-preferences step):
+python select_pairs.py --workspace workspaces/<name> --mode dump
+python select_pairs.py --workspace workspaces/<name> --mode render \
+       --selection workspaces/<name>/.repair_history/_selection.json
+
+# legacy algorithmic selector (reference + /repair-verify snapshot check):
+python find_informative_pairs.py --workspace workspaces/<name> --top-overall 5 --margin 0.05
+
+# spec evaluation harness (lives in the eval workspace; run from repo root):
+python workspaces/<name>/evaluate_against_spec.py
 ```
 
 If `.current_workspace` is set, `--workspace` may be omitted.

@@ -59,6 +59,7 @@ Must conform to the invariants in `CLAUDE.md`:
 
 Smoke-test after writing (run from the repo root):
 ```
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from gather_evidence.trajectory_features import Trajectory2Features; \
 from env_config import make_env; e = make_env(); \

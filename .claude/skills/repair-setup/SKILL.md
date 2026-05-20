@@ -44,6 +44,32 @@ anything else. Use kebab-case (e.g. `hopper`, `lunar-lander`, `my-task`).
 - Create empty `__init__.py` in those two subdirectories.
 - Write `<WORKSPACE>` to `.current_workspace` at the repo root.
 
+### 0.5. Detect evaluation mode
+
+If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an **evaluation
+workspace** (see "Evaluation workspaces" in `CLAUDE.md`). Follow the
+eval flow below in place of steps 1 and 2, then continue with step 3.
+
+**Eval flow:**
+
+1. Confirm `<WORKSPACE_DIR>/env_config.py` and
+   `<WORKSPACE_DIR>/designed_reward_fn.py` both exist. If either is
+   missing, the eval workspace was not properly pre-authored — tell
+   the user, stop, and do not attempt to author them yourself.
+2. Read `<WORKSPACE_DIR>/eval_spec.md` and print its contents to the
+   user, prefaced by one short sentence like "Here is your reward-design
+   task." Do not paraphrase the spec, do not add commentary on the
+   criteria.
+3. Read `<WORKSPACE_DIR>/designed_reward_fn.py` and print its contents
+   inline in a fenced code block (language = python). Introduce it as
+   "the reward function you've been given as a starting point — your
+   job is to revise it until it satisfies the criteria above."
+4. Skip the rest of step 1 and all of step 2; jump to step 3 (sanity
+   check) and then step 4 (exit).
+
+Do **not** ask the user "describe it" vs. "write it yourself" in eval
+mode — that choice is pre-decided by the workspace author.
+
 ### 1. Identify the environment
 Ask the user **which gym environment** they want to use. Accept either:
 - a gymnasium / gym id like `"Hopper-v4"` or `"CartPole-v1"`, or
@@ -66,8 +92,10 @@ Otherwise, write `<WORKSPACE_DIR>/env_config.py`. It must export:
 If the env requires a non-default pip install, also write
 `<WORKSPACE_DIR>/requirements.txt` listing those packages.
 
-Verify it imports cleanly:
+Verify it imports cleanly (the leading `conda activate` is required —
+see "How to run the Python boilerplate" in `CLAUDE.md`):
 ```
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from env_config import make_env; e = make_env(); \
 print(e.observation_space, e.action_space)"
@@ -145,6 +173,7 @@ system is ready when they're done filling it in.
 ### 3. Sanity check
 After the file exists and (if 1a) is implemented, smoke-test it:
 ```
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from env_config import make_env; from designed_reward_fn import designed_reward_fn; \
 import numpy as np; e = make_env(); \

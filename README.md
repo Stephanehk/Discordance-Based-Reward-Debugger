@@ -11,6 +11,18 @@ the reward.
 The pairs are the end product. There is no automated reward learning —
 this is a debugger for reward functions.
 
+## Where to start
+
+To see how the system works, ask Claude to run **`merge_human_eval_1`** —
+a bundled evaluation environment. Just say something like *"run
+merge_human_eval_1"* (or start it yourself with `/repair-setup
+merge_human_eval_1`). It walks the full loop on a highway on-ramp merge:
+you're given a deliberately flawed starting reward and the criteria it
+should satisfy, and Claude surfaces trajectory pairs that expose the
+flaws while you revise the reward and verify the fixes. See
+[Evaluation workspaces](#evaluation-workspaces) for what these
+environments are.
+
 ## Requirements
 
 - Python 3.10+
@@ -62,7 +74,11 @@ follow the prompts.
    the reward function to flip this preference* — and the run ends
    with an overall pattern interpretation. Pairs are snapshotted to
    disk so `/repair-verify` can recheck them later.
-5. **You edit the reward.** Then either:
+5. **You decide what to do.** After the pairs, Claude asks whether to
+   collect another round, edit the reward yourself, have Claude apply a
+   concrete edit you specify, or **finish and submit** (final, not
+   reversible). Once the reward is edited (by you or by Claude), then
+   either:
    - **`/repair-verify`** — recomputes the designed reward on the
      snapshotted pairs and reports which disagreements are now resolved.
    - **`/repair-round`** — skips verification and collects fresh
@@ -74,25 +90,31 @@ re-scores under whatever reward is currently in the workspace.
 
 ### How pairs are selected
 
-The pool of disagreeing pairs is all unordered trajectory pairs where
-the designed reward and at least one performance metric rank the two
-trajectories in opposite orders (rank-product check with an optional
-`--margin` threshold). From that pool, pairs are picked greedily to
-maximize `xᵀ V⁻¹ x` over the feature delta `x = φ(B) − φ(A)`, where
-`V` starts as `κλ · I` and accumulates `x xᵀ` from each prior pick.
-Each new pick prefers a direction in feature-delta space that the
-prior picks haven't already covered, so the surfaced pairs span
-different reward terms, different stakeholders, and different
-trade-off axes rather than re-showing variants of the loudest single
-disagreement.
+Pair selection is **Claude-driven**, not algorithmic. `select_pairs.py
+--mode dump` writes a table of every collected trajectory — its features
+(the same encoding you read), its total under the designed reward, and
+every stakeholder metric. Claude reads that table and picks the pairs
+most useful to show: ones where the designed reward and a stakeholder
+you plausibly care about rank the trajectories oppositely, favoring a
+diverse set across different stakeholders, behaviors, and reward terms
+rather than re-showing variants of the loudest single disagreement.
+Claude writes its picks to a selection file, and `select_pairs.py
+--mode render` orients each pair (A = the reward-preferred side), lists
+the disagreeing stakeholders, prints the preference-label block, and
+snapshots the pair so `/repair-verify` can recheck it later.
+
+A legacy algorithmic selector (`find_informative_pairs.py`, a
+rank-product disagreement check plus a Mahalanobis-greedy diversity
+pick) is kept for reference and is still used by `/repair-verify` to
+re-score snapshotted pairs under the current reward.
 
 ## Workspaces
 
 Everything env-specific lives under `workspaces/<name>/`. The shared
-`runtime/`, `find_informative_pairs.py`, `prompts/`, and skills are
-workspace-agnostic and select the active workspace at runtime via
-`--workspace workspaces/<name>`. The active workspace is persisted to
-`.current_workspace` at the repo root.
+`runtime/`, `select_pairs.py`, `find_informative_pairs.py`, `prompts/`,
+and skills are workspace-agnostic and select the active workspace at
+runtime via `--workspace workspaces/<name>`. The active workspace is
+persisted to `.current_workspace` at the repo root.
 
 You can have many workspaces side by side; they share zero state.
 
@@ -109,14 +131,71 @@ workspaces/<name>/
     └── performance_metrics.py
 ```
 
+## Evaluation workspaces
+
+The repairer can also be used to **evaluate itself**: how good is the
+system at letting a person fix a reward function when they are told only
+the *properties* the reward must satisfy, and left to translate those
+properties into concrete edits? It's a test of whether the surfaced
+disagreement pairs actually help a human find and articulate a reward's
+flaws.
+
+An evaluation workspace is marked by an `eval_spec.md` file holding the
+reward-design criteria the person must hit, in plain language. It ships
+pre-authored: a fixed `env_config.py`, an intentionally misaligned
+`designed_reward_fn.py` as the starting point, and the `eval_spec.md`
+criteria. `/repair-setup` skips elicitation, shows the person the spec
+and the starting reward, and the normal flow proceeds from there.
+
+A guardrail keeps the test honest: when the person asks Claude to edit
+the reward, Claude refuses if the request is just a paraphrase of the
+spec criteria with no concrete edit (a term, weight, threshold, or
+functional shape). The evaluation measures whether the *person* can
+identify and articulate the flaws — not whether Claude can infer fixes
+from a restated goal.
+
+`evaluate_against_spec.py` scores the result with a **ranking test**: the
+reward is aligned with the spec when every spec-satisfying trajectory
+out-scores every violating one. Because real rollouts rarely satisfy the
+strict criteria, it synthesizes a guaranteed-compliant set by ablating
+each collected trajectory (forcing speed and gaps to compliant values and
+clearing crashes), then reports whether the reward ranks all compliant
+trajectories above all violators, with an inversion count and a YES/NO.
+It lives inside the workspace (`workspaces/<name>/evaluate_against_spec.py`)
+as a persistent eval artifact — kept across workspace resets — and is run
+from the repo root: `python workspaces/<name>/evaluate_against_spec.py`.
+
+Two evaluation environments ship with the repo, both on the same highway
+on-ramp merge env, both starting from the same deliberately misaligned
+speed-only reward:
+
+- **`workspaces/merge_human_eval_1`** — revise the reward so the ego keeps
+  at least 10 m from other vehicles, never crashes, and averages about
+  25 m/s.
+- **`workspaces/merge_human_eval_2`** — the same criteria plus a left-lane
+  preference ("all else equal, the left lane is better than the right").
+  Its evaluator adds an all-else-equal lane test: for each compliant
+  trajectory it builds left- and right-lane variants and checks that the
+  reward scores the left one strictly higher.
+
 ## Running the boilerplate directly
 
 The skills do this for you, but you can also drive the Python directly:
 
 ```bash
+# roll out + featurize one round
 python -m runtime.run_round --workspace workspaces/<name> --round K
-python find_informative_pairs.py --workspace workspaces/<name> \
-       --top-overall 15 --format preference-labels
+
+# Claude-driven pair selection: dump the table, then render chosen pairs
+python select_pairs.py --workspace workspaces/<name> --mode dump
+python select_pairs.py --workspace workspaces/<name> --mode render \
+       --selection workspaces/<name>/.repair_history/_selection.json
+
+# re-score snapshotted pairs under the current reward (used by /repair-verify)
+python find_informative_pairs.py --workspace workspaces/<name> --check-snapshots
+
+# evaluation workspaces only: score the reward against the spec
+python workspaces/<name>/evaluate_against_spec.py
 ```
 
 If `.current_workspace` is set, `--workspace` may be omitted.

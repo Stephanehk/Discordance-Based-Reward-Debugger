@@ -103,21 +103,71 @@ doesn't exist, tell the user to run `/repair-setup` first.
 
 ## Procedure
 
-### 1. Pull the 15 most informative disagreements
+### 1. Select the pairs to surface — you choose them, not an algorithm
+
+Pair selection is **Claude-driven**. You read every collected trajectory
+(summarised by the same features the human sees), look at the designed
+reward and every stakeholder metric, and pick the pairs you judge most
+useful for the human to see. The legacy algorithmic selector lives in
+`find_informative_pairs.py` and is no longer used for this step.
+
+**Blind selection (do not read the reward-design criteria).** In an
+evaluation workspace the ground-truth reward-design goal lives in
+`eval_spec.md`. The selector must stay blind to it: when choosing pairs,
+use **only** the dumped trajectory table — features, the designed-reward
+total, and the stakeholder metrics. Do **not** open `eval_spec.md`, and
+do not rely on the reward-design criteria recalled from earlier in the
+conversation. The whole point of surfacing disagreements is to let the
+*human* discover the reward's flaws; a selector that already knows the
+target would be choosing the answer, not evidence.
+
+**1a. Dump the trajectory table.**
 
 ```
-python find_informative_pairs.py --workspace workspaces/<WORKSPACE> \
-       --top-overall 15 --format preference-labels
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
+python select_pairs.py --workspace workspaces/<WORKSPACE> --mode dump
 ```
 
-The script applies dedup across (stakeholder, policy_A_class,
-policy_B_class) triples, so the candidates already cover a variety of
-stakeholders and policy pairings. Read the full output — it is the
-deliverable.
+This writes `workspaces/<WORKSPACE>/.repair_history/_trajectory_table.txt`:
+one row per trajectory, with a stable id (`T001`, …), its total under the
+designed reward, every stakeholder metric, and every feature.
 
-(If the script returned fewer than 15 candidates, just show whatever
-came back. If it returned fewer than 3, jump to Step 3 and tell the
-user there's not yet enough evidence to surface diverse disagreements.)
+**1b. Read the table and reason about it.** Read that file with the Read
+tool. Each row is a trajectory encoded as features — the same encoding
+the human reads — which is what lets you reason about what happened.
+Identify pairs where the designed reward ranks the two trajectories
+oppositely to a stakeholder the human plausibly cares about, or that
+otherwise best expose how the reward trades off the outcomes that
+matter. Favor a set that is **diverse**: different stakeholders,
+different behaviors, different reward terms stressed — not many
+near-identical pairs. Use the internal `src` column only to judge
+diversity; never reveal round, policy, or step counts to the user.
+
+Select the pairs you judge most useful — **up to 15**.
+
+**1c. Write the selection and render it.** Write a selection file to
+`workspaces/<WORKSPACE>/.repair_history/_selection.json`:
+
+```json
+{"pairs": [{"a": "T012", "b": "T034"}, {"a": "T100", "b": "T077"}]}
+```
+
+Then render:
+
+```
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
+python select_pairs.py --workspace workspaces/<WORKSPACE> --mode render \
+       --selection workspaces/<WORKSPACE>/.repair_history/_selection.json
+```
+
+The render step orients A = the reward-preferred side, lists the
+stakeholder perspectives that prefer B, prints each pair in the
+preference-label format, and saves a snapshot so `/repair-verify` can
+recheck it. Its printed output is the deliverable you reprint in Step 2.
+
+(If the table holds fewer than 3 trajectories that form any useful
+disagreeing pair, jump to Step 3 and tell the user there's not yet
+enough evidence to surface diverse disagreements.)
 
 ### 2. Reprint every returned pair verbatim, interleaved with per-pair summaries
 
@@ -180,7 +230,7 @@ Whether the trade-off is acceptable is the user's call.
 
 ### 4. Always close by asking the user what to do next
 
-Use `AskUserQuestion` with exactly these three options (or wording very
+Use `AskUserQuestion` with exactly these four options (or wording very
 close to them):
 
 - **Run another round of evidence** — "the pairs above weren't
@@ -189,6 +239,8 @@ close to them):
   `designed_reward_fn.py` and call back when ready.
 - **Modify the reward for me** — Claude proposes and applies edits
   targeted at the disagreements above.
+- **Finish and submit (not reversible)** — finalize the current reward
+  as the submission. See "Finish and submit" in `CLAUDE.md`.
 
 Phrase the question in user-friendly language ("How would you like to
 proceed?" or "Where to next?"). Do **not** mention `/repair-round`,
@@ -205,11 +257,14 @@ Act on the answer:
   `/repair-round` directly** to gather fresh evidence under the new
   reward (verification only re-scores the saved pairs; a new round will
   surface fresh disagreements that may have emerged from the edit).
-- "Modify the reward for me" → propose specific edits to
+- "Modify the reward for me" → first print the reward-edit tip box (see
+  "Reward-edit tips" in `CLAUDE.md`). Then propose specific edits to
   `designed_reward_fn.py` that address the disagreements above, apply
   them with `Edit`, show the diff back to the user, then suggest either
   `/repair-verify` (re-check the past pairs) **or** `/repair-round`
   (skip verification and gather fresh evidence under the new reward).
+- "Finish and submit (not reversible)" → follow "Finish and submit" in
+  `CLAUDE.md`: write the submission record and stop.
 
 ## When the user edits the reward and asks you to recheck
 

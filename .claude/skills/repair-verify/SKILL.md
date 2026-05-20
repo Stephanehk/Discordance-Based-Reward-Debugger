@@ -39,6 +39,7 @@ doesn't exist, tell the user to run `/repair-setup` first.
 ### 1. Run the verifier
 
 ```
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python find_informative_pairs.py --workspace workspaces/<WORKSPACE> --check-snapshots
 ```
 
@@ -78,7 +79,7 @@ Say so in plain language:
 Whether all resolved or some remain, end the response by asking the
 user whether they want to repeat the analysis to find *new* trajectory
 pairs under the updated reward. Use the `AskUserQuestion` tool with
-two options:
+three options:
 
 - **Look for new disagreements** — runs the preference-labels analysis
   again on the existing trajectories; produces a fresh top-5 (and a new
@@ -87,6 +88,8 @@ two options:
   collection policies before re-analyzing. Use this when the trajectories
   on disk feel exhausted or when the user's reward edits should be
   tested against *new* adversarial policies.
+- **Finish and submit (not reversible)** — finalize the current reward
+  as the submission. See "Finish and submit" in `CLAUDE.md`.
 - (Implicit "Other" lets the user say "no, I'm done", etc.)
 
 Phrase the question in user-friendly language ("Would you like me to
@@ -100,4 +103,6 @@ Do **not** name `/repair-preferences` or `/repair-round` in the prompt.
   summaries and overall interpretation).
 - "Collect more evidence first" → run `/repair-round`, which will
   itself auto-continue into `/repair-preferences`.
+- "Finish and submit (not reversible)" → follow "Finish and submit" in
+  `CLAUDE.md`: write the submission record and stop.
 - "Other" / decline → just stop.

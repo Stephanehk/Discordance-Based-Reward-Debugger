@@ -26,6 +26,19 @@ rich enough"). Save filenames for tool calls.
 something is actually right is the user's call. (See `CLAUDE.md` for
 the full tone rules.)
 
+## Eval mode — information barrier
+
+If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation
+workspace. Authoring the data-collection policies, selecting trajectory
+pairs, and writing the per-pair / overall narrative must all be
+**spec-blind**: do not read or condition on `eval_spec.md`,
+`evaluate_against_spec.py`, or any criteria-naming text. Delegate those
+judgment steps to a subagent whose context holds only the env semantics,
+the verified denormalization facts, and the designed reward's
+operational mechanics. Frame every disagreement as "designed reward vs
+stakeholder X," never citing the criteria. See "Information barrier (eval
+mode)" in `CLAUDE.md`.
+
 ## Resolve the workspace
 
 The skill takes the workspace name as `args` (e.g. `/repair-round hopper`).

@@ -22,6 +22,18 @@ summary", "identify stakeholder perspectives" — not file paths.
 is actually right is the user's call — the system surfaces evidence,
 not verdicts. (See `CLAUDE.md` for the full tone rules.)
 
+## Eval mode — information barrier
+
+If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation
+workspace. The features and performance metrics this skill authors must
+be **spec-blind**: do not read or condition on `eval_spec.md`,
+`evaluate_against_spec.py`, or any criteria-naming text. Delegate the
+authoring to a subagent whose context holds only the env's obs/action
+semantics, the verified denormalization facts, and the designed reward's
+operational mechanics — never the criteria. Metrics must be independent
+stakeholder perspectives justifiable from the environment alone. See
+"Information barrier (eval mode)" in `CLAUDE.md`.
+
 ## Resolve the workspace
 
 The skill takes the workspace name as `args` (e.g. `/repair-init hopper`).

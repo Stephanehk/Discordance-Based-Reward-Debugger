@@ -150,6 +150,49 @@ evaluation workspace follows the same shape: a pre-authored
 `eval_spec.md`, and a pre-authored `evaluate_against_spec.py` (the spec
 evaluator described below).
 
+### Information barrier (eval mode) — do not break
+
+In an evaluation workspace, `eval_spec.md` is the **human's private
+task**: the criteria they are being evaluated on their ability to
+*discover and articulate*. The detection machinery is supposed to
+surface **neutral** evidence — disagreements between the designed reward
+and *independent* stakeholder metrics — from which the human reasons. If
+the spec leaks into that machinery, the system stops surfacing evidence
+and starts handing the human the answer key, which invalidates the
+evaluation.
+
+Therefore, in eval mode:
+
+- `eval_spec.md` may be read **only** to display it to the human in
+  `/repair-setup` (step 3 below). It must **not** be used by Claude when
+  authoring `trajectory_features.py`, `performance_metrics.py`, or the
+  data-collection policies, nor when selecting trajectory pairs or
+  writing the per-pair / overall "why they disagree" narrative.
+- The candidate performance metrics must be **independent** stakeholder
+  perspectives, each justifiable from generic domain knowledge of the
+  environment alone. Drop any metric (or policy, or feature threshold)
+  that only makes sense if you have read the criteria.
+- Pair selection and all pair explanations must be framed purely as
+  "designed reward vs stakeholder X disagree" — **never** cite, quote,
+  paraphrase, or enumerate the criteria.
+
+Because the criteria are also named outside `eval_spec.md` —
+`evaluate_against_spec.py`, the "Spec evaluation harness" subsection of
+this file, and the prose docstring at the top of the starting
+`designed_reward_fn.py` all state them — once any of those is in the
+working context the spec can no longer be un-seen. So in eval mode the
+spec-blind steps (authoring features/metrics/policies in `/repair-init`
+and `/repair-round`, and selecting + explaining pairs in
+`/repair-preferences`) **must be delegated to a subagent** whose context
+contains only: the env's obs/action semantics, the verified
+denormalization facts, and the designed reward's *operational* mechanics
+(what it computes, term by term) — and **never** `eval_spec.md`,
+`evaluate_against_spec.py`, this file's criteria-naming text, or the
+criteria-naming docstring lines of `designed_reward_fn.py`. The
+main thread (which has seen the spec) must not steer the subagent toward
+the criteria. This barrier is the evidence-gathering analogue of the
+"Reward-edit gate" below.
+
 ### Spec evaluation harness
 
 `evaluate_against_spec.py` (repo root) scores the current

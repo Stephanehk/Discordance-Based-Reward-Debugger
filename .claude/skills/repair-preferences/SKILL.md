@@ -90,6 +90,18 @@ evidence, not verdicts. The same applies to your overall interpretation:
 say "the reward *appears* to prioritize X over Y," not "the reward is
 wrong about Y." (See `CLAUDE.md` for the full tone rules.)
 
+## Eval mode — information barrier
+
+If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation
+workspace. Choosing which pairs to surface and writing the per-pair /
+overall "why they disagree" narrative must be **spec-blind**: do not read
+or condition on `eval_spec.md`, `evaluate_against_spec.py`, or any
+criteria-naming text. Delegate the selection and narrative to a subagent
+given only the dumped trajectory table (which is spec-neutral) plus the
+designed reward's operational mechanics. Frame every disagreement as
+"designed reward vs stakeholder X," never citing the criteria. See
+"Information barrier (eval mode)" in `CLAUDE.md`.
+
 ## Resolve the workspace
 
 The skill takes the workspace name as `args` (e.g. `/repair-preferences hopper`).

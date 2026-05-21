@@ -1,0 +1,52 @@
+{
+  "features": [
+    25.244500398635864,
+    30.0,
+    10.368059873580933,
+    6.0745541006326675,
+    27.92525090277195,
+    0.2,
+    0.6,
+    1.0,
+    5.0
+  ],
+  "names": [
+    [
+      "mean_speed",
+      "Mean ego forward speed over the trajectory (m/s)."
+    ],
+    [
+      "max_speed",
+      "Maximum ego forward speed reached (m/s)."
+    ],
+    [
+      "min_speed",
+      "Minimum ego forward speed reached (m/s)."
+    ],
+    [
+      "min_gap",
+      "Smallest distance to the nearest observed leading vehicle (m)."
+    ],
+    [
+      "mean_gap",
+      "Mean distance to the nearest observed leading vehicle (m)."
+    ],
+    [
+      "lane_change_frac",
+      "Fraction of steps where the ego commanded a lane change."
+    ],
+    [
+      "faster_frac",
+      "Fraction of steps where the ego commanded FASTER (accelerate)."
+    ],
+    [
+      "crashed",
+      "1.0 if the trajectory ended in a collision, else 0.0."
+    ],
+    [
+      "episode_length",
+      "Number of steps in the trajectory."
+    ]
+  ],
+  "source": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_004.pkl"
+}

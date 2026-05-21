@@ -25,6 +25,16 @@ Compliance *classification* of real trajectories is read from this
 workspace's ``Trajectory2Features`` by the ``mean_speed`` / ``min_gap`` /
 ``crashed`` short-names.
 
+It additionally checks the spec's second-paragraph *indifference* clause (a
+no-crash trajectory always 15-25 m from the nearest vehicle averaging
+20 m/s should be equally preferable to a no-crash trajectory always 10-12 m
+away averaging 27 m/s). The strict ranking test cannot express indifference,
+so this is tested directly: every collected trajectory is ablated into both
+profiles (holding all other observation dimensions fixed), giving one
+matched pair per trajectory whose two members the reward *should* score
+equally. The mean within-pair reward gap is then compared against the
+spread of return gaps between arbitrary trajectory pairs.
+
 Usage (from the repo root, with the `llm` conda env active):
     python workspaces/merge_human_eval_1/evaluate_against_spec.py
 """
@@ -56,6 +66,12 @@ DEFAULT_SPEED_TOL = 2.5   # m/s — tolerance band around the ~25 m/s average
 # preferred 15-25 m band).
 ABLATE_GAP_M = 15.0
 ABLATE_SPEED_MPS = TARGET_SPEED_MPS
+
+# Equality-preference profiles (eval_spec.md, 2nd paragraph). Each is a
+# constant gap inside the stated band and the stated average speed, crash-free.
+# The spec says the two profiles should be equally preferable.
+EQ_A_SPEED_MPS, EQ_A_GAP_M = 20.0, 20.0   # "between 15 and 25 m" -> midpoint 20 m
+EQ_B_SPEED_MPS, EQ_B_GAP_M = 27.0, 11.0   # "between 10 and 12 m" -> midpoint 11 m
 
 # highway-env Kinematics denormalisation for the ablation.
 VX_HALFWIDTH_MPS = 80.0
@@ -94,6 +110,34 @@ def _compliant_obs(obs):
 
 def _ablate(traj):
     return [(_compliant_obs(o), a, _compliant_obs(no)) for o, a, no in traj]
+
+
+def _profile_obs(obs, speed_mps, gap_m):
+    """Force an observation to an exact (no-crash, gap, ego-speed) profile.
+
+    Unlike ``_compliant_obs`` (which only floors gaps up to the minimum),
+    this sets the ego speed and *every* present neighbour's distance to the
+    exact requested values, holding all other observation dimensions fixed.
+    """
+    m = np.array(obs, dtype=float, copy=True)
+    m[0, 0] = 1.0                                   # no crash flag on ego row
+    m[0, 3] = speed_mps / VX_HALFWIDTH_MPS          # ego speed -> speed_mps
+    for i in range(1, m.shape[0]):
+        if m[i, 0] > 0.5:                           # present neighbour
+            rx, ry = m[i, 1] * X_HALFWIDTH_M, m[i, 2] * Y_HALFWIDTH_M
+            dist = float(np.hypot(rx, ry))
+            if dist > 1e-6:
+                scale = gap_m / dist                # rescale to exactly gap_m
+                m[i, 1] *= scale
+                m[i, 2] *= scale
+            else:
+                m[i, 1] = gap_m / X_HALFWIDTH_M     # place dead ahead at gap_m
+    return m
+
+
+def _profile_traj(traj, speed_mps, gap_m):
+    return [(_profile_obs(o, speed_mps, gap_m), a, _profile_obs(no, speed_mps, gap_m))
+            for o, a, no in traj]
 
 
 def main():
@@ -180,6 +224,48 @@ def main():
         print(f"  Violating '{crit}': {c} ({100*c/n:.1f}%)")
     print(f"Compliant set used for the ranking test: {len(compliant)} "
           f"({n_real_compliant} real + {len(ablated)} synthesized by ablation)")
+    print("-" * 78)
+
+    # ---- equality-preference check (eval_spec.md, 2nd paragraph) ----
+    # Ablate every collected trajectory into the two profiles the spec calls
+    # equally preferable, holding all other obs dims fixed, so each source
+    # yields one matched pair the reward *should* score equally. Then compare
+    # the within-pair reward gap to the spread of return gaps between
+    # arbitrary trajectory pairs.
+    eq_diffs = np.array([
+        reward_of(_profile_traj(r["traj"], EQ_A_SPEED_MPS, EQ_A_GAP_M))
+        - reward_of(_profile_traj(r["traj"], EQ_B_SPEED_MPS, EQ_B_GAP_M))
+        for r in real
+    ])
+    eq_abs = np.abs(eq_diffs)
+    returns = np.array([r["reward"] for r in real])
+    pair_abs = np.array([abs(returns[i] - returns[j])
+                         for i in range(len(returns))
+                         for j in range(i + 1, len(returns))])
+
+    print("Equality-preference check (eval_spec.md, 2nd paragraph):")
+    print(f"  Profile A: no crash, gap = {EQ_A_GAP_M:g} m (in 15-25 m band), "
+          f"avg speed = {EQ_A_SPEED_MPS:g} m/s")
+    print(f"  Profile B: no crash, gap = {EQ_B_GAP_M:g} m (in 10-12 m band), "
+          f"avg speed = {EQ_B_SPEED_MPS:g} m/s")
+    print(f"  Matched pairs (one ablated from each collected trajectory): "
+          f"{len(eq_diffs)}")
+    print(f"  Mean within-pair reward difference A-B (ideal 0.00): "
+          f"{eq_diffs.mean():+.3f}")
+    print(f"  Mean within-pair |reward difference|: {eq_abs.mean():.3f}")
+    if pair_abs.size:
+        mu, sd = float(pair_abs.mean()), float(pair_abs.std())
+        print(f"  Mean |return difference| over all {pair_abs.size} evaluated "
+              f"trajectory pairs: {mu:.3f} (sd {sd:.3f})")
+        delta = float(eq_abs.mean()) - mu
+        if sd > 1e-12:
+            print(f"  Equality-pair gap vs. typical pair gap: {delta:+.3f} "
+                  f"({delta / sd:+.2f} sd from the all-pairs mean)")
+        else:
+            print(f"  Equality-pair gap vs. typical pair gap: {delta:+.3f} "
+                  f"(all trajectory pairs have equal return; sd = 0)")
+    else:
+        print("  Only one trajectory collected — no all-pairs baseline.")
     print("-" * 78)
 
     if not violators:

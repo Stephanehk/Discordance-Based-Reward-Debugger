@@ -1,0 +1,122 @@
+{
+  "snapshot_id": 1,
+  "timestamp": "2026-05-19T19:26:14",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_006.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCautiousCruiser__traj_000.pkl",
+      "snapshot_reward_a": 131.32726281881332,
+      "snapshot_reward_b": 126.39790892601013,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide following gap and no collisions.",
+          "metric_a": 16.298516600259713,
+          "metric_b": 22.14582810799281
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -36.61078453063965,
+          "metric_b": -13.853311538696289
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -126.34651038038355,
+          "metric_b": -90.46040088264475
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_029.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCautiousCruiser__traj_009.pkl",
+      "snapshot_reward_a": 130.14791160821915,
+      "snapshot_reward_b": 126.39790892601013,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide following gap and no collisions.",
+          "metric_a": 13.58601072182258,
+          "metric_b": 24.6241827805837
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -29.317822456359863,
+          "metric_b": -13.853311538696289
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -111.7962370974763,
+          "metric_b": -90.46040088264475
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_001.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCautiousCruiser__traj_010.pkl",
+      "snapshot_reward_a": 131.70221596956253,
+      "snapshot_reward_b": 126.39790892601013,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -42.7453351020813,
+          "metric_b": -13.853311538696289
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -126.43779113831266,
+          "metric_b": -90.46040088264475
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_006.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCautiousCruiser__traj_009.pkl",
+      "snapshot_reward_a": 127.84789144992828,
+      "snapshot_reward_b": 126.39790892601013,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -52.892136573791504,
+          "metric_b": -13.853311538696289
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -114.1772954743079,
+          "metric_b": -90.46040088264475
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_022.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCautiousCruiser__traj_009.pkl",
+      "snapshot_reward_a": 130.09432464838028,
+      "snapshot_reward_b": 126.39790892601013,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide following gap and no collisions.",
+          "metric_a": 12.645596873647134,
+          "metric_b": 24.6241827805837
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -37.74551868438721,
+          "metric_b": -13.853311538696289
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -106.27483808551239,
+          "metric_b": -90.46040088264475
+        }
+      ]
+    }
+  ]
+}

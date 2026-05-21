@@ -1,0 +1,67 @@
+{
+  "features": [
+    4.0,
+    1.0,
+    28.597777485847473,
+    24.391109943389893,
+    30.0,
+    1.8696300188700359,
+    16.125312447547913,
+    29.8569492995739,
+    4.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "names": [
+    [
+      "episode_len_steps",
+      "Number of timesteps in the trajectory (caps at 100)."
+    ],
+    [
+      "crashed",
+      "1.0 if the trajectory ended in a crash, else 0.0."
+    ],
+    [
+      "mean_speed_mps",
+      "Mean ego forward speed over the trajectory (m/s)."
+    ],
+    [
+      "min_speed_mps",
+      "Minimum ego forward speed (m/s); low values mean it slowed/stopped."
+    ],
+    [
+      "max_speed_mps",
+      "Peak ego forward speed reached (m/s)."
+    ],
+    [
+      "speed_change_mps",
+      "Mean absolute step-to-step change in ego speed (m/s); speed steadiness."
+    ],
+    [
+      "min_neighbour_gap_m",
+      "Closest straight-line distance to any neighbour over the trajectory (m)."
+    ],
+    [
+      "mean_neighbour_gap_m",
+      "Mean nearest-neighbour straight-line distance over the trajectory (m)."
+    ],
+    [
+      "mean_lateral_pos_m",
+      "Mean ego lateral position (m); ~4 = on-ramp lane, ~0 = mainline."
+    ],
+    [
+      "frac_in_mainline",
+      "Fraction of steps with the ego in the mainline (lateral position < ~2 m)."
+    ],
+    [
+      "frac_in_left_lane",
+      "Fraction of steps with the ego in the left mainline lane (lateral position near 0 m)."
+    ],
+    [
+      "num_lane_changes",
+      "Count of LANE_LEFT/LANE_RIGHT actions issued."
+    ]
+  ],
+  "source": "gather_evidence/round_1_trajectories/DataCollectionPolicyTailgater__traj_014.pkl"
+}

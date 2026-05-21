@@ -206,10 +206,27 @@ end of this turn. Follow `repair-preferences/SKILL.md` precisely:
    `select_pairs.py --mode dump`, read it, choose up to 15 useful pairs,
    write the selection JSON, and render them with
    `select_pairs.py --mode render`. You pick the pairs, not an algorithm.
-2. Reprint **every** rendered pair **verbatim** inside fenced code
-   blocks (feature key first, then each pair in the order it was
-   rendered), with **two summary lines directly under each pair**,
-   in this order:
+2. **Open the response with these four leading elements, in order**
+   (before any pair):
+   - the **overall-pattern paragraph** + 1–2 possible reward tweaks
+     ("if you didn't intend X over Y, one option is …"), never framed
+     as "the reward is wrong";
+   - an **orientation line**: "View the following trajectory pairs to
+     note where the designed reward function may be misaligned. You'll
+     be asked to edit the reward function afterwards; you can also
+     request additional trajectory features for more detail on these
+     trajectories, or ask to view more trajectory pairs." (Keep *may be
+     misaligned* — not "wrong.")
+   - the **feature key**;
+   - a **criteria reminder**: "As a reminder, here are the criteria your
+     reward function must encode:" followed by the criteria the reward
+     must encode (the filled reward-design template; in an evaluation
+     workspace, the criteria in `eval_spec.md`, displayed to the human
+     verbatim — human-facing only, never fed to the spec-blind
+     selection/narrative subagent).
+3. Then reprint **every** rendered pair **verbatim** inside fenced code
+   blocks, in render order, with **two summary lines directly under each
+   pair**, in this order:
    - `**Why they disagree:**` — 1–2 sentences naming the trade-off
      the reward made, framed as trade-offs, not as verdicts.
    - `**What you might change in the reward function to flip this preference:**`
@@ -218,15 +235,14 @@ end of this turn. Follow `repair-preferences/SKILL.md` precisely:
      actual variable/constant names from `designed_reward_fn.py`) that
      would make the designed reward prefer the stakeholder's side on
      that pair. Phrase as an option, not a directive.
-3. A short overall-pattern paragraph + 1–2 possible reward tweaks
-   ("if you didn't intend X over Y, one option is …"), never framed
-   as "the reward is wrong."
 4. **Always** close with an `AskUserQuestion` offering four options:
-   (a) run another round of evidence, (b) modify the reward yourself,
-   (c) ask Claude to modify the reward to satisfy the surfaced
-   preferences, or (d) **Finish and submit (not reversible)**. If the
-   user picks (c), first print the reward-edit tip box; if (d), follow
-   "Finish and submit" — both are specified in `CLAUDE.md`.
+   (a) **Edit the reward function**, (b) **Add another trajectory
+   feature**, (c) **View more trajectory pairs**, or (d) **Finish and
+   submit (not reversible)**. Act on the answer per
+   `repair-preferences/SKILL.md` Step 4 (the edit path asks Claude-vs-self
+   and applies the reward-edit tip box / eval-mode gate; "add a feature"
+   re-featurizes and re-presents; "view more pairs" selects additional
+   distinct pairs; "finish" follows "Finish and submit" in `CLAUDE.md`).
 
 The script anonymizes trajectory identity — each is shown as just
 "Trajectory A" / "Trajectory B" with no round, step count, or policy
@@ -247,7 +263,8 @@ Do not say "running /repair-preferences" or list internal commands.
 ## After `/repair-preferences` returns
 
 The end-of-turn message is whatever `/repair-preferences` produced
-(verbatim pairs + per-pair interpretations + overall pattern + the
-closing `AskUserQuestion`). Don't append a summary of which files
+(leading overall pattern + orientation line + feature key + criteria
+reminder, then the verbatim pairs with per-pair interpretations, then
+the closing `AskUserQuestion`). Don't append a summary of which files
 exist or how to re-run individual skills. Act on the user's answer per
-`repair-preferences/SKILL.md` Step 5.
+`repair-preferences/SKILL.md` Step 4.

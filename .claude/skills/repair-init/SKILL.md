@@ -52,6 +52,27 @@ into `<WORKSPACE_DIR>/...`.
 
 If either is missing or broken, tell the user to run `/repair-setup` first.
 
+## Before authoring — don't overwrite existing work
+
+`/repair-init` is normally a one-time step, but it may be invoked on a
+workspace where these files already exist. Before authoring either file,
+check whether it is already present:
+
+- `<WORKSPACE_DIR>/gather_evidence/trajectory_features.py`
+- `<WORKSPACE_DIR>/candidate_performance_metrics/performance_metrics.py`
+
+If **either** exists, do not silently overwrite it. Use `AskUserQuestion`
+to ask the user, per existing file, whether to **keep** the existing one
+or **overwrite** it with a freshly authored version. Frame this in plain
+language — "you already have a trajectory summary set up" / "you already
+have stakeholder perspectives set up" — not by filename. Then:
+
+- **Keep** → skip authoring that file; leave it untouched (and skip its
+  smoke test, since it is unchanged).
+- **Overwrite** → author it fresh as described below.
+
+If neither file exists, proceed straight to authoring with no prompt.
+
 ## Step 2: write `<WORKSPACE_DIR>/gather_evidence/trajectory_features.py`
 
 Read `prompts/trajectory_features_prompt.md` for the verbatim task text.

@@ -39,10 +39,25 @@ Kinematics observation: a (V, F) matrix listing the V=5 closest vehicles
                      when info["crashed"] is True for this step, so that
                      consumers without access to `info` can detect crashes
                      by reading next_obs[0, 0] < 0.5.
-  col 1: x         - longitudinal position, normalised by the road extent.
-  col 2: y         - lateral position, normalised by the road width.
-  col 3: vx        - longitudinal velocity, normalised by reward speed range.
-  col 4: vy        - lateral velocity, normalised by reward speed range.
+  col 1: x         - longitudinal position (normalised, see ranges below).
+  col 2: y         - lateral position (normalised, see ranges below).
+  col 3: vx        - longitudinal velocity (normalised, see ranges below).
+  col 4: vy        - lateral velocity (normalised, see ranges below).
+
+Normalisation / denormalisation (IMPORTANT — verified empirically against
+the live simulator's ground-truth vehicle state):
+  Each feature is min-max scaled to [-1, 1] (and clipped to [-1, 1]) using
+  highway-env's Kinematics `features_range`, which for merge-v0 is:
+      x:  [-200, 200] m      y:  [-8, 8] m
+      vx: [-80,  80]  m/s    vy: [-80, 80] m/s
+  To recover physical units, multiply the normalised value by the range
+  half-width: e.g. ego speed (m/s) = obs[0, 3] * 80; relative longitudinal
+  gap (m) = obs[i, 1] * 200; relative lateral offset (m) = obs[i, 2] * 8.
+
+  NOTE: vx/vy are normalised over the *Kinematics features_range*
+  ([-80, 80]), NOT over the env's `reward_speed_range` ([20, 30]). These
+  two ranges are unrelated; using the reward-speed range (or any other
+  half-width such as 30) to denormalise speed yields a wrong m/s value.
 
 Positions/velocities of rows 1..4 are *relative* to the ego (defaults of
 highway-env Kinematics observation). The ego row (0) is in absolute

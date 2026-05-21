@@ -1,0 +1,207 @@
+{
+  "snapshot_id": 3,
+  "timestamp": "2026-05-20T17:00:14",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_006.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_015.pkl",
+      "snapshot_reward_a": 131.32726281881332,
+      "snapshot_reward_b": 130.14791160821915,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide buffer to other vehicles and avoiding collisions.",
+          "metric_a": 16.331421750111513,
+          "metric_b": 21.49877971029473
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -36.61078453063965,
+          "metric_b": -29.317822456359863
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -126.34651038038355,
+          "metric_b": -111.7962370974763
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_029.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_027.pkl",
+      "snapshot_reward_a": 130.14791160821915,
+      "snapshot_reward_b": 126.39572024345398,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide buffer to other vehicles and avoiding collisions.",
+          "metric_a": 17.438813293213265,
+          "metric_b": 21.986179581629138
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCautiousCruiser__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCautiousCruiser__traj_012.pkl",
+      "snapshot_reward_a": 135.38806468248367,
+      "snapshot_reward_b": 132.02291250228882,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide buffer to other vehicles and avoiding collisions.",
+          "metric_a": 20.356402359476178,
+          "metric_b": 23.6170803163547
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -26.64788246154785,
+          "metric_b": -13.852369785308838
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -108.9305792731738,
+          "metric_b": -92.2094715362706
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_001.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_013.pkl",
+      "snapshot_reward_a": 131.70221596956253,
+      "snapshot_reward_b": 130.14791160821915,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -42.7453351020813,
+          "metric_b": -29.317822456359863
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -126.43779113831266,
+          "metric_b": -111.7962370974763
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_006.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCautiousCruiser__traj_000.pkl",
+      "snapshot_reward_a": 131.32726281881332,
+      "snapshot_reward_b": 126.39790892601013,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide buffer to other vehicles and avoiding collisions.",
+          "metric_a": 16.331421750111513,
+          "metric_b": 23.66116576009706
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -36.61078453063965,
+          "metric_b": -13.853311538696289
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -126.34651038038355,
+          "metric_b": -90.46040088264475
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCautiousCruiser__traj_000.pkl",
+      "snapshot_reward_a": 127.51320540904999,
+      "snapshot_reward_b": 126.39790892601013,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide buffer to other vehicles and avoiding collisions.",
+          "metric_a": 21.594080088165523,
+          "metric_b": 23.66116576009706
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -34.90227699279785,
+          "metric_b": -13.853311538696289
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -119.5846861983581,
+          "metric_b": -90.46040088264475
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_006.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_029.pkl",
+      "snapshot_reward_a": 131.32726281881332,
+      "snapshot_reward_b": 130.14791160821915,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide buffer to other vehicles and avoiding collisions.",
+          "metric_a": 16.331421750111513,
+          "metric_b": 17.438813293213265
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -36.61078453063965,
+          "metric_b": -29.317822456359863
+        },
+        {
+          "perspective": "Energy / efficiency stakeholder: penalises high speed and hard acceleration.",
+          "metric_a": -126.34651038038355,
+          "metric_b": -111.7962370974763
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_022.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_008.pkl",
+      "snapshot_reward_a": 130.09432464838028,
+      "snapshot_reward_b": 128.27290445566177,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide buffer to other vehicles and avoiding collisions.",
+          "metric_a": 15.26689414021652,
+          "metric_b": 18.139054777153035
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -37.74551868438721,
+          "metric_b": -31.530473232269287
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_006.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyStopAndGo__traj_027.pkl",
+      "snapshot_reward_a": 127.84789144992828,
+      "snapshot_reward_b": 126.39572024345398,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: rewards keeping a wide buffer to other vehicles and avoiding collisions.",
+          "metric_a": 15.15801227738394,
+          "metric_b": 21.986179581629138
+        },
+        {
+          "perspective": "Passenger comfort: penalises abrupt speed changes and frequent lane changes.",
+          "metric_a": -52.892136573791504,
+          "metric_b": -41.16197347640991
+        }
+      ]
+    }
+  ]
+}

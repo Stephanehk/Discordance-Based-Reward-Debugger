@@ -1,0 +1,117 @@
+{
+  "snapshot_id": 1,
+  "timestamp": "2026-05-21T11:45:18",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaximizeDesignedReward__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_001.pkl",
+      "snapshot_reward_a": 120.0,
+      "snapshot_reward_b": -1200.0,
+      "disagreements": [
+        {
+          "perspective": "Hospital capacity: a lower peak critical-case load is better.",
+          "metric_a": -0.032,
+          "metric_b": -0.004
+        },
+        {
+          "perspective": "Epidemic control: a lower total currently-infected burden is better.",
+          "metric_a": -0.08870000000000001,
+          "metric_b": -0.0018833333333333334
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaximizeDesignedReward__traj_001.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyOscillating__traj_002.pkl",
+      "snapshot_reward_a": 120.0,
+      "snapshot_reward_b": -216.0,
+      "disagreements": [
+        {
+          "perspective": "Hospital capacity: a lower peak critical-case load is better.",
+          "metric_a": -0.036,
+          "metric_b": -0.0
+        },
+        {
+          "perspective": "Epidemic control: a lower total currently-infected burden is better.",
+          "metric_a": -0.09583333333333337,
+          "metric_b": -0.004466666666666669
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyOscillating__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_001.pkl",
+      "snapshot_reward_a": -216.0,
+      "snapshot_reward_b": -1200.0,
+      "disagreements": [
+        {
+          "perspective": "Epidemic control: a lower total currently-infected burden is better.",
+          "metric_a": -0.004466666666666669,
+          "metric_b": -0.0018833333333333334
+        },
+        {
+          "perspective": "Planning stability: fewer and smaller swings in the regulation stage are better.",
+          "metric_a": -286.0,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaximizeDesignedReward__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyProportionalResponse__traj_001.pkl",
+      "snapshot_reward_a": 120.0,
+      "snapshot_reward_b": 73.0,
+      "disagreements": [
+        {
+          "perspective": "Hospital capacity: a lower peak critical-case load is better.",
+          "metric_a": -0.032,
+          "metric_b": -0.014
+        },
+        {
+          "perspective": "Epidemic control: a lower total currently-infected burden is better.",
+          "metric_a": -0.08870000000000001,
+          "metric_b": -0.05405000000000001
+        },
+        {
+          "perspective": "Proportionality reviewer: restriction severity should track the actual disease level.",
+          "metric_a": -0.14603333333333332,
+          "metric_b": -0.12388333333333333
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyProportionalResponse__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyProportionalResponse__traj_002.pkl",
+      "snapshot_reward_a": 64.0,
+      "snapshot_reward_b": 13.0,
+      "disagreements": [
+        {
+          "perspective": "Business community: keeping venues open (lower closure cost) is better.",
+          "metric_a": -0.2041666666666667,
+          "metric_b": -0.19000000000000003
+        },
+        {
+          "perspective": "Civil liberties: less time spent under heavy restrictions is better.",
+          "metric_a": -0.175,
+          "metric_b": -0.11666666666666667
+        },
+        {
+          "perspective": "Proportionality reviewer: restriction severity should track the actual disease level.",
+          "metric_a": -0.16496666666666665,
+          "metric_b": -0.12911666666666669
+        }
+      ]
+    }
+  ]
+}

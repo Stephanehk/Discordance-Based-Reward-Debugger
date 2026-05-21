@@ -1,0 +1,126 @@
+{
+  "ids": [
+    "T001",
+    "T002",
+    "T003",
+    "T004",
+    "T005",
+    "T006",
+    "T007",
+    "T008",
+    "T009",
+    "T010",
+    "T011",
+    "T012",
+    "T013",
+    "T014",
+    "T015",
+    "T016",
+    "T017",
+    "T018",
+    "T019",
+    "T020",
+    "T021",
+    "T022",
+    "T023",
+    "T024",
+    "T025",
+    "T026",
+    "T027",
+    "T028",
+    "T029",
+    "T030"
+  ],
+  "pool": {
+    "T001": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_000.pkl"
+    },
+    "T002": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_001.pkl"
+    },
+    "T003": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_002.pkl"
+    },
+    "T004": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_003.pkl"
+    },
+    "T005": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_004.pkl"
+    },
+    "T006": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_005.pkl"
+    },
+    "T007": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_006.pkl"
+    },
+    "T008": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_007.pkl"
+    },
+    "T009": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_008.pkl"
+    },
+    "T010": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_009.pkl"
+    },
+    "T011": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_010.pkl"
+    },
+    "T012": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_011.pkl"
+    },
+    "T013": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_012.pkl"
+    },
+    "T014": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_013.pkl"
+    },
+    "T015": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_014.pkl"
+    },
+    "T016": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_015.pkl"
+    },
+    "T017": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_016.pkl"
+    },
+    "T018": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_017.pkl"
+    },
+    "T019": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_018.pkl"
+    },
+    "T020": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_019.pkl"
+    },
+    "T021": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_020.pkl"
+    },
+    "T022": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_021.pkl"
+    },
+    "T023": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_022.pkl"
+    },
+    "T024": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_023.pkl"
+    },
+    "T025": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_024.pkl"
+    },
+    "T026": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_025.pkl"
+    },
+    "T027": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_026.pkl"
+    },
+    "T028": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_027.pkl"
+    },
+    "T029": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_028.pkl"
+    },
+    "T030": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_029.pkl"
+    }
+  }
+}

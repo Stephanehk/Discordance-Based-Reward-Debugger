@@ -1,0 +1,59 @@
+TRAJECTORY TABLE — 24 trajectories
+
+Each row is one trajectory, summarised exactly as the human sees it
+(the features below), plus its total under the designed reward and
+each stakeholder metric. Pick pairs (by id) where the designed
+reward ranks the two trajectories oppositely to a stakeholder you
+think the human cares about, or that otherwise best expose how the
+reward trades off the outcomes that matter.
+
+Feature key (short_name — what it measures):
+  episode_days       Number of simulated days in the rollout
+  mean_stage         Average regulation stage in force (0=open .. 4=lockdown)
+  peak_stage         Strictest regulation stage reached
+  frac_full_lockdown Fraction of days at full lockdown (stage 4)
+  frac_open          Fraction of days with no restrictions (stage 0)
+  mean_stage_change  Mean day-to-day change in stage (fluctuation)
+  mean_critical      Mean critical-case fraction (alpha+delta)
+  peak_critical      Peak critical-case fraction (alpha+delta)
+  frac_days_over_capacity Fraction of days critical load exceeded hospital capacity
+  peak_infected      Peak active-infection fraction (alpha+delta)
+  mean_infected      Mean active-infection fraction (alpha+delta)
+  final_death_fraction Cumulative death fraction at episode end (alpha+delta)
+
+Stakeholder metrics (higher = better by that stakeholder's lights):
+  [economy         ] Local-business stakeholder: prefers the lowest, least costly restriction levels.
+  [hospital_capacity] Hospital administrator: prefers as few days as possible with critical load over capacity.
+  [total_infection_control] Epidemiologist: prefers fewer total infections, including mild ones, to limit spread.
+  [mortality       ] Bereaved-families advocate: prefers the fewest deaths, weighing mortality above all else.
+  [policy_stability] Public-communications stakeholder: prefers stable, predictable restriction levels over erratic swings.
+
+'src' is internal provenance for your diversity reasoning only —
+never reveal round, policy, or step counts to the user.
+
+    id      reward       economy  hospital_capacity  total_infection_control     mortality  policy_stability  episode_days  mean_stage  peak_stage  frac_full_lockdown  frac_open  mean_stage_change  mean_critical  peak_critical  frac_days_over_capacity  peak_infected  mean_infected  final_death_fraction               src
+------  ----------  ------------  ------------  ------------  ------------  ------------  ------------  ----------  ----------  ------------------  ---------  -----------------  -------------  -------------  -----------------------  -------------  -------------  --------------------  ----------------
+  T001     -658.00         -0.00         -0.80         -0.14         -0.00         -0.00        +80.00       +0.00       +0.00               +0.00      +1.00              +0.00          +0.01          +0.03                    +0.80          +0.30          +0.14                 +0.00   r1:LaissezFaire
+  T002     -664.04         -0.00         -0.81         -0.12         -0.00         -0.00        +80.00       +0.00       +0.00               +0.00      +1.00              +0.00          +0.01          +0.03                    +0.81          +0.24          +0.12                 +0.00   r1:LaissezFaire
+  T003     -614.58         -0.00         -0.75         -0.13         -0.00         -0.00        +80.00       +0.00       +0.00               +0.00      +1.00              +0.00          +0.01          +0.02                    +0.75          +0.28          +0.13                 +0.00   r1:LaissezFaire
+  T004     -100.73         -2.00         -0.00         -0.00         -0.00         -0.03        +80.00       +2.00       +2.00               +0.00      +0.00              +0.03          +0.00          +0.00                    +0.00          +0.00          +0.00                 +0.00  r1:ModerateConstant
+  T005     -619.31         -2.00         -0.64         -0.08         -0.00         -0.03        +80.00       +2.00       +2.00               +0.00      +0.00              +0.03          +0.00          +0.01                    +0.64          +0.17          +0.08                 +0.00  r1:ModerateConstant
+  T006     -602.43         -2.00         -0.61         -0.07         -0.00         -0.03        +80.00       +2.00       +2.00               +0.00      +0.00              +0.03          +0.01          +0.02                    +0.61          +0.17          +0.07                 +0.00  r1:ModerateConstant
+  T007     -199.50         -2.00         -0.00         -0.00         -0.00         -3.95        +80.00       +2.00       +4.00               +0.50      +0.50              +3.95          +0.00          +0.00                    +0.00          +0.01          +0.00                 +0.00     r1:Oscillator
+  T008     -200.04         -2.00         -0.00         -0.00         -0.00         -3.95        +80.00       +2.00       +4.00               +0.50      +0.50              +3.95          +0.00          +0.00                    +0.00          +0.00          +0.00                 +0.00     r1:Oscillator
+  T009     -199.50         -2.00         -0.00         -0.00         -0.00         -3.95        +80.00       +2.00       +4.00               +0.50      +0.50              +3.95          +0.00          +0.00                    +0.00          +0.00          +0.00                 +0.00     r1:Oscillator
+  T010     -541.10         -4.00         -0.28         -0.01         -0.00         -0.05        +80.00       +4.00       +4.00               +1.00      +0.00              +0.05          +0.00          +0.00                    +0.28          +0.04          +0.01                 +0.00  r1:PermanentLockdown
+  T011     -321.34         -4.00         -0.00         -0.00         -0.00         -0.05        +80.00       +4.00       +4.00               +1.00      +0.00              +0.05          +0.00          +0.00                    +0.00          +0.01          +0.00                 +0.00  r1:PermanentLockdown
+  T012     -320.74         -4.00         -0.00         -0.00         -0.00         -0.05        +80.00       +4.00       +4.00               +1.00      +0.00              +0.05          +0.00          +0.00                    +0.00          +0.01          +0.00                 +0.00  r1:PermanentLockdown
+  T013     -902.15         -3.25         -0.80         -0.06         -0.00         -0.05        +80.00       +3.25       +4.00               +0.78      +0.11              +0.05          +0.00          +0.01                    +0.80          +0.13          +0.06                 +0.00  r1:RewardMaximizer
+  T014       -3.97         -0.09         -0.00         -0.00         -0.00         -0.03        +80.00       +0.09       +1.00               +0.00      +0.91              +0.03          +0.00          +0.00                    +0.00          +0.01          +0.00                 +0.00  r1:RewardMaximizer
+  T015     -858.17         -3.11         -0.76         -0.04         -0.00         -0.07        +80.00       +3.11       +4.00               +0.72      +0.10              +0.07          +0.00          +0.01                    +0.76          +0.08          +0.04                 +0.00  r1:RewardMaximizer
+  T016     -861.82         -3.06         -0.76         -0.06         -0.00         -0.05        +80.00       +3.06       +4.00               +0.75      +0.20              +0.05          +0.00          +0.01                    +0.76          +0.10          +0.06                 +0.00  r2:GradedController
+  T017     -597.26         -2.46         -0.51         -0.02         -0.00         -0.11        +80.00       +2.46       +4.00               +0.51      +0.19              +0.11          +0.00          +0.00                    +0.51          +0.04          +0.02                 +0.00  r2:GradedController
+  T018     -769.67         -2.95         -0.68         -0.04         -0.00         -0.05        +80.00       +2.95       +4.00               +0.66      +0.05              +0.05          +0.00          +0.01                    +0.68          +0.10          +0.04                 +0.00  r2:GradedController
+  T019     -951.64         -3.36         -0.85         -0.05         -0.00         -0.05        +80.00       +3.36       +4.00               +0.81      +0.11              +0.05          +0.00          +0.01                    +0.85          +0.10          +0.05                 +0.00  r2:RewardMaximizer
+  T020     -837.83         -3.09         -0.74         -0.04         -0.00         -0.14        +80.00       +3.09       +4.00               +0.71      +0.12              +0.14          +0.00          +0.01                    +0.74          +0.08          +0.04                 +0.00  r2:RewardMaximizer
+  T021     -809.53         -2.96         -0.71         -0.04         -0.00         -0.09        +80.00       +2.96       +4.00               +0.69      +0.17              +0.09          +0.00          +0.01                    +0.71          +0.10          +0.04                 +0.00  r2:RewardMaximizer
+  T022     -197.24         -3.00         -0.00         -0.00         -0.00         -0.04        +80.00       +3.00       +3.00               +0.00      +0.00              +0.04          +0.00          +0.00                    +0.00          +0.01          +0.00                 +0.00  r2:StableStrongSuppression
+  T023     -754.25         -3.00         -0.69         -0.07         -0.00         -0.04        +80.00       +3.00       +3.00               +0.00      +0.00              +0.04          +0.00          +0.02                    +0.69          +0.14          +0.07                 +0.00  r2:StableStrongSuppression
+  T024     -195.74         -3.00         -0.00         -0.00         -0.00         -0.04        +80.00       +3.00       +3.00               +0.00      +0.00              +0.04          +0.00          +0.00                    +0.00          +0.00          +0.00                 +0.00  r2:StableStrongSuppression

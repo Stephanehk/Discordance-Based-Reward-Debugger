@@ -1,0 +1,48 @@
+TRAJECTORY TABLE — 12 trajectories
+
+Each row is one trajectory, summarised exactly as the human sees it
+(the features below), plus its total under the designed reward and
+each stakeholder metric. Pick pairs (by id) where the designed
+reward ranks the two trajectories oppositely to a stakeholder you
+think the human cares about, or that otherwise best expose how the
+reward trades off the outcomes that matter.
+
+Feature key (short_name — what it measures):
+  n_days             Number of simulated days (transitions) in the trajectory.
+  mean_stage         Mean regulation stage imposed over the episode (0=none .. 4=strictest).
+  max_stage          Strictest regulation stage imposed at any point in the episode.
+  frac_days_open     Fraction of days with no/light restrictions (stage <= 1).
+  frac_days_strict   Fraction of days under strict lockdown (stage >= 3).
+  stage_switches     Number of days the imposed stage changed from the previous day.
+  mean_infected      Mean combined currently-infected proportion over the episode.
+  peak_infected      Peak combined currently-infected proportion reached during the episode.
+  mean_critical      Mean combined critical-case proportion over the episode.
+  peak_critical      Peak combined critical-case proportion reached during the episode.
+  final_critical     Combined critical-case proportion at the end of the episode.
+  final_recovered    Combined recovered proportion at the end of the episode (alpha+delta).
+
+Stakeholder metrics (higher = better by that stakeholder's lights):
+  [hospital_capacity] Hospital capacity: a lower peak critical-case load is better.
+  [infection_burden] Epidemic control: a lower total currently-infected burden is better.
+  [economic_openness] Business community: keeping venues open (lower closure cost) is better.
+  [civil_liberties ] Civil liberties: less time spent under heavy restrictions is better.
+  [policy_stability] Planning stability: fewer and smaller swings in the regulation stage are better.
+  [proportionality ] Proportionality reviewer: restriction severity should track the actual disease level.
+
+'src' is internal provenance for your diversity reasoning only —
+never reveal round, policy, or step counts to the user.
+
+    id      reward  hospital_capacity  infection_burden  economic_openness  civil_liberties  policy_stability  proportionality    n_days  mean_stage  max_stage  frac_days_open  frac_days_strict  stage_switches  mean_infected  peak_infected  mean_critical  peak_critical  final_critical  final_recovered               src
+------  ----------  ------------  ------------  ------------  ------------  ------------  ------------  --------  ----------  ---------  --------------  ----------------  --------------  -------------  -------------  -------------  -------------  --------------  ---------------  ----------------
+  T001    -1200.00         -0.01         -0.02         -1.00         -1.00         -0.00         -0.97   +120.00       +4.00      +4.00           +0.00             +1.00           +0.00          +0.02          +0.04          +0.00          +0.01           +0.00            +0.10   r1:AlwaysStrict
+  T002    -1200.00         -0.00         -0.00         -1.00         -1.00         -0.00         -1.00   +120.00       +4.00      +4.00           +0.00             +1.00           +0.00          +0.00          +0.01          +0.00          +0.00           +0.00            +0.01   r1:AlwaysStrict
+  T003    -1200.00         -0.00         -0.00         -1.00         -1.00         -0.00         -1.00   +120.00       +4.00      +4.00           +0.00             +1.00           +0.00          +0.00          +0.01          +0.00          +0.00           +0.00            +0.01   r1:AlwaysStrict
+  T004     +120.00         -0.03         -0.09         -0.00         -0.00         -0.00         -0.15   +120.00       +0.00      +0.00           +1.00             +0.00           +0.00          +0.09          +0.25          +0.01          +0.03           +0.00            +0.41  r1:MaximizeDesignedReward
+  T005     +120.00         -0.04         -0.10         -0.00         -0.00         -0.00         -0.15   +120.00       +0.00      +0.00           +1.00             +0.00           +0.00          +0.10          +0.24          +0.01          +0.04           +0.00            +0.42  r1:MaximizeDesignedReward
+  T006     +120.00         -0.00         -0.00         -0.00         -0.00         -0.00         -0.00   +120.00       +0.00      +0.00           +1.00             +0.00           +0.00          +0.00          +0.00          +0.00          +0.00           +0.00            +0.00  r1:MaximizeDesignedReward
+  T007     -216.00         -0.00         -0.00         -0.50         -0.40       -286.00         -0.50   +120.00       +2.00      +4.00           +0.40             +0.40         +119.00          +0.00          +0.01          +0.00          +0.00           +0.00            +0.02    r1:Oscillating
+  T008     -216.00         -0.00         -0.00         -0.50         -0.40       -286.00         -0.50   +120.00       +2.00      +4.00           +0.40             +0.40         +119.00          +0.00          +0.00          +0.00          +0.00           +0.00            +0.00    r1:Oscillating
+  T009     -216.00         -0.00         -0.00         -0.50         -0.40       -286.00         -0.50   +120.00       +2.00      +4.00           +0.40             +0.40         +119.00          +0.00          +0.01          +0.00          +0.00           +0.00            +0.02    r1:Oscillating
+  T010      +64.00         -0.02         -0.04         -0.20         -0.17        -10.00         -0.16   +120.00       +0.86      +3.00           +0.78             +0.17           +9.00          +0.04          +0.11          +0.00          +0.02           +0.00            +0.17  r1:ProportionalResponse
+  T011      +73.00         -0.01         -0.05         -0.17         -0.11        -12.00         -0.12   +120.00       +0.70      +3.00           +0.80             +0.11          +12.00          +0.05          +0.15          +0.00          +0.01           +0.00            +0.22  r1:ProportionalResponse
+  T012      +13.00         -0.02         -0.06         -0.19         -0.12        -12.00         -0.13   +120.00       +0.78      +4.00           +0.78             +0.12          +11.00          +0.06          +0.18          +0.00          +0.02           +0.00            +0.28  r1:ProportionalResponse

@@ -1,0 +1,57 @@
+{
+  "features": [
+    28.10735285282135,
+    29.99976396560669,
+    5.596410632133484,
+    0.0,
+    0.125,
+    3.6257307529449463,
+    14.211775809526443,
+    0.5,
+    1.0,
+    8.0
+  ],
+  "names": [
+    [
+      "mean_speed",
+      "Mean ego forward speed over the trajectory (m/s)"
+    ],
+    [
+      "max_speed",
+      "Maximum ego forward speed reached (m/s)"
+    ],
+    [
+      "speed_dev_from_25",
+      "Mean absolute deviation of ego speed from the 25 m/s band midpoint (m/s)"
+    ],
+    [
+      "frac_speed_over_30",
+      "Fraction of steps with ego speed above the 30 m/s band top"
+    ],
+    [
+      "frac_speed_under_20",
+      "Fraction of steps with ego speed below the 20 m/s band floor"
+    ],
+    [
+      "min_gap",
+      "Smallest distance to the nearest observed neighbour over the trajectory (m)"
+    ],
+    [
+      "mean_gap",
+      "Mean distance to the nearest observed neighbour (m)"
+    ],
+    [
+      "frac_lane_change",
+      "Fraction of steps requesting a lane change"
+    ],
+    [
+      "crashed",
+      "1.0 if the trajectory ended in a collision, else 0.0"
+    ],
+    [
+      "n_steps",
+      "Number of steps in the trajectory (short = early termination)"
+    ]
+  ],
+  "source": "gather_evidence/round_1_trajectories/DataCollectionPolicyRestlessLaneChanger__traj_019.pkl"
+}

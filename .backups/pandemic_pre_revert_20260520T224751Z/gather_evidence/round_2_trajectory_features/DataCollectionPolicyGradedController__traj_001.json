@@ -1,0 +1,62 @@
+{
+  "features": [
+    80.0,
+    2.4625,
+    4.0,
+    0.5125,
+    0.1875,
+    0.1125,
+    0.0018000000000000002,
+    0.004,
+    0.036000000000000004,
+    0.019075,
+    0.0
+  ],
+  "names": [
+    [
+      "episode_days",
+      "Number of simulated days in the rollout"
+    ],
+    [
+      "mean_stage",
+      "Average regulation stage in force (0=open .. 4=lockdown)"
+    ],
+    [
+      "peak_stage",
+      "Strictest regulation stage reached"
+    ],
+    [
+      "frac_full_lockdown",
+      "Fraction of days at full lockdown (stage 4)"
+    ],
+    [
+      "frac_open",
+      "Fraction of days with no restrictions (stage 0)"
+    ],
+    [
+      "mean_stage_change",
+      "Mean day-to-day change in stage (fluctuation)"
+    ],
+    [
+      "mean_critical",
+      "Mean critical-case fraction (alpha+delta)"
+    ],
+    [
+      "peak_critical",
+      "Peak critical-case fraction (alpha+delta)"
+    ],
+    [
+      "peak_infected",
+      "Peak active-infection fraction (alpha+delta)"
+    ],
+    [
+      "mean_infected",
+      "Mean active-infection fraction (alpha+delta)"
+    ],
+    [
+      "final_death_fraction",
+      "Cumulative death fraction at episode end (alpha+delta)"
+    ]
+  ],
+  "source": "gather_evidence/round_2_trajectories/DataCollectionPolicyGradedController__traj_001.pkl"
+}

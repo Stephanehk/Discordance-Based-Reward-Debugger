@@ -19,12 +19,38 @@ by the script, copied unchanged) with **both** per-pair summary lines
 attached to each one, the skill has failed regardless of how good the
 overall interpretation is.
 
-A correct response looks like:
+The response must also include, **before** the pairs and in this order:
+(1) the overall-pattern paragraph, (2) the orientation line telling the
+user to view the pairs to note where the designed reward may be
+misaligned (and that they can edit the reward, request more features, or
+view more pairs next), (3) the feature key, and (4) a reminder of the
+reward-design criteria the reward must encode. These four leading
+elements and the closing `AskUserQuestion` are part of the contract —
+not optional.
+
+A correct response looks like (note the order — the overall pattern, an
+orientation line, the feature key, and a reminder of the reward-design
+criteria all come **before** the pairs):
 
 ````
+<overall pattern + 1–2 possible reward tweaks, ≤ 6 lines, framed as
+"the reward *appears* to prioritize X over Y" — never as "the reward
+is wrong">
+
+View the following trajectory pairs to note where the designed reward
+function may be misaligned. You'll be asked to edit the reward function
+afterwards; you can also request additional trajectory features to see
+more detail on these trajectories, or ask to view more trajectory pairs.
+
 ```
 <feature key, copied verbatim>
 ```
+
+<criteria reminder: "As a reminder, here are the criteria your reward
+function must encode:" followed by the reward-design criteria. In an
+evaluation workspace these are the criteria in `eval_spec.md` (shown to
+the human only — see the eval-mode note below); otherwise the filled
+reward-design template at the top of `designed_reward_fn.py`.>
 
 ```
 <PAIR 1/15 block, copied verbatim — header through feature table.
@@ -53,12 +79,8 @@ verdict.>
 **Why they disagree:** ...
 **What you might change in the reward function to flip this preference:** ...
 
-<overall pattern + 1–2 possible reward tweaks, ≤ 6 lines, framed as
-"the reward *appears* to prioritize X over Y" — never as "the reward
-is wrong">
-
-<AskUserQuestion call: another round of evidence / modify reward
-yourself / Claude modifies the reward>
+<AskUserQuestion call: edit the reward function / add another trajectory
+feature / view more trajectory pairs / Finish and submit>
 ````
 
 Do not paraphrase the pairs. Do not lump the per-pair summary lines
@@ -101,6 +123,16 @@ given only the dumped trajectory table (which is spec-neutral) plus the
 designed reward's operational mechanics. Frame every disagreement as
 "designed reward vs stakeholder X," never citing the criteria. See
 "Information barrier (eval mode)" in `CLAUDE.md`.
+
+The criteria reminder (element 4 above) is the **one** human-facing
+exception: the main thread — which has already seen `eval_spec.md` at
+setup — re-displays those criteria to the human verbatim as a reminder.
+This is display only; it must never feed the spec-blind subagent that
+selects pairs or writes the narrative, and the per-pair / overall text
+must still never cite, quote, or paraphrase the criteria. Assemble the
+final response in the main thread: the subagent returns the overall
+pattern + pairs (spec-blind); the main thread prepends the orientation
+line, the feature key, and the `eval_spec.md` criteria reminder.
 
 ## Resolve the workspace
 
@@ -152,8 +184,11 @@ oppositely to a stakeholder the human plausibly cares about, or that
 otherwise best expose how the reward trades off the outcomes that
 matter. Favor a set that is **diverse**: different stakeholders,
 different behaviors, different reward terms stressed — not many
-near-identical pairs. Use the internal `src` column only to judge
-diversity; never reveal round, policy, or step counts to the user.
+near-identical pairs. It's fine to include pairs where you're unsure
+which trajectory a stakeholder prefers or how to read the trade-off —
+uncertain pairs are often the most informative for the human. Use the
+internal `src` column only to judge diversity; never reveal round,
+policy, or step counts to the user.
 
 Select the pairs you judge most useful — **up to 15**.
 
@@ -225,10 +260,14 @@ Do not truncate, summarise, or paraphrase any pair. If the script
 saved a snapshot path on the last line, you can omit that — it's an
 internal detail.
 
-### 3. Overall interpretation — name the trade-off, not the verdict
+### 3. Lead with the overall interpretation, orientation, feature key, and criteria reminder
 
-After every pair (each followed by its own two summary lines), write a
-short (≤ 6 lines) interpretation that:
+These four elements open the response, **before** the pairs, in this
+order. (You still compute the overall pattern after reading the pairs;
+it just gets placed first.)
+
+**3a. Overall interpretation — name the trade-off, not the verdict.**
+A short (≤ 6 lines) interpretation that:
 - names the **pattern** common to the disagreements
 - points to the **reward term** or **implicit priority** that drove
   the trade-off (by referencing what the reward credits/penalizes —
@@ -240,17 +279,37 @@ wrong about X" or "the reward should be Y." Say "the reward *appears*
 to prioritize X over Y — if that wasn't intended, one option is …".
 Whether the trade-off is acceptable is the user's call.
 
+**3b. Orientation line.** One short paragraph (reword freely, keep it
+neutral): "View the following trajectory pairs to note where the
+designed reward function may be misaligned. You'll be asked to edit the
+reward function afterwards; you can also request additional trajectory
+features to see more detail on these trajectories, or ask to view more
+trajectory pairs." Do **not** say "where the reward is wrong" — keep the
+*may be misaligned* phrasing (the neutrality rule still holds).
+
+**3c. Feature key** — the fenced feature-key block from the render.
+
+**3d. Criteria reminder.** Right after the feature key, remind the user
+of the criteria their reward must encode: a line like "As a reminder,
+here are the criteria your reward function must encode:" followed by the
+criteria. In a normal workspace these are the filled reward-design
+template at the top of `designed_reward_fn.py`. In an **evaluation**
+workspace they are the criteria in `eval_spec.md`, displayed to the
+human verbatim (human-facing only — see the eval-mode note above; this
+display must never reach the spec-blind selection/narrative subagent).
+
 ### 4. Always close by asking the user what to do next
 
 Use `AskUserQuestion` with exactly these four options (or wording very
 close to them):
 
-- **Run another round of evidence** — "the pairs above weren't
-  informative; collect more focused evidence and try again."
-- **I'll modify the reward myself** — user will edit
-  `designed_reward_fn.py` and call back when ready.
-- **Modify the reward for me** — Claude proposes and applies edits
-  targeted at the disagreements above.
+- **Edit the reward function** — change `designed_reward_fn.py` to
+  address the disagreements above.
+- **Add another trajectory feature** — add a new feature to the set
+  that encodes each trajectory, then re-present the evidence with it
+  visible.
+- **View more trajectory pairs** — surface additional, distinct
+  disagreeing pairs from the evidence already collected.
 - **Finish and submit (not reversible)** — finalize the current reward
   as the submission. See "Finish and submit" in `CLAUDE.md`.
 
@@ -261,20 +320,28 @@ itself — but do feel free to act on the answer by running the relevant
 skill.
 
 Act on the answer:
-- "Another round of evidence" → continue inline into `/repair-round`'s
-  rubric (and re-enter this skill when its rubric is satisfied).
-- "I'll modify the reward myself" → tell the user the system will wait;
-  remind them that when they're done they can run `/repair-verify` to
-  re-check the previously-surfaced pairs, **or skip that step and run
-  `/repair-round` directly** to gather fresh evidence under the new
-  reward (verification only re-scores the saved pairs; a new round will
-  surface fresh disagreements that may have emerged from the edit).
-- "Modify the reward for me" → first print the reward-edit tip box (see
-  "Reward-edit tips" in `CLAUDE.md`). Then propose specific edits to
-  `designed_reward_fn.py` that address the disagreements above, apply
-  them with `Edit`, show the diff back to the user, then suggest either
-  `/repair-verify` (re-check the past pairs) **or** `/repair-round`
-  (skip verification and gather fresh evidence under the new reward).
+- "Edit the reward function" → ask whether the user wants to make the
+  edit themselves or have Claude make it.
+  - *Claude makes the edit:* first print the reward-edit tip box (see
+    "Reward-edit tips" in `CLAUDE.md`), and **in eval mode apply the
+    reward-edit gate first** (see "Reward-edit gate" in `CLAUDE.md`).
+    Once the user gives a concrete edit, apply it with `Edit`, show the
+    diff back, then re-score: re-run this skill (trajectories on disk
+    are unchanged, so it just re-scores under the new reward) or suggest
+    `/repair-verify` to re-check the previously-surfaced pairs.
+  - *User edits it themselves:* tell the user the system will wait; when
+    they're done they can run `/repair-verify` to re-check the
+    previously-surfaced pairs, **or** `/repair-round` to gather fresh
+    evidence under the new reward.
+- "Add another trajectory feature" → ask the user what feature they want
+  (or implement the one they named). Add it to
+  `gather_evidence/trajectory_features.py` (in eval mode keep the
+  implementation spec-blind — derive it from env semantics, not the
+  criteria), re-run `runtime.compute_features` over every existing round
+  so all trajectories carry the new feature, then re-present the
+  evidence (Steps 1–4) with the feature visible.
+- "View more trajectory pairs" → re-run Step 1 to select additional
+  pairs distinct from those already shown, and present them (Steps 2–4).
 - "Finish and submit (not reversible)" → follow "Finish and submit" in
   `CLAUDE.md`: write the submission record and stop.
 

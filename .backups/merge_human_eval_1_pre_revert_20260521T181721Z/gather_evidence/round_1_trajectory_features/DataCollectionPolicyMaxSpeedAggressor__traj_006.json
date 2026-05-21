@@ -1,0 +1,57 @@
+{
+  "features": [
+    28.005641400814056,
+    30.0,
+    5.744358599185944,
+    0.0,
+    0.125,
+    4.347188472747803,
+    18.017170071601868,
+    0.0,
+    1.0,
+    8.0
+  ],
+  "names": [
+    [
+      "mean_speed",
+      "Mean ego forward speed over the trajectory (m/s)"
+    ],
+    [
+      "max_speed",
+      "Maximum ego forward speed reached (m/s)"
+    ],
+    [
+      "speed_dev_from_25",
+      "Mean absolute deviation of ego speed from the 25 m/s band midpoint (m/s)"
+    ],
+    [
+      "frac_speed_over_30",
+      "Fraction of steps with ego speed above the 30 m/s band top"
+    ],
+    [
+      "frac_speed_under_20",
+      "Fraction of steps with ego speed below the 20 m/s band floor"
+    ],
+    [
+      "min_gap",
+      "Smallest distance to the nearest observed neighbour over the trajectory (m)"
+    ],
+    [
+      "mean_gap",
+      "Mean distance to the nearest observed neighbour (m)"
+    ],
+    [
+      "frac_lane_change",
+      "Fraction of steps requesting a lane change"
+    ],
+    [
+      "crashed",
+      "1.0 if the trajectory ended in a collision, else 0.0"
+    ],
+    [
+      "n_steps",
+      "Number of steps in the trajectory (short = early termination)"
+    ]
+  ],
+  "source": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaxSpeedAggressor__traj_006.pkl"
+}

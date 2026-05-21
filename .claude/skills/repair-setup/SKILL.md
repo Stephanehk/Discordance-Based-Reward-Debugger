@@ -64,8 +64,25 @@ eval flow below in place of steps 1 and 2, then continue with step 3.
    inline in a fenced code block (language = python). Introduce it as
    "the reward function you've been given as a starting point — your
    job is to revise it until it satisfies the criteria above."
-4. Skip the rest of step 1 and all of step 2; jump to step 3 (sanity
-   check) and then step 4 (exit).
+4. Skip the rest of step 1 and all of step 2; run the sanity check
+   (step 3).
+5. **Offer the reward-edit interaction** before exiting — the *exact
+   same process* used after `/repair-preferences` shows trajectory
+   pairs. Use `AskUserQuestion` to ask whether the user wants to revise
+   this starting reward now and, if so, whether they will edit it
+   themselves or have Claude make the edit (offer options like "Edit it
+   myself", "Have Claude edit it", and "Continue without editing for
+   now"). Act on the answer exactly as the "Edit the reward function"
+   path in Step 4 of `repair-preferences/SKILL.md`:
+   - *Claude makes the edit:* first print the reward-edit tip box, then
+     apply the eval-mode reward-edit gate (refuse a mere paraphrase of
+     the criteria; require a concrete edit) before applying it with
+     `Edit` and showing the diff back. See "Reward-edit tips" and
+     "Reward-edit gate" in `CLAUDE.md`.
+   - *User edits it themselves:* tell them the system will wait; they
+     can run `/repair-init` when done.
+   - *Continue without editing:* proceed straight to the exit.
+6. Finish with step 4 (exit → `/repair-init`).
 
 Do **not** ask the user "describe it" vs. "write it yourself" in eval
 mode — that choice is pre-decided by the workspace author.

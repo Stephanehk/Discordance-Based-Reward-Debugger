@@ -92,13 +92,16 @@ the relevant options. The expected chain is:
 - `/repair-setup` → tell the user to run `/repair-init`.
 - `/repair-init` → tell the user to run `/repair-round`.
 - `/repair-round` → after surfacing disagreements, **ask** the user
-  whether they want to (1) run `/repair-round` again because the
-  surfaced pairs were not informative, (2) modify the reward themselves,
-  (3) ask Claude to modify the reward to satisfy the shown preferences,
-  or (4) **Finish and submit (not reversible)**. Use `AskUserQuestion`.
+  whether they want to (1) **Edit the reward function**, (2) **Add
+  another trajectory feature** to the set that encodes each trajectory,
+  (3) **View more trajectory pairs** from the evidence already
+  collected, or (4) **Finish and submit (not reversible)**. Use
+  `AskUserQuestion`. (The "Edit the reward function" option then asks
+  whether the user or Claude makes the edit; the Claude path prints the
+  reward-edit tip box and, in eval mode, applies the reward-edit gate.)
 - `/repair-preferences` → same closing question as `/repair-round`
-  (another round / modify yourself / Claude modifies / Finish and submit).
-  Use `AskUserQuestion`.
+  (edit the reward / add another trajectory feature / view more
+  trajectory pairs / Finish and submit). Use `AskUserQuestion`.
 - `/repair-verify` → ask whether to look for new disagreements, collect
   more evidence first, or **Finish and submit (not reversible)**. Use
   `AskUserQuestion`.
@@ -115,9 +118,9 @@ is irreversible, only do this when the user explicitly selects it.
 
 ### Reward-edit tips (print when asked to edit the reward)
 
-Whenever the user asks Claude to modify the reward (the "Modify the
-reward for me" path), print this tip box before requesting or applying
-the edit:
+Whenever the user asks Claude to modify the reward (the Claude branch of
+the "Edit the reward function" option), print this tip box before
+requesting or applying the edit:
 
 > 💡 **Tips for guiding a reward edit**
 > - Be concrete: name the term to change, and — if you can — the
@@ -163,11 +166,17 @@ evaluation.
 
 Therefore, in eval mode:
 
-- `eval_spec.md` may be read **only** to display it to the human in
-  `/repair-setup` (step 3 below). It must **not** be used by Claude when
+- `eval_spec.md` may be read **only** to **display it to the human** —
+  in `/repair-setup` (step 3 below) and as the criteria reminder shown
+  after the feature key during evidence presentation (`/repair-round`,
+  `/repair-preferences`). Both are human-facing reminders of the human's
+  own task. It must **not** otherwise be used by Claude: not when
   authoring `trajectory_features.py`, `performance_metrics.py`, or the
   data-collection policies, nor when selecting trajectory pairs or
-  writing the per-pair / overall "why they disagree" narrative.
+  writing the per-pair / overall "why they disagree" narrative. The
+  criteria reminder is assembled by the main thread and must never be
+  fed to the spec-blind subagent that selects pairs or writes the
+  narrative.
 - The candidate performance metrics must be **independent** stakeholder
   perspectives, each justifiable from generic domain knowledge of the
   environment alone. Drop any metric (or policy, or feature threshold)
@@ -225,7 +234,14 @@ When `/repair-setup <name>` is invoked on an evaluation workspace:
 4. Display the contents of `designed_reward_fn.py` inline as
    "the reward function you've been given to revise."
 5. Run the standard smoke test from the regular `/repair-setup` flow.
-6. Exit by telling the user to run `/repair-init` next, same as the
+6. Offer the reward-edit interaction — the **same process** used after
+   `/repair-preferences` shows trajectory pairs: ask (via
+   `AskUserQuestion`) whether to revise the starting reward now and, if
+   so, whether the user or Claude makes the edit (plus a "continue
+   without editing" option). The Claude path prints the reward-edit tip
+   box and applies the reward-edit gate (see "Reward-edit tips" and
+   "Reward-edit gate" below); the self-edit path waits for the user.
+7. Exit by telling the user to run `/repair-init` next, same as the
    normal flow.
 
 ### Reward-edit gate

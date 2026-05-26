@@ -71,7 +71,6 @@ baseline_workspaces/<name>/
 ├── env_config.py                 # authored in /baseline-setup
 ├── designed_reward_fn.py         # authored or stubbed in /baseline-setup
 ├── eval_spec.md                  # eval mode only (pre-authored / copied in)
-├── evaluate_against_spec.py      # eval mode only (run from repo root)
 ├── gather_evidence/
 │   ├── __init__.py
 │   ├── trajectory_features.py             # authored in /baseline-init
@@ -139,8 +138,9 @@ python show_trajectories.py --workspace baseline_workspaces/<name> --mode dump
 python show_trajectories.py --workspace baseline_workspaces/<name> --mode render \
        --selection baseline_workspaces/<name>/.baseline_history/_selection.json
 
-# eval mode only — spec evaluation harness (run from repo root):
-python baseline_workspaces/<name>/evaluate_against_spec.py
+# eval mode only — spec evaluation harness (run from repo root; the same
+# eval_scripts/<name>.py scores either the human-eval or the baseline copy):
+python eval_scripts/<name>.py --workspace baseline_workspaces/<name>
 ```
 
 ## Evaluation workspaces
@@ -150,11 +150,15 @@ A baseline workspace is in evaluation mode iff
 method's eval rules (see "Evaluation workspaces" and the information barrier in
 `CLAUDE.md`):
 
-- The pre-authored eval artifacts are `env_config.py`, `designed_reward_fn.py`
-  (the human's intentionally-misaligned starting point), `eval_spec.md`, and
-  `evaluate_against_spec.py`. `/baseline-setup` will offer to copy them from a
-  matching `workspaces/<name>/` eval workspace if they are not already present.
-  A workspace reset must keep these four files.
+- The pre-authored eval artifacts inside the workspace are `env_config.py`,
+  `designed_reward_fn.py` (the human's intentionally-misaligned starting
+  point), and `eval_spec.md`. The spec evaluator itself lives at the repo root
+  as `eval_scripts/<name>.py` (one per env, shared with the matching human-eval
+  workspace) — it is **not** part of the workspace. `/baseline-setup` will
+  offer to copy the three in-workspace artifacts from a matching
+  `workspaces/<name>/` eval workspace if they are not already present. A
+  workspace reset must keep those three files; the eval script sits outside the
+  workspace and is unaffected by resets.
 - **Information barrier.** `eval_spec.md` is the human's private task. It may be
   read **only** to **display it to the human** — in `/baseline-setup` and as the
   criteria reminder shown after the feature key during evidence presentation
@@ -165,12 +169,27 @@ method's eval rules (see "Evaluation workspaces" and the information barrier in
   per-trajectory descriptions shown to the user must all be **spec-blind** and
   delegated to a subagent whose context contains only the env's obs/action
   semantics, the verified denormalization facts, and the designed reward's
-  operational mechanics — never `eval_spec.md`, `evaluate_against_spec.py`, the
+  operational mechanics — never `eval_spec.md`, `eval_scripts/<name>.py`, the
   criteria-naming text, or the criteria-naming docstring lines of
   `designed_reward_fn.py`.
 - **Reward-edit gate.** When the user asks Claude to modify the reward, apply
-  the same gate as the method (see "Reward-edit gate" in `CLAUDE.md`): refuse a
-  request that merely paraphrases the criteria with no concrete edit, quoting
-  the relevant `eval_spec.md` lines and asking for a concrete edit.
+  the same gate as the method (see "Reward-edit gate" in `CLAUDE.md`). The gate
+  has **two checks**: (1) the request must specify a concrete edit (a term,
+  weight, threshold, or functional shape), and (2) every clause must read as a
+  reward-mechanics instruction (term, weight, gating condition, functional
+  shape) — **not** a policy-desideratum description of what the policy should
+  do. Clauses that prescribe a reward term are fine even when they reference
+  values/thresholds also named in `eval_spec.md`; clauses that only describe
+  the desired behavior trip Check 2. If either check fails, refuse the
+  **entire** request, quote the offending clause alongside the matching
+  `eval_spec.md` line, and ask the user to rephrase.
+- **Criteria reminder above any reward-edit menu.** Whenever a baseline skill
+  presents an `AskUserQuestion` whose options include "Edit the reward
+  function" (or any option that may lead to a reward edit), reprint the
+  criteria from `eval_spec.md` verbatim in the main thread's text immediately
+  above the question, prefaced by "As a reminder, here are the criteria your
+  reward function must encode:" — in addition to any earlier display of the
+  criteria in the same response. The reprint is human-facing only and must
+  never reach a spec-blind subagent.
 - The per-trajectory descriptions must stay purely descriptive of the observed
   behavior/features — never citing, quoting, or paraphrasing the criteria.

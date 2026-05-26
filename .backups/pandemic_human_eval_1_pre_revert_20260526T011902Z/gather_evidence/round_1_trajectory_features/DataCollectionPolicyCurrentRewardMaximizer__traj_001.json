@@ -1,0 +1,67 @@
+{
+  "features": [
+    120.0,
+    0.14166666666666666,
+    3.0,
+    0.95,
+    0.041666666666666664,
+    11.0,
+    0.08203333333333335,
+    0.218,
+    0.004383333333333334,
+    0.022,
+    0.0,
+    0.314
+  ],
+  "names": [
+    [
+      "n_days",
+      "Number of simulated days (transitions) in the trajectory."
+    ],
+    [
+      "mean_stage",
+      "Mean regulation stage imposed over the episode (0=none .. 4=strictest)."
+    ],
+    [
+      "max_stage",
+      "Strictest regulation stage imposed at any point in the episode."
+    ],
+    [
+      "frac_days_open",
+      "Fraction of days with no/light restrictions (stage <= 1)."
+    ],
+    [
+      "frac_days_strict",
+      "Fraction of days under strict lockdown (stage >= 3)."
+    ],
+    [
+      "stage_switches",
+      "Number of days the imposed stage changed from the previous day."
+    ],
+    [
+      "mean_infected",
+      "Mean combined currently-infected proportion over the episode."
+    ],
+    [
+      "peak_infected",
+      "Peak combined currently-infected proportion reached during the episode."
+    ],
+    [
+      "mean_critical",
+      "Mean combined critical-case proportion over the episode."
+    ],
+    [
+      "peak_critical",
+      "Peak combined critical-case proportion reached during the episode."
+    ],
+    [
+      "final_critical",
+      "Combined critical-case proportion at the end of the episode."
+    ],
+    [
+      "final_recovered",
+      "Combined recovered proportion at the end of the episode (alpha+delta)."
+    ]
+  ],
+  "source": "gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_001.pkl"
+}

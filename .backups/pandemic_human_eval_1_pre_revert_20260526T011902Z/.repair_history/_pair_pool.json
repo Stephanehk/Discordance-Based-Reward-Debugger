@@ -1,0 +1,102 @@
+{
+  "ids": [
+    "T001",
+    "T002",
+    "T003",
+    "T004",
+    "T005",
+    "T006",
+    "T007",
+    "T008",
+    "T009",
+    "T010",
+    "T011",
+    "T012",
+    "T013",
+    "T014",
+    "T015",
+    "T016",
+    "T017",
+    "T018",
+    "T019",
+    "T020",
+    "T021",
+    "T022",
+    "T023",
+    "T024"
+  ],
+  "pool": {
+    "T001": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_000.pkl"
+    },
+    "T002": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_001.pkl"
+    },
+    "T003": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_002.pkl"
+    },
+    "T004": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_000.pkl"
+    },
+    "T005": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_001.pkl"
+    },
+    "T006": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_002.pkl"
+    },
+    "T007": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_000.pkl"
+    },
+    "T008": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_001.pkl"
+    },
+    "T009": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_002.pkl"
+    },
+    "T010": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyPeriodicCycle__traj_000.pkl"
+    },
+    "T011": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyPeriodicCycle__traj_001.pkl"
+    },
+    "T012": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyPeriodicCycle__traj_002.pkl"
+    },
+    "T013": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyReactiveLockdown__traj_000.pkl"
+    },
+    "T014": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyReactiveLockdown__traj_001.pkl"
+    },
+    "T015": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyReactiveLockdown__traj_002.pkl"
+    },
+    "T016": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyCurrentRewardMaximizerV2__traj_000.pkl"
+    },
+    "T017": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyCurrentRewardMaximizerV2__traj_001.pkl"
+    },
+    "T018": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyCurrentRewardMaximizerV2__traj_002.pkl"
+    },
+    "T019": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyLateOnlyEscalator__traj_000.pkl"
+    },
+    "T020": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyLateOnlyEscalator__traj_001.pkl"
+    },
+    "T021": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyLateOnlyEscalator__traj_002.pkl"
+    },
+    "T022": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySmoothStableLockdown__traj_000.pkl"
+    },
+    "T023": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySmoothStableLockdown__traj_001.pkl"
+    },
+    "T024": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySmoothStableLockdown__traj_002.pkl"
+    }
+  }
+}

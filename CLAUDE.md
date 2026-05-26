@@ -150,8 +150,9 @@ required to design toward, written in plain language. Any future
 evaluation workspace follows the same shape: a pre-authored
 `env_config.py`, a pre-authored (intentionally misaligned)
 `designed_reward_fn.py` as the human's starting point, a populated
-`eval_spec.md`, and a pre-authored `evaluate_against_spec.py` (the spec
-evaluator described below).
+`eval_spec.md`, and a matching `eval_scripts/<name>.py` at the repo root
+(the spec evaluator described below; one per env, shared across the
+human-eval and baseline copies of the workspace).
 
 ### Information barrier (eval mode) — do not break
 
@@ -186,7 +187,7 @@ Therefore, in eval mode:
   paraphrase, or enumerate the criteria.
 
 Because the criteria are also named outside `eval_spec.md` —
-`evaluate_against_spec.py`, the "Spec evaluation harness" subsection of
+`eval_scripts/<name>.py`, the "Spec evaluation harness" subsection of
 this file, and the prose docstring at the top of the starting
 `designed_reward_fn.py` all state them — once any of those is in the
 working context the spec can no longer be un-seen. So in eval mode the
@@ -196,7 +197,7 @@ and `/repair-round`, and selecting + explaining pairs in
 contains only: the env's obs/action semantics, the verified
 denormalization facts, and the designed reward's *operational* mechanics
 (what it computes, term by term) — and **never** `eval_spec.md`,
-`evaluate_against_spec.py`, this file's criteria-naming text, or the
+`eval_scripts/<name>.py`, this file's criteria-naming text, or the
 criteria-naming docstring lines of `designed_reward_fn.py`. The
 main thread (which has seen the spec) must not steer the subagent toward
 the criteria. This barrier is the evidence-gathering analogue of the
@@ -204,22 +205,27 @@ the criteria. This barrier is the evidence-gathering analogue of the
 
 ### Spec evaluation harness
 
-`evaluate_against_spec.py` (repo root) scores the current
-`designed_reward_fn.py` against `eval_spec.md` for an evaluation
-workspace with a **ranking test**: the reward is aligned with the spec
-when every spec-satisfying trajectory out-scores every violating one
-(checkable criteria: no crash, nearest gap ≥ 10 m, average speed near
-25 m/s). Because real rollouts rarely satisfy the strict criteria, it
-synthesizes a guaranteed-compliant set by **ablating** each collected
-trajectory (forcing ego speed → 25 m/s, every observed gap → ≥ 10 m, no
-crash), then checks whether the reward ranks all compliant trajectories
-above all real violating ones and reports the inversion count plus a
-YES/NO. It lives **inside the eval workspace**
-(`workspaces/<name>/evaluate_against_spec.py`) as a persistent
-pre-authored eval artifact: a workspace reset must **keep it** (alongside
-`env_config.py`, `eval_spec.md`, and the starting `designed_reward_fn.py`),
-not treat it as authored/collected output. Run it from the repo root with
-`python workspaces/<name>/evaluate_against_spec.py`.
+`eval_scripts/<name>.py` (one per evaluation env, at the repo root) scores
+the current `designed_reward_fn.py` against `eval_spec.md` for an
+evaluation workspace with a **ranking test**: the reward is aligned with
+the spec when every spec-satisfying trajectory out-scores every violating
+one (e.g. for the merge envs: no crash, nearest gap ≥ 10 m, average speed
+near 25 m/s). Because real rollouts rarely satisfy the strict criteria,
+it synthesizes a guaranteed-compliant set by **ablating** each collected
+trajectory toward compliant values, then checks whether the reward ranks
+all compliant trajectories above all real violating ones and reports the
+inversion count plus a YES/NO. The exact checks vary per env — see the
+docstring at the top of each `eval_scripts/<name>.py`.
+
+Each `eval_scripts/<name>.py` is **shared across the human-eval and
+baseline copies of the workspace**: pass
+`--workspace workspaces/<name>` to score the human-eval copy or
+`--workspace baseline_workspaces/<name>` to score the baseline copy.
+Because the eval scripts now live at the repo root rather than inside the
+workspace, a workspace reset never touches them — they're a separate
+artifact, not part of the workspace. Run it from the repo root with
+`python eval_scripts/<name>.py --workspace workspaces/<name>` (or
+`baseline_workspaces/<name>`).
 
 ### `/repair-setup` behavior in eval mode
 
@@ -249,8 +255,12 @@ When `/repair-setup <name>` is invoked on an evaluation workspace:
 In an evaluation workspace, whenever the user asks Claude to modify
 `designed_reward_fn.py` (either via the post-`/repair-round` or
 post-`/repair-preferences` question, or organically mid-conversation),
-Claude must first check whether the request specifies a **concrete
-edit** — at least one of:
+Claude must apply **both** checks below before making the edit. If
+either check fails, Claude must refuse the **entire** request — even
+when other parts of the message contain otherwise-concrete edits.
+
+**Check 1 — concrete edit required.** The request must specify a
+**concrete edit** — at least one of:
 
 - a particular term to add or remove,
 - a numerical weight or coefficient,
@@ -258,22 +268,78 @@ edit** — at least one of:
 - a specific function shape (e.g. quadratic in distance, linear in
   speed, clipped above some value).
 
-If the request is a **paraphrase of the criteria in `eval_spec.md`**
-(i.e. a restatement of the reward-design goal with no implementation
-detail) and does *not* contain any concrete edit, Claude must refuse to
-make the edit. The refusal must:
+If the request specifies no concrete edit and is purely a restatement
+of the reward-design goal, refuse.
 
-1. Quote the relevant lines from `eval_spec.md` back to the user, so
-   the user can see Claude has read their request as a restatement of
-   the criteria they were given.
-2. Ask for more specific guidance, naming the kind of guidance Claude
+**Check 2 — reward-mechanics framing, not policy-desideratum framing.**
+The request must describe **what to change in the reward function** —
+terms, weights, gating conditions, functional shapes — rather than
+**what the policy should do**. Concretely:
+
+- *Accept* clauses that prescribe a reward term, even when the term
+  references a value, threshold, or state-variable that is also named
+  in `eval_spec.md`. "Add a penalty when stage == 4", "add a penalty
+  proportional to the day-over-day increase in critical proportion",
+  "add a penalty for any nonzero stage when critical proportion <
+  0.01" — all fine. The clause is describing the *math* of the reward,
+  even though the gating values come from the criteria.
+- *Refuse* clauses that only describe the desired policy outcome
+  without specifying a reward term. "The policy should spend as
+  little time at stage 4 as possible", "lockdown should be zero when
+  the critical proportion is low", "higher critical rates should
+  always be worse" — these tell Claude *what should happen* and leave
+  Claude to infer the reward translation, which is what the
+  evaluation is testing the human on.
+
+The line is roughly: does the clause read as **a reward-function
+instruction** (it tells Claude what code to write — add/remove a
+term, set a weight, gate on a condition, choose a shape) or as **a
+policy desideratum** (it tells Claude what the resulting behavior
+should look like, leaving the reward-function translation
+unspecified)? Verbatim copy-paste of a criterion that is purely
+desideratum-language still trips Check 2. Verbatim copy-paste of a
+threshold or state-variable name inside a reward-term instruction
+does not.
+
+If **any** clause in the request triggers Check 2, refuse the entire
+request. Do **not** silently strip the offending clause and proceed
+with the rest; the user must resubmit without it.
+
+**Refusal format.** The refusal must:
+
+1. Quote the offending clause(s) from the user's message **and** the
+   matching lines from `eval_spec.md`, side by side, so the user can
+   see Claude has read their request as restating the criteria they
+   were given.
+2. State that the gate refuses the **entire** request (not just the
+   restated portion), so the user knows to rephrase the concrete edits
+   without invoking the criteria text.
+3. Ask for re-phrased guidance, naming the kind of guidance Claude
    needs — which term to change, what weight, under what condition,
-   what functional shape.
+   what functional shape — and reminding the user that the request
+   must not restate the criteria.
 
-Only after the user supplies a concrete edit may Claude modify
-`designed_reward_fn.py`. This gate exists because the evaluation is
-about whether the human can identify and articulate reward flaws —
-not whether Claude can infer fixes from a restated objective.
+Only after the user supplies a request that passes both checks may
+Claude modify `designed_reward_fn.py`. This gate exists because the
+evaluation is about whether the human can identify and articulate
+reward flaws — not whether Claude can infer fixes from a restated
+objective.
+
+### Criteria reminder above any reward-edit menu
+
+Any time a skill presents an `AskUserQuestion` whose options include
+"Edit the reward function" — or any other option that may lead to a
+reward edit (Claude- or user-driven) — the criteria from
+`eval_spec.md` must be **reprinted verbatim** in the main thread's
+text immediately above the question, prefaced by a one-line reminder
+("As a reminder, here are the criteria your reward function must
+encode:"). This is required in addition to any earlier display of the
+criteria in the same response, so the user always has the criteria
+directly in front of them at the moment they decide what edit to
+request. The rule applies to every such menu in every skill —
+`/repair-setup`, `/repair-round`, `/repair-preferences`,
+`/baseline-setup`, `/baseline-evidence`. The reprint is human-facing
+only and must never reach a spec-blind subagent.
 
 ## File layout
 
@@ -297,6 +363,11 @@ automated_reward_repairer/
 │   ├── trajectory_features_prompt.md
 │   ├── data_collection_policy_prompt.md
 │   └── performance_metrics_prompt.md
+│
+├── eval_scripts/                        # one per evaluation env (see "Spec evaluation harness")
+│   ├── merge_human_eval_1.py
+│   ├── merge_human_eval_2.py
+│   └── pandemic_human_eval_1.py
 │
 ├── .claude/skills/{repair-setup,repair-init,repair-round,repair-preferences,repair-verify}/SKILL.md
 │
@@ -421,8 +492,10 @@ python select_pairs.py --workspace workspaces/<name> --mode render \
 # legacy algorithmic selector (reference + /repair-verify snapshot check):
 python find_informative_pairs.py --workspace workspaces/<name> --top-overall 5 --margin 0.05
 
-# spec evaluation harness (lives in the eval workspace; run from repo root):
-python workspaces/<name>/evaluate_against_spec.py
+# spec evaluation harness (one per eval env; run from repo root; the same
+# script scores either the human-eval or the baseline copy of the workspace):
+python eval_scripts/<name>.py --workspace workspaces/<name>
+python eval_scripts/<name>.py --workspace baseline_workspaces/<name>
 ```
 
 If `.current_workspace` is set, `--workspace` may be omitted.

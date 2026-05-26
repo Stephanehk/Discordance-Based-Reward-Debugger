@@ -32,7 +32,7 @@ If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation
 workspace. Authoring the data-collection policies, selecting trajectory
 pairs, and writing the per-pair / overall narrative must all be
 **spec-blind**: do not read or condition on `eval_spec.md`,
-`evaluate_against_spec.py`, or any criteria-naming text. Delegate those
+`eval_scripts/<name>.py`, or any criteria-naming text. Delegate those
 judgment steps to a subagent whose context holds only the env semantics,
 the verified denormalization facts, and the designed reward's
 operational mechanics. Frame every disagreement as "designed reward vs
@@ -225,30 +225,40 @@ end of this turn. Follow `repair-preferences/SKILL.md` precisely:
      verbatim — human-facing only, never fed to the spec-blind
      selection/narrative subagent).
 3. Then reprint **every** rendered pair **verbatim** inside fenced code
-   blocks, in render order, with **two summary lines directly under each
-   pair**, in this order:
+   blocks, in render order, with one summary line directly under each
+   pair:
    - `**Why they disagree:**` — 1–2 sentences naming the trade-off
      the reward made, framed as trade-offs, not as verdicts.
-   - `**What you might change in the reward function to flip this preference:**`
-     — 1–2 sentences proposing a concrete, specific edit (a weight to
-     bump, a term to add, a gating condition, etc., referencing the
-     actual variable/constant names from `designed_reward_fn.py`) that
-     would make the designed reward prefer the stakeholder's side on
-     that pair. Phrase as an option, not a directive.
 4. **Always** close with an `AskUserQuestion` offering four options:
    (a) **Edit the reward function**, (b) **Add another trajectory
    feature**, (c) **View more trajectory pairs**, or (d) **Finish and
-   submit (not reversible)**. Act on the answer per
-   `repair-preferences/SKILL.md` Step 4 (the edit path asks Claude-vs-self
-   and applies the reward-edit tip box / eval-mode gate; "add a feature"
-   re-featurizes and re-presents; "view more pairs" selects additional
-   distinct pairs; "finish" follows "Finish and submit" in `CLAUDE.md`).
+   submit (not reversible)**. Immediately **above** the question,
+   reprint the criteria the reward must encode (verbatim from
+   `eval_spec.md` in an evaluation workspace, or from the filled
+   reward-design template at the top of `designed_reward_fn.py`
+   otherwise), prefaced by "As a reminder, here are the criteria your
+   reward function must encode:" — this is in addition to the earlier
+   criteria reminder at step 2 and is required because the menu
+   offers a reward-edit option (see "Criteria reminder above any
+   reward-edit menu" in `CLAUDE.md`). In eval mode the reprint is
+   human-facing only and must never reach the spec-blind subagent.
+   Act on the answer per `repair-preferences/SKILL.md` Step 4 (the
+   edit path asks Claude-vs-self and applies the reward-edit tip box
+   plus the eval-mode reward-edit gate — which runs **two checks**: a
+   concrete-edit check and a "reward-mechanics framing, not
+   policy-desideratum framing" check (clauses prescribing a reward
+   term are fine even when they reference values from `eval_spec.md`;
+   clauses that only describe the desired policy outcome trip the
+   gate), refusing the entire request if either fails; "add a
+   feature" re-featurizes and re-presents; "view more pairs" selects
+   additional distinct pairs; "finish" follows "Finish and submit" in
+   `CLAUDE.md`).
 
 The script anonymizes trajectory identity — each is shown as just
 "Trajectory A" / "Trajectory B" with no round, step count, or policy
 class. Do not re-introduce any of that information in your text.
 
-Skipping the verbatim pairs, either per-pair summary line, or the
+Skipping the verbatim pairs, the per-pair summary line, or the
 closing `AskUserQuestion` is not optional — they are the core
 deliverable of this skill. The user should never have to ask for any
 of them separately.

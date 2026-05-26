@@ -1,0 +1,157 @@
+{
+  "snapshot_id": 1,
+  "timestamp": "2026-05-25T17:15:21",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_000.pkl",
+      "snapshot_reward_a": -440.0,
+      "snapshot_reward_b": -1841.0,
+      "disagreements": [
+        {
+          "perspective": "Hospital-capacity stakeholder: prefers the peak critical-case load to stay below ICU capacity.",
+          "metric_a": -0.01,
+          "metric_b": -0.0
+        },
+        {
+          "perspective": "Epidemic-control stakeholder: prefers a smaller final attack rate (fewer people ever infected).",
+          "metric_a": -0.22399999999999998,
+          "metric_b": -0.007000000000000006
+        },
+        {
+          "perspective": "Long-term-health stakeholder: prefers more of the eventually-infected population to recover rather than remain ill.",
+          "metric_a": 0.9508928571428571,
+          "metric_b": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_001.pkl",
+      "snapshot_reward_a": -27.0,
+      "snapshot_reward_b": -1841.0,
+      "disagreements": [
+        {
+          "perspective": "Epidemic-control stakeholder: prefers a smaller final attack rate (fewer people ever infected).",
+          "metric_a": -0.008000000000000007,
+          "metric_b": -0.0050000000000000044
+        },
+        {
+          "perspective": "Civic-trust stakeholder: prefers regulations that change in small, gradual steps rather than abrupt swings.",
+          "metric_a": -0.03361344537815126,
+          "metric_b": -0.0
+        },
+        {
+          "perspective": "Long-term-health stakeholder: prefers more of the eventually-infected population to recover rather than remain ill.",
+          "metric_a": 0.875,
+          "metric_b": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyPeriodicCycle__traj_001.pkl",
+      "snapshot_reward_a": -360.0,
+      "snapshot_reward_b": -570.0,
+      "disagreements": [
+        {
+          "perspective": "Epidemic-control stakeholder: prefers a smaller final attack rate (fewer people ever infected).",
+          "metric_a": -0.21200000000000002,
+          "metric_b": -0.174
+        },
+        {
+          "perspective": "Long-term-health stakeholder: prefers more of the eventually-infected population to recover rather than remain ill.",
+          "metric_a": 0.9669811320754716,
+          "metric_b": 0.9770114942528736
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyReactiveLockdown__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_002.pkl",
+      "snapshot_reward_a": -722.0,
+      "snapshot_reward_b": -2066.0,
+      "disagreements": [
+        {
+          "perspective": "Hospital-capacity stakeholder: prefers the peak critical-case load to stay below ICU capacity.",
+          "metric_a": -0.024,
+          "metric_b": -0.002
+        },
+        {
+          "perspective": "Epidemic-control stakeholder: prefers a smaller final attack rate (fewer people ever infected).",
+          "metric_a": -0.21300000000000002,
+          "metric_b": -0.11399999999999999
+        },
+        {
+          "perspective": "Civic-trust stakeholder: prefers regulations that change in small, gradual steps rather than abrupt swings.",
+          "metric_a": -0.06722689075630252,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyPeriodicCycle__traj_000.pkl",
+      "snapshot_reward_a": -254.0,
+      "snapshot_reward_b": -645.0,
+      "disagreements": [
+        {
+          "perspective": "Civic-trust stakeholder: prefers regulations that change in small, gradual steps rather than abrupt swings.",
+          "metric_a": -0.25210084033613445,
+          "metric_b": -0.12605042016806722
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_001.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyPeriodicCycle__traj_001.pkl",
+      "snapshot_reward_a": -400.0,
+      "snapshot_reward_b": -570.0,
+      "disagreements": [
+        {
+          "perspective": "Hospital-capacity stakeholder: prefers the peak critical-case load to stay below ICU capacity.",
+          "metric_a": -0.018000000000000002,
+          "metric_b": -0.014
+        },
+        {
+          "perspective": "Epidemic-control stakeholder: prefers a smaller final attack rate (fewer people ever infected).",
+          "metric_a": -0.21000000000000002,
+          "metric_b": -0.174
+        },
+        {
+          "perspective": "Long-term-health stakeholder: prefers more of the eventually-infected population to recover rather than remain ill.",
+          "metric_a": 0.9428571428571428,
+          "metric_b": 0.9770114942528736
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyReactiveLockdown__traj_000.pkl",
+      "snapshot_reward_a": -27.0,
+      "snapshot_reward_b": -722.0,
+      "disagreements": [
+        {
+          "perspective": "Long-term-health stakeholder: prefers more of the eventually-infected population to recover rather than remain ill.",
+          "metric_a": 0.875,
+          "metric_b": 0.9436619718309859
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+[slurm] host=next6.stanford.edu ws=pandemic_human_eval_1 round=1 rollouts/policy=3 workers=24
+[run_round_parallel] workspace=/next/u/stephhk/automated_reward_repairer/workspaces/pandemic_human_eval_1
+[run_round_parallel] round=1  policies=5  rollouts/policy=3  tasks=15  workers=24  max_steps=120
+[run_round_parallel]   (1/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_002.pkl
+[run_round_parallel]   (2/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_000.pkl
+[run_round_parallel]   (3/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyPeriodicCycle__traj_001.pkl
+[run_round_parallel]   (4/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyReactiveLockdown__traj_001.pkl
+[run_round_parallel]   (5/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_001.pkl
+[run_round_parallel]   (6/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyReactiveLockdown__traj_000.pkl
+[run_round_parallel]   (7/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyPeriodicCycle__traj_002.pkl
+[run_round_parallel]   (8/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_000.pkl
+[run_round_parallel]   (9/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_002.pkl
+[run_round_parallel]   (10/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyCurrentRewardMaximizer__traj_000.pkl
+[run_round_parallel]   (11/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_002.pkl
+[run_round_parallel]   (12/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyReactiveLockdown__traj_002.pkl
+[run_round_parallel]   (13/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_001.pkl
+[run_round_parallel]   (14/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyPeriodicCycle__traj_000.pkl
+[run_round_parallel]   (15/15) wrote gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_001.pkl
+[run_round_parallel] computing features for round 1 ...
+[run_round_parallel] wrote 15 feature files. done.

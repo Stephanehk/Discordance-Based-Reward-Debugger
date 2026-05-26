@@ -57,13 +57,17 @@ place of steps 1 and 2, then continue with step 3.
 
 **Eval flow:**
 
-1. Confirm the four pre-authored eval artifacts exist in `<WORKSPACE_DIR>`:
-   `env_config.py`, `designed_reward_fn.py`, `eval_spec.md`,
-   `evaluate_against_spec.py`. If any is missing, check whether a matching
+1. Confirm the three pre-authored in-workspace eval artifacts exist in
+   `<WORKSPACE_DIR>`: `env_config.py`, `designed_reward_fn.py`, and
+   `eval_spec.md`. If any is missing, check whether a matching
    `workspaces/<WORKSPACE>/` eval workspace has it; if so, offer to copy the
    missing artifact(s) into `<WORKSPACE_DIR>` and do so on confirmation. If
    they cannot be sourced, tell the user the eval workspace was not properly
-   set up, stop, and do not author them yourself.
+   set up, stop, and do not author them yourself. Also confirm the matching
+   spec evaluator `eval_scripts/<WORKSPACE>.py` exists at the repo root (the
+   evaluator is shared with the human-eval workspace and is not part of the
+   workspace itself); if not, stop and tell the user the eval workspace was
+   not properly set up — do not author it.
 2. Read `<WORKSPACE_DIR>/eval_spec.md` and print its contents to the user,
    prefaced by one short sentence like "Here is your reward-design task." Do
    not paraphrase the spec or comment on the criteria.

@@ -154,16 +154,17 @@ functional shape). The evaluation measures whether the *person* can
 identify and articulate the flaws — not whether Claude can infer fixes
 from a restated goal.
 
-`evaluate_against_spec.py` scores the result with a **ranking test**: the
+`eval_scripts/<name>.py` scores the result with a **ranking test**: the
 reward is aligned with the spec when every spec-satisfying trajectory
 out-scores every violating one. Because real rollouts rarely satisfy the
 strict criteria, it synthesizes a guaranteed-compliant set by ablating
-each collected trajectory (forcing speed and gaps to compliant values and
-clearing crashes), then reports whether the reward ranks all compliant
-trajectories above all violators, with an inversion count and a YES/NO.
-It lives inside the workspace (`workspaces/<name>/evaluate_against_spec.py`)
-as a persistent eval artifact — kept across workspace resets — and is run
-from the repo root: `python workspaces/<name>/evaluate_against_spec.py`.
+each collected trajectory toward compliant values, then reports whether
+the reward ranks all compliant trajectories above all violators, with an
+inversion count and a YES/NO. There is one eval script per evaluation env
+at the repo root, shared across the human-eval and baseline copies of the
+workspace, and it is run from the repo root:
+`python eval_scripts/<name>.py --workspace workspaces/<name>` (or
+`--workspace baseline_workspaces/<name>`).
 
 Two evaluation environments ship with the repo, both on the same highway
 on-ramp merge env, both starting from the same deliberately misaligned
@@ -195,7 +196,8 @@ python select_pairs.py --workspace workspaces/<name> --mode render \
 python find_informative_pairs.py --workspace workspaces/<name> --check-snapshots
 
 # evaluation workspaces only: score the reward against the spec
-python workspaces/<name>/evaluate_against_spec.py
+# (the same script works on either the human-eval or the baseline copy)
+python eval_scripts/<name>.py --workspace workspaces/<name>
 ```
 
 If `.current_workspace` is set, `--workspace` may be omitted.

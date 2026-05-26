@@ -8,16 +8,14 @@ description: Show the 15 most informative trajectory pairs as preference labels.
 ## ⚠ CORE CONTRACT (do not skip)
 
 **Up to 15 pretty-printed pairs — every disagreement returned by the
-script — MUST appear in your text response, verbatim, with TWO summary
-lines printed directly under each pair (interleaved, not in a single
-block after the last pair):** a `**Why they disagree:**` line and a
-`**What you might change in the reward function to flip this
-preference:**` line. The bash tool result is invisible to the user —
-only what you type into the response is. If your response does not
-contain the pairs themselves (feature key + every PAIR block returned
-by the script, copied unchanged) with **both** per-pair summary lines
-attached to each one, the skill has failed regardless of how good the
-overall interpretation is.
+script — MUST appear in your text response, verbatim, with a
+`**Why they disagree:**` summary line printed directly under each pair
+(interleaved, not in a single block after the last pair).** The bash
+tool result is invisible to the user — only what you type into the
+response is. If your response does not contain the pairs themselves
+(feature key + every PAIR block returned by the script, copied
+unchanged) with the per-pair summary line attached to each one, the
+skill has failed regardless of how good the overall interpretation is.
 
 The response must also include, **before** the pairs and in this order:
 (1) the overall-pattern paragraph, (2) the orientation line telling the
@@ -59,17 +57,11 @@ reward-design template at the top of `designed_reward_fn.py`.>
 **Why they disagree:** <1–2 sentences naming the trade-off the reward
 made, the feature deltas that drove it, and why this stakeholder would
 have chosen oppositely>
-**What you might change in the reward function to flip this preference:**
-<1–2 sentences naming a concrete edit — which weight to change, which
-term to add, remove, or gate — that would cause the designed reward to
-prefer the stakeholder's side on this pair. Framed as an option, not a
-verdict.>
 
 ```
 <PAIR 2/15 block, copied verbatim>
 ```
 **Why they disagree:** ...
-**What you might change in the reward function to flip this preference:** ...
 
 ...
 
@@ -77,16 +69,15 @@ verdict.>
 <PAIR 15/15 block, copied verbatim>
 ```
 **Why they disagree:** ...
-**What you might change in the reward function to flip this preference:** ...
 
 <AskUserQuestion call: edit the reward function / add another trajectory
 feature / view more trajectory pairs / Finish and submit>
 ````
 
 Do not paraphrase the pairs. Do not lump the per-pair summary lines
-into a single section after the last pair — both summary lines go
-directly beneath the pair they explain. Do not skip the feature key.
-Do not skip either summary line on any pair. Do not skip the closing
+into a single section after the last pair — the summary line goes
+directly beneath the pair it explains. Do not skip the feature key.
+Do not skip the summary line on any pair. Do not skip the closing
 `AskUserQuestion` — the user must always be offered a next step.
 
 The script anonymizes trajectory identity in the printed header — each
@@ -117,7 +108,7 @@ wrong about Y." (See `CLAUDE.md` for the full tone rules.)
 If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation
 workspace. Choosing which pairs to surface and writing the per-pair /
 overall "why they disagree" narrative must be **spec-blind**: do not read
-or condition on `eval_spec.md`, `evaluate_against_spec.py`, or any
+or condition on `eval_spec.md`, `eval_scripts/<name>.py`, or any
 criteria-naming text. Delegate the selection and narrative to a subagent
 given only the dumped trajectory table (which is spec-neutral) plus the
 designed reward's operational mechanics. Frame every disagreement as
@@ -235,22 +226,9 @@ See the CORE CONTRACT above. This is the load-bearing step.
       <reward-term> over <stakeholder-priority>, scoring A higher
       because <feature shift>; this stakeholder would have chosen the
       opposite trade-off because <their priority>."
-   c. On the very next line, write a
-      `**What you might change in the reward function to flip this preference:**`
-      line followed by 1–2 sentences. Read the body of
-      `designed_reward_fn.py` and name a **concrete, specific edit** —
-      bump a weight, lower a threshold, add a new term, gate a term on
-      a feature — that would cause the designed reward to prefer the
-      stakeholder's side on this specific pair. Mention the variable
-      or constant name from the reward source so the suggestion is
-      actionable. Phrase as an option, not a directive: "one option is
-      to …" or "if you wanted B to win this pair, raise <CONST> from X
-      to Y."
 
-Do not lump the per-pair summary lines into a single section at the
-end. Both summary lines go directly under the pair they explain — the
-"Why they disagree" first, then "What you might change …" on the
-following line, in that order.
+Do not lump the per-pair summary line into a single section at the
+end. The summary line goes directly under the pair it explains.
 
 Don't name a metric by its internal id; either say "the candidate
 performance metric" or refer to the stakeholder perspective ("the
@@ -300,8 +278,19 @@ display must never reach the spec-blind selection/narrative subagent).
 
 ### 4. Always close by asking the user what to do next
 
-Use `AskUserQuestion` with exactly these four options (or wording very
-close to them):
+Before the question, **reprint the criteria the reward must encode**
+immediately above the menu, prefaced by "As a reminder, here are the
+criteria your reward function must encode:" — verbatim from
+`eval_spec.md` in an evaluation workspace, or verbatim from the filled
+reward-design template at the top of `designed_reward_fn.py`
+otherwise. This is in addition to the criteria reminder shown earlier
+at step 3d, and is required because the menu offers a reward-edit
+option (see "Criteria reminder above any reward-edit menu" in
+`CLAUDE.md`). In eval mode the reprint is human-facing only and must
+never reach the spec-blind selection/narrative subagent.
+
+Then use `AskUserQuestion` with exactly these four options (or wording
+very close to them):
 
 - **Edit the reward function** — change `designed_reward_fn.py` to
   address the disagreements above.
@@ -325,10 +314,20 @@ Act on the answer:
   - *Claude makes the edit:* first print the reward-edit tip box (see
     "Reward-edit tips" in `CLAUDE.md`), and **in eval mode apply the
     reward-edit gate first** (see "Reward-edit gate" in `CLAUDE.md`).
-    Once the user gives a concrete edit, apply it with `Edit`, show the
-    diff back, then re-score: re-run this skill (trajectories on disk
-    are unchanged, so it just re-scores under the new reward) or suggest
-    `/repair-verify` to re-check the previously-surfaced pairs.
+    The gate runs **two checks**: (1) the request must specify a
+    concrete edit; (2) every clause must read as a reward-mechanics
+    instruction (term, weight, gating condition, functional shape) —
+    **not** a policy-desideratum description of what the policy should
+    do. Clauses that prescribe a reward term are fine even when they
+    reference values/thresholds also named in `eval_spec.md`; clauses
+    that only describe the desired behavior trip Check 2. If either
+    check fails, refuse the entire request, quote the offending clause
+    alongside the matching `eval_spec.md` line, and ask the user to
+    rephrase. Only after both checks pass may you apply the edit with
+    `Edit`, show the diff back, then re-score: re-run this skill
+    (trajectories on disk are unchanged, so it just re-scores under
+    the new reward) or suggest `/repair-verify` to re-check the
+    previously-surfaced pairs.
   - *User edits it themselves:* tell the user the system will wait; when
     they're done they can run `/repair-verify` to re-check the
     previously-surfaced pairs, **or** `/repair-round` to gather fresh

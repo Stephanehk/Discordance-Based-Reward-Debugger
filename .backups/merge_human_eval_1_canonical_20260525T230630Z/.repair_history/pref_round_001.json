@@ -1,0 +1,187 @@
+{
+  "snapshot_id": 1,
+  "timestamp": "2026-05-19T16:44:27",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_006.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySlowCruiser__traj_029.pkl",
+      "snapshot_reward_a": 134.91322427988052,
+      "snapshot_reward_b": 130.14791160821915,
+      "disagreements": [
+        {
+          "perspective": "Sustainability stakeholder: prefers moderate steady speeds, penalising high speed and hard acceleration.",
+          "metric_a": -8.022381887291417,
+          "metric_b": -0.5926345218630398
+        },
+        {
+          "perspective": "Passenger-comfort stakeholder: prefers smooth driving with few lane changes and gentle speed changes.",
+          "metric_a": -5.041665380651301,
+          "metric_b": -0.3659026324748993
+        },
+        {
+          "perspective": "Highway operator: prefers speeds near the 25 m/s posted target, neither crawling nor speeding.",
+          "metric_a": -4.980716506640117,
+          "metric_b": -4.6851639186634735
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySlowCruiser__traj_017.pkl",
+      "snapshot_reward_a": 134.91322427988052,
+      "snapshot_reward_b": 130.14791160821915,
+      "disagreements": [
+        {
+          "perspective": "Sustainability stakeholder: prefers moderate steady speeds, penalising high speed and hard acceleration.",
+          "metric_a": -8.022381887291417,
+          "metric_b": -0.5926345218630398
+        },
+        {
+          "perspective": "Passenger-comfort stakeholder: prefers smooth driving with few lane changes and gentle speed changes.",
+          "metric_a": -5.041665380651301,
+          "metric_b": -0.3659026324748993
+        },
+        {
+          "perspective": "Highway operator: prefers speeds near the 25 m/s posted target, neither crawling nor speeding.",
+          "metric_a": -4.980716506640117,
+          "metric_b": -4.6851639186634735
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_005.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_018.pkl",
+      "snapshot_reward_a": 134.91322427988052,
+      "snapshot_reward_b": 126.39791339635849,
+      "disagreements": [
+        {
+          "perspective": "Sustainability stakeholder: prefers moderate steady speeds, penalising high speed and hard acceleration.",
+          "metric_a": -8.022381887291417,
+          "metric_b": -1.8868772711072648
+        },
+        {
+          "perspective": "Passenger-comfort stakeholder: prefers smooth driving with few lane changes and gentle speed changes.",
+          "metric_a": -5.041665380651301,
+          "metric_b": -0.41817409651620047
+        },
+        {
+          "perspective": "Highway operator: prefers speeds near the 25 m/s posted target, neither crawling nor speeding.",
+          "metric_a": -4.980716506640117,
+          "metric_b": -2.6666661898295083
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_019.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_007.pkl",
+      "snapshot_reward_a": 134.91322427988052,
+      "snapshot_reward_b": 132.02291429042816,
+      "disagreements": [
+        {
+          "perspective": "Sustainability stakeholder: prefers moderate steady speeds, penalising high speed and hard acceleration.",
+          "metric_a": -8.022381887291417,
+          "metric_b": -1.5797040263811748
+        },
+        {
+          "perspective": "Passenger-comfort stakeholder: prefers smooth driving with few lane changes and gentle speed changes.",
+          "metric_a": -5.041665380651301,
+          "metric_b": -0.39029614130655926
+        },
+        {
+          "perspective": "Highway operator: prefers speeds near the 25 m/s posted target, neither crawling nor speeding.",
+          "metric_a": -4.980716506640117,
+          "metric_b": -3.1249967217445374
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_007.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_005.pkl",
+      "snapshot_reward_a": -17.06071674823761,
+      "snapshot_reward_b": -44.91813689470291,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: prefers large gaps to other vehicles and no collisions.",
+          "metric_a": -38.63145139482286,
+          "metric_b": -25.254077366420198
+        },
+        {
+          "perspective": "Sustainability stakeholder: prefers moderate steady speeds, penalising high speed and hard acceleration.",
+          "metric_a": -8.13332106338607,
+          "metric_b": -3.462463929539635
+        },
+        {
+          "perspective": "Passenger-comfort stakeholder: prefers smooth driving with few lane changes and gentle speed changes.",
+          "metric_a": -3.003213554620743,
+          "metric_b": -1.1724064747492473
+        },
+        {
+          "perspective": "Highway operator: prefers speeds near the 25 m/s posted target, neither crawling nor speeding.",
+          "metric_a": -4.770114289389716,
+          "metric_b": -1.6222618307386125
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_007.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAggressiveTailgater__traj_027.pkl",
+      "snapshot_reward_a": -55.01744598150253,
+      "snapshot_reward_b": -66.25,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: prefers large gaps to other vehicles and no collisions.",
+          "metric_a": -31.3212140083313,
+          "metric_b": -26.668068408966064
+        },
+        {
+          "perspective": "Sustainability stakeholder: prefers moderate steady speeds, penalising high speed and hard acceleration.",
+          "metric_a": -10.876362526416779,
+          "metric_b": -8.0
+        },
+        {
+          "perspective": "Passenger-comfort stakeholder: prefers smooth driving with few lane changes and gentle speed changes.",
+          "metric_a": -10.485667049884796,
+          "metric_b": -0.0
+        },
+        {
+          "perspective": "Highway operator: prefers speeds near the 25 m/s posted target, neither crawling nor speeding.",
+          "metric_a": -6.560808897018433,
+          "metric_b": -5.0
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySlowCruiser__traj_029.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_025.pkl",
+      "snapshot_reward_a": 130.14791160821915,
+      "snapshot_reward_b": 126.39791160821915,
+      "disagreements": [
+        {
+          "perspective": "Highway operator: prefers speeds near the 25 m/s posted target, neither crawling nor speeding.",
+          "metric_a": -4.6851639186634735,
+          "metric_b": -4.617699044091361
+        },
+        {
+          "perspective": "Traffic-operations stakeholder: prefers steady, brisk forward progress through the merge.",
+          "metric_a": 20.415358683642218,
+          "metric_b": 24.075792687279836
+        }
+      ]
+    }
+  ]
+}

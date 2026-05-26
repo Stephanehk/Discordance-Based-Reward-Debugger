@@ -1,0 +1,1 @@
+[slurm] host=next7.stanford.edu ws=pandemic_human_eval_1 round=1 rollouts/policy=3 workers=24

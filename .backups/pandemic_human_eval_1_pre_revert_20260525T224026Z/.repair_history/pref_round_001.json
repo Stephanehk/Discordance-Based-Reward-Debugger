@@ -1,0 +1,107 @@
+{
+  "snapshot_id": 1,
+  "timestamp": "2026-05-25T14:18:59",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_000.pkl",
+      "snapshot_reward_a": 0.0,
+      "snapshot_reward_b": -1320.0,
+      "disagreements": [
+        {
+          "perspective": "The hospital acute-care stakeholder: higher means the worst-day critical-case load was lower.",
+          "metric_a": -0.024,
+          "metric_b": -0.002
+        },
+        {
+          "perspective": "The public-health epidemiologist: higher means a smaller total infection burden over the episode.",
+          "metric_a": -12.196000000000002,
+          "metric_b": -0.3580000000000001
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysOpen__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyWhiplash__traj_000.pkl",
+      "snapshot_reward_a": 0.0,
+      "snapshot_reward_b": -660.0,
+      "disagreements": [
+        {
+          "perspective": "The hospital acute-care stakeholder: higher means the worst-day critical-case load was lower.",
+          "metric_a": -0.024,
+          "metric_b": -0.0
+        },
+        {
+          "perspective": "The public-health epidemiologist: higher means a smaller total infection burden over the episode.",
+          "metric_a": -12.196000000000002,
+          "metric_b": -0.098
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyWhiplash__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_000.pkl",
+      "snapshot_reward_a": -660.0,
+      "snapshot_reward_b": -1320.0,
+      "disagreements": [
+        {
+          "perspective": "The civic-stability stakeholder: higher means the regulation stage changed less often day-to-day.",
+          "metric_a": -119.0,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyDesignedRewardMaximizer__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAlwaysStrict__traj_000.pkl",
+      "snapshot_reward_a": -30.0,
+      "snapshot_reward_b": -1320.0,
+      "disagreements": [
+        {
+          "perspective": "The hospital acute-care stakeholder: higher means the worst-day critical-case load was lower.",
+          "metric_a": -0.024,
+          "metric_b": -0.002
+        },
+        {
+          "perspective": "The civic-stability stakeholder: higher means the regulation stage changed less often day-to-day.",
+          "metric_a": -8.0,
+          "metric_b": -0.0
+        },
+        {
+          "perspective": "The public-health epidemiologist: higher means a smaller total infection burden over the episode.",
+          "metric_a": -11.392000000000003,
+          "metric_b": -0.3580000000000001
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyDesignedRewardMaximizer__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyWhiplash__traj_000.pkl",
+      "snapshot_reward_a": -30.0,
+      "snapshot_reward_b": -660.0,
+      "disagreements": [
+        {
+          "perspective": "The hospital acute-care stakeholder: higher means the worst-day critical-case load was lower.",
+          "metric_a": -0.024,
+          "metric_b": -0.0
+        },
+        {
+          "perspective": "The public-health epidemiologist: higher means a smaller total infection burden over the episode.",
+          "metric_a": -11.392000000000003,
+          "metric_b": -0.098
+        }
+      ]
+    }
+  ]
+}

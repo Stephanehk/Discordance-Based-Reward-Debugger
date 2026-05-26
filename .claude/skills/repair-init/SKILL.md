@@ -27,7 +27,7 @@ not verdicts. (See `CLAUDE.md` for the full tone rules.)
 If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation
 workspace. The features and performance metrics this skill authors must
 be **spec-blind**: do not read or condition on `eval_spec.md`,
-`evaluate_against_spec.py`, or any criteria-naming text. Delegate the
+`eval_scripts/<name>.py`, or any criteria-naming text. Delegate the
 authoring to a subagent whose context holds only the env's obs/action
 semantics, the verified denormalization facts, and the designed reward's
 operational mechanics — never the criteria. Metrics must be independent

@@ -1,0 +1,14 @@
+[slurm] host=next6.stanford.edu ws=pandemic_human_eval_1 round=2 rollouts/policy=3 workers=24
+[run_round_parallel] workspace=/next/u/stephhk/automated_reward_repairer/workspaces/pandemic_human_eval_1
+[run_round_parallel] round=2  policies=3  rollouts/policy=3  tasks=9  workers=24  max_steps=120
+[run_round_parallel]   (1/9) wrote gather_evidence/round_2_trajectories/DataCollectionPolicyLateOnlyEscalator__traj_001.pkl
+[run_round_parallel]   (2/9) wrote gather_evidence/round_2_trajectories/DataCollectionPolicyLateOnlyEscalator__traj_000.pkl
+[run_round_parallel]   (3/9) wrote gather_evidence/round_2_trajectories/DataCollectionPolicyCurrentRewardMaximizerV2__traj_001.pkl
+[run_round_parallel]   (4/9) wrote gather_evidence/round_2_trajectories/DataCollectionPolicyCurrentRewardMaximizerV2__traj_000.pkl
+[run_round_parallel]   (5/9) wrote gather_evidence/round_2_trajectories/DataCollectionPolicyLateOnlyEscalator__traj_002.pkl
+[run_round_parallel]   (6/9) wrote gather_evidence/round_2_trajectories/DataCollectionPolicyCurrentRewardMaximizerV2__traj_002.pkl
+[run_round_parallel]   (7/9) wrote gather_evidence/round_2_trajectories/DataCollectionPolicySmoothStableLockdown__traj_002.pkl
+[run_round_parallel]   (8/9) wrote gather_evidence/round_2_trajectories/DataCollectionPolicySmoothStableLockdown__traj_000.pkl
+[run_round_parallel]   (9/9) wrote gather_evidence/round_2_trajectories/DataCollectionPolicySmoothStableLockdown__traj_001.pkl
+[run_round_parallel] computing features for round 2 ...
+[run_round_parallel] wrote 9 feature files. done.

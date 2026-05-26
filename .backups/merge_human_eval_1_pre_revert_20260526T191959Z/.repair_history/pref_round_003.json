@@ -1,0 +1,196 @@
+{
+  "snapshot_id": 3,
+  "timestamp": "2026-05-26T11:31:01",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_007.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_010.pkl",
+      "snapshot_reward_a": 121.1714220046997,
+      "snapshot_reward_b": 112.05595970153809,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: prefers smooth speed (low jerk / few abrupt accel-brake cycles).",
+          "metric_a": -6.657143884858065,
+          "metric_b": -2.549356171441742
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAggressiveTailgater__traj_001.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_005.pkl",
+      "snapshot_reward_a": 110.0,
+      "snapshot_reward_b": 46.884968280792236,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: prefers smooth speed (low jerk / few abrupt accel-brake cycles).",
+          "metric_a": -6.513547909516529,
+          "metric_b": -2.096454561128484
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_000.pkl",
+      "snapshot_reward_a": 359.7685980796814,
+      "snapshot_reward_b": 346.2066602706909,
+      "disagreements": [
+        {
+          "perspective": "Driving instructor: prefers minimal lane-change churn (only switch lanes when needed).",
+          "metric_a": -0.5,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySlowCruiser__traj_001.pkl",
+      "snapshot_reward_a": 359.7685980796814,
+      "snapshot_reward_b": 347.0610976219177,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: prefers trajectories whose smallest distance to any neighbour stays large.",
+          "metric_a": 4.310364723205566,
+          "metric_b": 9.848857879638672
+        },
+        {
+          "perspective": "Driving instructor: prefers minimal lane-change churn (only switch lanes when needed).",
+          "metric_a": -0.5,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAggressiveTailgater__traj_001.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAggressiveTailgater__traj_009.pkl",
+      "snapshot_reward_a": 110.0,
+      "snapshot_reward_b": 80.0,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: prefers smooth speed (low jerk / few abrupt accel-brake cycles).",
+          "metric_a": -6.513547909516529,
+          "metric_b": -1.7292263859621066
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_006.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_018.pkl",
+      "snapshot_reward_a": 20.0,
+      "snapshot_reward_b": -10.0,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: prefers smooth speed (low jerk / few abrupt accel-brake cycles).",
+          "metric_a": -6.634436934654636,
+          "metric_b": -1.4142138995478832
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_015.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_003.pkl",
+      "snapshot_reward_a": 80.0,
+      "snapshot_reward_b": 79.86127376556396,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: prefers smooth speed (low jerk / few abrupt accel-brake cycles).",
+          "metric_a": -2.5802002330263276,
+          "metric_b": -0.0917249823643906
+        },
+        {
+          "perspective": "Merge supervisor: prefers reaching and holding the mainline lane (lateral merge completed).",
+          "metric_a": 0.0,
+          "metric_b": 0.5714285714285714
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_009.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_010.pkl",
+      "snapshot_reward_a": 121.1714220046997,
+      "snapshot_reward_b": 112.05595970153809,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: prefers smooth speed (low jerk / few abrupt accel-brake cycles).",
+          "metric_a": -3.6063943774518896,
+          "metric_b": -2.549356171441742
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAggressiveTailgater__traj_001.pkl",
+      "snapshot_reward_a": 359.7685980796814,
+      "snapshot_reward_b": 110.0,
+      "disagreements": [
+        {
+          "perspective": "Driving instructor: prefers minimal lane-change churn (only switch lanes when needed).",
+          "metric_a": -0.5,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySlowCruiser__traj_001.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_000.pkl",
+      "snapshot_reward_a": 347.0610976219177,
+      "snapshot_reward_b": 346.2066602706909,
+      "disagreements": []
+    },
+    {
+      "rank": 11,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyLaneWeaver__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_007.pkl",
+      "snapshot_reward_a": 359.7685980796814,
+      "snapshot_reward_b": 352.0611047744751,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: prefers trajectories whose smallest distance to any neighbour stays large.",
+          "metric_a": 4.310364723205566,
+          "metric_b": 5.656907081604004
+        },
+        {
+          "perspective": "Driving instructor: prefers minimal lane-change churn (only switch lanes when needed).",
+          "metric_a": -0.5,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 12,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySafeFollower__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyAggressiveTailgater__traj_027.pkl",
+      "snapshot_reward_a": 346.2066602706909,
+      "snapshot_reward_b": -10.0,
+      "disagreements": [
+        {
+          "perspective": "Passenger comfort: prefers smooth speed (low jerk / few abrupt accel-brake cycles).",
+          "metric_a": -1.8278491543236104,
+          "metric_b": -0.0
+        }
+      ]
+    }
+  ]
+}

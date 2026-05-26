@@ -23,16 +23,16 @@ for the full tone rules; they apply here too.)
 
 If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation workspace. The
 features this skill authors must be **spec-blind**: do not read or condition on
-`eval_spec.md`, `evaluate_against_spec.py`, or any criteria-naming text.
+`eval_spec.md`, `eval_scripts/<name>.py`, or any criteria-naming text.
 Delegate the authoring to a subagent whose context holds only the env's
 obs/action semantics, the verified denormalization facts, and the designed
 reward's operational mechanics — never the criteria. See "Information barrier"
 in `BASELINE.md` and `CLAUDE.md`.
 
-(If this baseline workspace's `evaluate_against_spec.py` reads features by
-specific short-names — e.g. `mean_speed` / `min_gap` / `crashed` — those
-short-names are part of the env's measurement vocabulary, not the criteria;
-the subagent may expose features under those names. Do not pass it the spec.)
+(If this env's `eval_scripts/<name>.py` reads features by specific short-names
+— e.g. `mean_speed` / `min_gap` / `crashed` — those short-names are part of the
+env's measurement vocabulary, not the criteria; the subagent may expose
+features under those names. Do not pass it the spec.)
 
 ## Resolve the workspace
 

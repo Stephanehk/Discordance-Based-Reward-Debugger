@@ -18,9 +18,7 @@ function must encode the criteria below.
    constant is preferable to one whose regulation stage rises or falls while
    the critical-case rate does not change at all.
 
-4. Avoid spending any time at stage 2.
-
-5. Over a single step, a change in critical cases of 0.01 with no change in
+4. Over a single step, a change in critical cases of 0.01 with no change in
    regulation stage is exactly as desirable as a change in critical cases of
    0.005 together with an increase in regulation stage from 0 to 1.
 

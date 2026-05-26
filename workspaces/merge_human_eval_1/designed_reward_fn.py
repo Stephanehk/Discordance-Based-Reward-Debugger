@@ -15,10 +15,9 @@ surface (with the help of the /repair-* skills) and repair.
 _CRASH_PENALTY = -100.0  # dimensionless reward units; paid on the crash step
 
 # highway-env's Kinematics observation normalises longitudinal velocity
-# to [-1, 1] over a features_range that spans roughly [-30, 30] m/s
-# for the merge env. Multiplying the normalised vx by this half-width
-# recovers unnormalised ego speed in m/s.
-_VX_HALFWIDTH_MPS = 30.0  # m/s — matches highway-env's default Kinematics vx range
+# to [-1, 1] over the features_range [-80, 80] m/s for the merge env.
+# Multiplying the normalised vx by this half-width recovers ego speed in m/s.
+_VX_HALFWIDTH_MPS = 80.0  # m/s — Kinematics features_range half-width for vx
 
 
 def designed_reward_fn(obs, act, next_obs) -> float:

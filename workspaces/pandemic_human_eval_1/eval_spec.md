@@ -7,22 +7,23 @@ function must encode the criteria below.
 
 ## Criteria
 
-1. When the critical-case proportion is below 0.01, the regulation stage
-   should be 0. As the critical-case proportion rises, the regulation stage
-   should rise in proportion.
+1. When the critical proportion is less than 0.01, lockdown regulation
+   should be zero. Higher critical rates are always worse than lower
+   critical rates.
 
-2. Spend as little time as possible at the strictest lockdown (stage 4).
+2. Spend as little time in lockdown stage 4 as possible.
 
-3. Avoid rapidly changing the regulation stage. A trajectory whose
-   critical-case rate changes by 0.001 while the regulation stage stays
-   constant is preferable to one whose regulation stage rises or falls while
-   the critical-case rate does not change at all.
+3. Avoid rapidly changing lockdown levels; a change in critical rates of
+   0.001 but a constant lockdown stage is preferable to an increasing or
+   decreasing lockdown stage but no change in critical rates. (Keeping
+   the lockdown stage from fluctuating is worth a small increase in
+   critical cases.)
 
-4. Avoid spending any time at stage 2.
-
-5. Over a single step, a change in critical cases of 0.01 with no change in
-   regulation stage is exactly as desirable as a change in critical cases of
-   0.005 together with an increase in regulation stage from 0 to 1.
+4. For a single step, a change in critical cases of 0.01 and no change in
+   lockdown regulation is equally as desirable as a change in critical
+   cases of 0.005 and an increase from lockdown regulation 0 to 1.
+   (Keeping critical rates low is more important than keeping lockdown
+   rates low.)
 
 ## Starting point
 

@@ -29,7 +29,7 @@ correct/incorrect or "appears aligned/misaligned with what you described."
 If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation workspace.
 Authoring the reward-maximizing policy and writing the per-trajectory
 descriptions shown to the user must be **spec-blind**: do not read or condition
-on `eval_spec.md`, `evaluate_against_spec.py`, or any criteria-naming text.
+on `eval_spec.md`, `eval_scripts/<name>.py`, or any criteria-naming text.
 Delegate those judgment steps to a subagent whose context holds only the env
 semantics, the verified denormalization facts, and the designed reward's
 operational mechanics. Describe trajectories purely by their observed
@@ -173,16 +173,33 @@ proceed?"). Do **not** mention command names in the question text.
   reward-maximizing behavior.
 - **Finish and submit (not reversible)** — finalize the current reward.
 
+Before the `AskUserQuestion`, **reprint the criteria the reward must encode**
+immediately above the menu, prefaced by "As a reminder, here are the criteria
+your reward function must encode:" — verbatim from `eval_spec.md` in an
+evaluation workspace, or verbatim from the filled reward-design template at the
+top of `designed_reward_fn.py` otherwise. This is in addition to the criteria
+reminder shown earlier with the trajectory blocks, and is required because the
+menu offers a reward-edit option (see "Criteria reminder above any reward-edit
+menu" in `CLAUDE.md` / `BASELINE.md`). In eval mode the reprint is human-facing
+only and must never reach the spec-blind subagent.
+
 Act on the answer:
 - **Edit the reward function** → ask whether the user wants to make the edit
   themselves or have Claude make it.
   - *Claude makes the edit:* first print the reward-edit tip box (see
     "Reward-edit tips" in `CLAUDE.md`). **In eval mode, apply the reward-edit
-    gate first** (see "Reward-edit gate" in `CLAUDE.md` / `BASELINE.md`): if the
-    request merely paraphrases the criteria with no concrete edit, refuse —
-    quote the relevant `eval_spec.md` lines and ask for a concrete edit (a term,
-    weight, threshold, or functional shape). Only with a concrete edit may you
-    modify `designed_reward_fn.py`. Apply edits with `Edit`, show the diff back,
+    gate first** (see "Reward-edit gate" in `CLAUDE.md` / `BASELINE.md`). The
+    gate runs **two checks**: (1) the request must specify a concrete edit
+    (a term, weight, threshold, or functional shape); (2) every clause must
+    read as a reward-mechanics instruction (term, weight, gating condition,
+    functional shape) — **not** a policy-desideratum description of what
+    the policy should do. Clauses that prescribe a reward term are fine
+    even when they reference values/thresholds also named in
+    `eval_spec.md`; clauses that only describe the desired behavior trip
+    Check 2. If either check fails, refuse the **entire** request, quote
+    the offending clause alongside the matching `eval_spec.md` line, and
+    ask the user to rephrase. Only after both checks pass may you modify
+    `designed_reward_fn.py`. Apply edits with `Edit`, show the diff back,
     then suggest running `/baseline-evidence` to roll out a fresh maximizer
     under the new reward.
   - *User edits it themselves:* tell the user the system will wait; when

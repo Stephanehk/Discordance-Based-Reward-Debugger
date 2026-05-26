@@ -68,17 +68,33 @@ eval flow below in place of steps 1 and 2, then continue with step 3.
    (step 3).
 5. **Offer the reward-edit interaction** before exiting — the *exact
    same process* used after `/repair-preferences` shows trajectory
-   pairs. Use `AskUserQuestion` to ask whether the user wants to revise
-   this starting reward now and, if so, whether they will edit it
-   themselves or have Claude make the edit (offer options like "Edit it
-   myself", "Have Claude edit it", and "Continue without editing for
-   now"). Act on the answer exactly as the "Edit the reward function"
-   path in Step 4 of `repair-preferences/SKILL.md`:
+   pairs. Before the question, **reprint the criteria from
+   `eval_spec.md` verbatim** in the main thread's text immediately
+   above the menu, prefaced by "As a reminder, here are the criteria
+   your reward function must encode:" — this is in addition to the
+   earlier display at step 2 of this flow, and is required because the
+   menu offers a reward-edit option (see "Criteria reminder above any
+   reward-edit menu" in `CLAUDE.md`). Then use `AskUserQuestion` to
+   ask whether the user wants to revise this starting reward now and,
+   if so, whether they will edit it themselves or have Claude make the
+   edit (offer options like "Edit it myself", "Have Claude edit it",
+   and "Continue without editing for now"). Act on the answer exactly
+   as the "Edit the reward function" path in Step 4 of
+   `repair-preferences/SKILL.md`:
    - *Claude makes the edit:* first print the reward-edit tip box, then
-     apply the eval-mode reward-edit gate (refuse a mere paraphrase of
-     the criteria; require a concrete edit) before applying it with
-     `Edit` and showing the diff back. See "Reward-edit tips" and
-     "Reward-edit gate" in `CLAUDE.md`.
+     apply the eval-mode reward-edit gate. The gate runs **two
+     checks**: (1) the request must specify a concrete edit; (2) every
+     clause must read as a reward-mechanics instruction (term, weight,
+     gating condition, functional shape) — **not** a policy-desideratum
+     description of what the policy should do. Clauses that prescribe
+     a reward term are fine even when they reference values/thresholds
+     also named in `eval_spec.md`; clauses that only describe the
+     desired behavior trip Check 2. If either check fails, refuse the
+     entire request, quote the offending clause alongside the matching
+     `eval_spec.md` line, and ask the user to rephrase. Only after
+     both checks pass may you apply the edit with `Edit` and show the
+     diff back. See "Reward-edit tips" and "Reward-edit gate" in
+     `CLAUDE.md`.
    - *User edits it themselves:* tell them the system will wait; they
      can run `/repair-init` when done.
    - *Continue without editing:* proceed straight to the exit.

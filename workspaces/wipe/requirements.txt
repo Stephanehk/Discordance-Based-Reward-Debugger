@@ -1,0 +1,4 @@
+robosuite
+mujoco
+imageio
+imageio-ffmpeg

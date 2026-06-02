@@ -1,0 +1,88 @@
+{
+  "snapshot_id": 8,
+  "timestamp": "2026-05-27T12:57:50",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_5_trajectories/DataCollectionPolicyAggressiveSweep__traj_008.pkl",
+      "traj_b_path": "gather_evidence/round_5_trajectories/DataCollectionPolicyPatientWiper__traj_000.pkl",
+      "snapshot_reward_a": 42.034900921421375,
+      "snapshot_reward_b": 41.30976695878559,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: avoid arm collisions and joint-limit saturation (higher = safer).",
+          "metric_a": -0.014084507042253521,
+          "metric_b": -0.009615384615384616
+        },
+        {
+          "perspective": "Maintenance engineer: avoid pressing too hard on the table or the wiping pad (higher = gentler).",
+          "metric_a": -98.04783931816065,
+          "metric_b": -29.478105239884954
+        },
+        {
+          "perspective": "Human collaborator: prefers smooth, low-acceleration arm motion (higher = smoother).",
+          "metric_a": -0.08162955181594465,
+          "metric_b": -0.0059714324427904315
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_5_trajectories/DataCollectionPolicyPatientWiper__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_5_trajectories/DataCollectionPolicyDesignedRewardMaximizer__traj_011.pkl",
+      "snapshot_reward_a": 41.30976695878559,
+      "snapshot_reward_b": 38.233071010673314,
+      "disagreements": [
+        {
+          "perspective": "Productivity: dirt cleaned per control step (higher = more cleaning per second).",
+          "metric_a": 0.27884615384615385,
+          "metric_b": 0.3176470588235294
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_5_trajectories/DataCollectionPolicyDesignedRewardMaximizer__traj_008.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHeavyPress__traj_015.pkl",
+      "snapshot_reward_a": 91.74330383972388,
+      "snapshot_reward_b": 61.9041496334001,
+      "disagreements": [
+        {
+          "perspective": "Human collaborator: prefers smooth, low-acceleration arm motion (higher = smoother).",
+          "metric_a": -0.10736933691669406,
+          "metric_b": -0.042383094487542454
+        },
+        {
+          "perspective": "Productivity: dirt cleaned per control step (higher = more cleaning per second).",
+          "metric_a": 0.5284552845528455,
+          "metric_b": 2.0
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHeavyPress__traj_015.pkl",
+      "traj_b_path": "gather_evidence/round_5_trajectories/DataCollectionPolicyDesignedRewardMaximizer__traj_014.pkl",
+      "snapshot_reward_a": 61.9041496334001,
+      "snapshot_reward_b": 52.27857532457059,
+      "disagreements": [
+        {
+          "perspective": "Safety reviewer: avoid arm collisions and joint-limit saturation (higher = safer).",
+          "metric_a": -0.045454545454545456,
+          "metric_b": -0.011764705882352941
+        },
+        {
+          "perspective": "Maintenance engineer: avoid pressing too hard on the table or the wiping pad (higher = gentler).",
+          "metric_a": -210.5421498324722,
+          "metric_b": -57.08498519686637
+        }
+      ]
+    }
+  ],
+  "lotteries": []
+}

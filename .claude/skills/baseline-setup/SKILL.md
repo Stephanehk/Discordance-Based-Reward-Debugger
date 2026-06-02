@@ -49,38 +49,6 @@ anything else. Use kebab-case.
 - Create an empty `__init__.py` in `<WORKSPACE_DIR>/gather_evidence`.
 - Write `<WORKSPACE>` to `.current_baseline_workspace` at the repo root.
 
-### 0.5. Detect evaluation mode
-
-If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an **evaluation workspace**
-(see "Evaluation workspaces" in `BASELINE.md`). Follow the eval flow below in
-place of steps 1 and 2, then continue with step 3.
-
-**Eval flow:**
-
-1. Confirm the three pre-authored in-workspace eval artifacts exist in
-   `<WORKSPACE_DIR>`: `env_config.py`, `designed_reward_fn.py`, and
-   `eval_spec.md`. If any is missing, check whether a matching
-   `workspaces/<WORKSPACE>/` eval workspace has it; if so, offer to copy the
-   missing artifact(s) into `<WORKSPACE_DIR>` and do so on confirmation. If
-   they cannot be sourced, tell the user the eval workspace was not properly
-   set up, stop, and do not author them yourself. Also confirm the matching
-   spec evaluator `eval_scripts/<WORKSPACE>.py` exists at the repo root (the
-   evaluator is shared with the human-eval workspace and is not part of the
-   workspace itself); if not, stop and tell the user the eval workspace was
-   not properly set up — do not author it.
-2. Read `<WORKSPACE_DIR>/eval_spec.md` and print its contents to the user,
-   prefaced by one short sentence like "Here is your reward-design task." Do
-   not paraphrase the spec or comment on the criteria.
-3. Read `<WORKSPACE_DIR>/designed_reward_fn.py` and print its contents inline
-   in a fenced code block (language = python). Introduce it as "the reward
-   function you've been given as a starting point — your job is to revise it
-   until it satisfies the criteria above."
-4. Skip the rest of step 1 and all of step 2; jump to step 3 (sanity check)
-   then step 4 (exit).
-
-Do **not** ask "describe it" vs. "write it yourself" in eval mode — that choice
-is pre-decided by the workspace author.
-
 ### 1. Identify the environment
 Ask the user **which gym environment** they want to use. Accept either a
 gymnasium / gym id (`"Hopper-v4"`) or a path to a custom env class

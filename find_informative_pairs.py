@@ -295,8 +295,8 @@ def _print_pair(rec_a: TrajRecord, rec_b: TrajRecord,
     """Full per-trajectory feature dump format.
 
     A is the reward-preferred trajectory; `disagreements` is the list of
-    stakeholder perspectives whose ranking prefers B over A. The feature
-    key is printed once at the top of the run (see `_print_feature_key`).
+    other perspectives whose ranking prefers B over A. The feature key is
+    printed once at the top of the run (see `_print_feature_key`).
     """
     a_r = rec_a.designed_reward
     b_r = rec_b.designed_reward
@@ -317,7 +317,7 @@ def _print_pair(rec_a: TrajRecord, rec_b: TrajRecord,
     print(f"                                         {'Trajectory A':>14s}   {'Trajectory B':>14s}")
     print(f"  designed reward (prefers A ≻ B)        {a_r:>+14.3f}   {b_r:>+14.3f}")
     print()
-    print(f"  Stakeholder perspectives that disagree (prefer B ≻ A):")
+    print(f"  Other perspectives that disagree (prefer B ≻ A):")
     for d in disagreements:
         print(f"    • {d['perspective']}")
         print(f"        A={d['metric_a']:+10.3f}   B={d['metric_b']:+10.3f}")
@@ -358,8 +358,8 @@ def _print_pair_preference_labels(rank: int, total: int,
                                   score: float | None = None) -> None:
     """Compact preference-label view; A is reward-preferred.
 
-    Stakeholder perspectives are printed by their docstring (e.g. "the
-    safety reviewer's view") rather than internal metric ids.
+    Other perspectives are printed by their docstring (e.g. "the safety
+    reviewer's view") rather than internal metric ids.
     """
     a_r = rec_a.designed_reward
     b_r = rec_b.designed_reward
@@ -378,7 +378,7 @@ def _print_pair_preference_labels(rank: int, total: int,
     print()
     print(f"  preference by designed reward         →   A ≻ B")
     print()
-    print(f"  Stakeholder perspectives that disagree (prefer B ≻ A):")
+    print(f"  Other perspectives that disagree (prefer B ≻ A):")
     for d in disagreements:
         print(f"    • {d['perspective']}")
         print(f"        A={d['metric_a']:+10.3f}   B={d['metric_b']:+10.3f}")
@@ -394,6 +394,81 @@ def _print_pair_preference_labels(rank: int, total: int,
             print(f"    {short:24s}   {va:>+10.2f}   {vb:>+10.2f}   {d_v:>+10.2f}")
     else:
         print("  (no features on disk for these trajectories)")
+
+
+def _print_trajectory_features_block(rec: TrajRecord, indent: str = "    ") -> None:
+    """Print one trajectory's features as a small (feature, value) table."""
+    if not rec.features:
+        print(f"{indent}(no features on disk for this trajectory)")
+        return
+    print(f"{indent}{'feature':24s}   {'value':>10s}")
+    print(f"{indent}{'─' * 40}")
+    for (short, _desc), v in zip(rec.feature_names, rec.features):
+        print(f"{indent}{short:24s}   {v:>+10.2f}")
+
+
+def _print_lottery_preference_labels(rank: int, total: int,
+                                     rec_c: TrajRecord,
+                                     rec_a: TrajRecord,
+                                     rec_b: TrajRecord,
+                                     p: float,
+                                     reward_prefers_c: bool,
+                                     r_c: float,
+                                     r_lottery: float,
+                                     disagreements: list[dict],
+                                     justification: str | None = None) -> None:
+    """Lottery comparison: certain trajectory C vs (p·A, (1-p)·B).
+
+    Rendered as a question to the user. Other perspectives that disagree
+    with the designed reward are listed (a perspective "disagrees" when
+    its preference between C and the lottery differs from the reward's).
+    """
+    pct_a = 100.0 * p
+    pct_b = 100.0 * (1.0 - p)
+
+    print()
+    print("═" * 78)
+    print(f"LOTTERY {rank}/{total}")
+    print("─" * 78)
+    print()
+    print(f"Do you prefer the following trajectory:")
+    print()
+    _print_trajectory_features_block(rec_c)
+    print()
+    print(f"or a {pct_a:g}% chance of this trajectory:")
+    print()
+    _print_trajectory_features_block(rec_a)
+    print()
+    print(f"and a {pct_b:g}% chance of this trajectory:")
+    print()
+    _print_trajectory_features_block(rec_b)
+    print(f"?")
+    print()
+    print(f"  Designed reward")
+    print(f"    return(C)                              =  {r_c:>+10.3f}")
+    print(f"    {p:.2f}·return(A) + {1.0-p:.2f}·return(B)  "
+          f"           =  {r_lottery:>+10.3f}")
+    if reward_prefers_c:
+        print(f"    → preference by designed reward            →   C ≻ lottery")
+    else:
+        print(f"    → preference by designed reward            →   lottery ≻ C")
+    print()
+    pref_side = "lottery ≻ C" if reward_prefers_c else "C ≻ lottery"
+    print(f"  Other perspectives that disagree (prefer {pref_side}):")
+    if not disagreements:
+        print(f"    (none — no other perspective disagrees with the reward "
+              f"on this lottery)")
+    else:
+        for d in disagreements:
+            print(f"    • {d['perspective']}")
+            m_c = d.get("metric_c", 0.0)
+            m_lot = d.get("metric_lottery", 0.0)
+            print(f"        metric(C)={m_c:+10.3f}   "
+                  f"{p:.2f}·m(A)+{1.0-p:.2f}·m(B)={m_lot:+10.3f}")
+    if justification:
+        print()
+        print(f"  Why this p={p:g}:")
+        print(f"    {justification}")
 
 
 HISTORY_DIR = ".repair_history"
@@ -413,9 +488,9 @@ def _save_snapshot(records: list[TrajRecord],
     """Save the selected pairs to a JSON snapshot.
 
     Convention: pair["traj_a_path"] is the reward-preferred trajectory and
-    pair["disagreements"] is the list of stakeholder perspectives that
-    prefer B over A on this pair. /repair-verify rechecks resolution by
-    reward direction alone.
+    pair["disagreements"] is the list of other perspectives that prefer B
+    over A on this pair. /repair-verify rechecks resolution by reward
+    direction alone.
     """
     os.makedirs(HISTORY_DIR, exist_ok=True)
     snap_id = _next_snapshot_id()
@@ -464,7 +539,7 @@ def _check_snapshots(records: list[TrajRecord]) -> int:
     """Re-verify every past snapshot under the current designed reward.
 
     Returns 0 if all past disagreements are resolved, 1 if any still
-    disagree (the unresolved pairs are pretty-printed).
+    disagree (the unresolved pairs and lotteries are pretty-printed).
     """
     if not os.path.isdir(HISTORY_DIR):
         print("No past disagreement snapshots have been saved for this workspace yet.")
@@ -475,50 +550,99 @@ def _check_snapshots(records: list[TrajRecord]) -> int:
         return 0
 
     rec_by_path = {r.path: r for r in records}
-    unresolved: list[dict] = []
-    total = 0
-    missing = 0
+    unresolved_pairs: list[dict] = []
+    unresolved_lotteries: list[dict] = []
+    pair_total = 0
+    pair_missing = 0
+    lottery_total = 0
+    lottery_missing = 0
     for snap_path in snap_paths:
         with open(snap_path) as f:
             snap = json.load(f)
-        for pair in snap["pairs"]:
-            total += 1
+        for pair in snap.get("pairs", []):
+            pair_total += 1
             rec_a = rec_by_path.get(pair["traj_a_path"])
             rec_b = rec_by_path.get(pair["traj_b_path"])
             if rec_a is None or rec_b is None:
-                missing += 1
+                pair_missing += 1
                 continue
             r_a = rec_a.designed_reward
             r_b = rec_b.designed_reward
             # Pair was "reward prefers A". "Resolved" = reward no longer prefers A
             # (either prefers B or ties).
             if r_a > r_b:
-                unresolved.append({
+                unresolved_pairs.append({
                     "snapshot_id": snap["snapshot_id"],
                     "rec_a": rec_a,
                     "rec_b": rec_b,
                     "disagreements": _pair_disagreements_from_snapshot(pair),
                 })
+        for lot in snap.get("lotteries", []):
+            lottery_total += 1
+            rec_c = rec_by_path.get(lot["traj_c_path"])
+            rec_a = rec_by_path.get(lot["traj_a_path"])
+            rec_b = rec_by_path.get(lot["traj_b_path"])
+            if rec_c is None or rec_a is None or rec_b is None:
+                lottery_missing += 1
+                continue
+            p = float(lot["p"])
+            r_c = rec_c.designed_reward
+            r_lottery = p * rec_a.designed_reward + (1.0 - p) * rec_b.designed_reward
+            reward_prefers_c_now = r_c >= r_lottery
+            snapshot_prefers_c = bool(lot["snapshot_reward_prefers_c"])
+            if reward_prefers_c_now == snapshot_prefers_c:
+                # Reward kept its original preference → unresolved.
+                unresolved_lotteries.append({
+                    "snapshot_id": snap["snapshot_id"],
+                    "rec_c": rec_c,
+                    "rec_a": rec_a,
+                    "rec_b": rec_b,
+                    "p": p,
+                    "reward_prefers_c": reward_prefers_c_now,
+                    "r_c": r_c,
+                    "r_lottery": r_lottery,
+                    "disagreements": lot.get("disagreements", []),
+                    "justification": lot.get("justification"),
+                })
 
-    checked = total - missing
-    resolved = checked - len(unresolved)
-    print(f"Checked {checked} pair(s) from {len(snap_paths)} past snapshot(s).")
-    if missing:
-        print(f"  ({missing} pair(s) skipped — underlying trajectories no longer on disk.)")
-    print(f"  Resolved by current reward:   {resolved}")
-    print(f"  Still disagreeing:            {len(unresolved)}")
+    checked_pairs = pair_total - pair_missing
+    resolved_pairs = checked_pairs - len(unresolved_pairs)
+    checked_lotteries = lottery_total - lottery_missing
+    resolved_lotteries = checked_lotteries - len(unresolved_lotteries)
 
-    if not unresolved:
+    print(f"Checked {checked_pairs} pair(s) and {checked_lotteries} lottery comparison(s) "
+          f"from {len(snap_paths)} past snapshot(s).")
+    if pair_missing:
+        print(f"  ({pair_missing} pair(s) skipped — underlying trajectories no longer on disk.)")
+    if lottery_missing:
+        print(f"  ({lottery_missing} lottery(ies) skipped — underlying trajectories no longer on disk.)")
+    print(f"  Pairs      resolved: {resolved_pairs:>3d}   still disagreeing: {len(unresolved_pairs)}")
+    print(f"  Lotteries  resolved: {resolved_lotteries:>3d}   still disagreeing: {len(unresolved_lotteries)}")
+
+    if not unresolved_pairs and not unresolved_lotteries:
         print("\nAll past disagreements are now resolved by the current reward.")
         return 0
 
-    print(f"\nThe following {len(unresolved)} pair(s) still disagree under the "
-          f"current reward function:")
-    total_u = len(unresolved)
-    for idx, u in enumerate(unresolved, 1):
-        _print_pair_preference_labels(idx, total_u,
-                                       u["rec_a"], u["rec_b"],
-                                       u["disagreements"])
+    if unresolved_pairs:
+        print(f"\nThe following {len(unresolved_pairs)} pair(s) still disagree under the "
+              f"current reward function:")
+        total_u = len(unresolved_pairs)
+        for idx, u in enumerate(unresolved_pairs, 1):
+            _print_pair_preference_labels(idx, total_u,
+                                           u["rec_a"], u["rec_b"],
+                                           u["disagreements"])
+    if unresolved_lotteries:
+        print(f"\nThe following {len(unresolved_lotteries)} lottery comparison(s) still "
+              f"disagree under the current reward function:")
+        total_u = len(unresolved_lotteries)
+        for idx, u in enumerate(unresolved_lotteries, 1):
+            _print_lottery_preference_labels(
+                idx, total_u,
+                u["rec_c"], u["rec_a"], u["rec_b"], u["p"],
+                u["reward_prefers_c"], u["r_c"], u["r_lottery"],
+                u["disagreements"],
+                justification=u.get("justification"),
+            )
     return 1
 
 
@@ -530,7 +654,7 @@ def main():
                         "Ignored when --top-overall is set.")
     p.add_argument("--top-overall", type=int, default=None,
                    help="Number of pairs to surface via Mahalanobis-greedy "
-                        "selection across all stakeholders. Overrides --top-k.")
+                        "selection across all perspectives. Overrides --top-k.")
     p.add_argument("--format", choices=["default", "preference-labels"],
                    default="default",
                    help="default: full per-trajectory feature dumps. "
@@ -574,8 +698,8 @@ def main():
     if args.top_overall is not None:
         candidates = _build_disagreeing_candidates(records, metrics, args.margin)
         if not candidates:
-            print("\nNo disagreeing pairs found (no pair has a stakeholder whose "
-                  "ranking opposes the reward at the requested margin).")
+            print("\nNo disagreeing pairs found (no pair has another perspective "
+                  "whose ranking opposes the reward at the requested margin).")
             return 0
         deltas = np.stack([c.delta for c in candidates], axis=0)
         picks = _greedy_mahalanobis_select(deltas, args.top_overall,

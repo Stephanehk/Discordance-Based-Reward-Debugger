@@ -29,9 +29,15 @@ import os
 import sys
 
 from runtime.workspace import add_workspace_arg, activate
-from runtime.env_loader import load_env_config
+from runtime.env_loader import load_env_config, capture_frames_enabled
 from runtime.compute_features import compute_features_for_round
-from runtime.run_round import discover_policies, pick_rollouts_per_policy
+from runtime.trajectory_io import video_path_for
+from runtime.run_round import (
+    discover_policies,
+    pick_rollouts_per_policy,
+    cap_rollouts,
+    MAX_TOTAL_ROLLOUTS,
+)
 
 
 def _init_worker(workspace: str) -> None:
@@ -41,9 +47,13 @@ def _init_worker(workspace: str) -> None:
     activate(workspace)
 
 
-def _build_env(seed: int):
+def _build_env(seed: int, capture: bool):
     """Build the env, seeding it per task when the workspace's make_env supports
-    a `seed` kwarg; otherwise fall back to whatever seeding make_env does."""
+    a `seed` kwarg; otherwise fall back to whatever seeding make_env does.
+
+    If `capture` is True and make_env accepts `render_mode`, pass
+    `render_mode="rgb_array"` so the rollout can call env.render() per step.
+    """
     import env_config
 
     try:
@@ -51,35 +61,41 @@ def _build_env(seed: int):
     except (TypeError, ValueError):
         params = {}
 
+    kwargs = {}
     if "seed" in params:
-        return env_config.make_env(seed=seed)
-    # Generic fallback: nudge a module-level seed counter if the workspace
-    # exposes one, so forked/spawned workers don't all replay the same seed.
-    if hasattr(env_config, "_seed_counter"):
+        kwargs["seed"] = seed
+    if capture and "render_mode" in params:
+        kwargs["render_mode"] = "rgb_array"
+
+    if "seed" not in kwargs and hasattr(env_config, "_seed_counter"):
         env_config._seed_counter = itertools.count(seed)
-    return env_config.make_env()
+
+    return env_config.make_env(**kwargs)
 
 
 def _rollout_one(task):
     """Worker entrypoint: roll out a single episode and save its trajectory.
 
-    `task` = (round_k, policy_cls_name, episode_idx, seed, max_steps).
+    `task` = (round_k, policy_cls_name, episode_idx, seed, max_steps, capture).
     Returns the path written (or raises, which the pool surfaces to the parent).
     """
-    round_k, policy_cls_name, episode_idx, seed, max_steps = task
+    round_k, policy_cls_name, episode_idx, seed, max_steps, capture = task
 
     from runtime.rollout import rollout_one_episode
     from runtime.trajectory_io import save_trajectory
 
-    env = _build_env(seed)
+    env = _build_env(seed, capture)
     try:
         mod = importlib.import_module(
             f"gather_evidence.data_collection_policy_round_{round_k}"
         )
         policy = getattr(mod, policy_cls_name)(env)
-        traj = rollout_one_episode(env, policy, max_steps)
         out_dir = f"gather_evidence/round_{round_k}_trajectories"
         path = os.path.join(out_dir, f"{policy_cls_name}__traj_{episode_idx:03d}.pkl")
+        video_path = video_path_for(path) if capture else None
+        traj = rollout_one_episode(
+            env, policy, max_steps, record_video_path=video_path,
+        )
         save_trajectory(path, traj, {
             "round": round_k,
             "policy_class": policy_cls_name,
@@ -116,19 +132,22 @@ def main():
     os.makedirs(f"gather_evidence/round_{k}_trajectories", exist_ok=True)
 
     policy_classes = discover_policies(k)
+    n_per = cap_rollouts(len(policy_classes), n_per)
+    capture = capture_frames_enabled()
 
     # One task per (policy, episode); each gets a unique, deterministic seed.
     tasks = []
     seed = 0
     for cls in policy_classes:
         for i in range(n_per):
-            tasks.append((k, cls.__name__, i, seed, max_steps))
+            tasks.append((k, cls.__name__, i, seed, max_steps, capture))
             seed += 1
 
     workers = args.workers if args.workers is not None else min(len(tasks), os.cpu_count() or 1)
     print(f"[run_round_parallel] round={k}  policies={len(policy_classes)}  "
           f"rollouts/policy={n_per}  tasks={len(tasks)}  workers={workers}  "
-          f"max_steps={max_steps}")
+          f"(cap={MAX_TOTAL_ROLLOUTS})  max_steps={max_steps}  "
+          f"capture_frames={capture}")
 
     # 'spawn' gives each worker a clean interpreter, so the env's process-global
     # simulator state (e.g. pandemic_simulator globals) never leaks across tasks.

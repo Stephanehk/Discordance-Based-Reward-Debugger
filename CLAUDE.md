@@ -6,9 +6,10 @@ The user has a gym/gymnasium environment and a manually written (or
 LLM-elicited) reward function `designed_reward_fn(obs, act, next_obs) -> float`.
 This system surfaces *evidence of reward misspecification* by collecting
 diverse trajectories, scoring them with both the designed reward and a set
-of stakeholder-style performance metrics, and showing the user **trajectory
-pairs where the two disagree on which trajectory is better**. The pairs are
-the end product: the user reads them and decides how to edit the reward.
+of alternative-perspective performance metrics, and showing the user
+**trajectory pairs where the two disagree on which trajectory is better**.
+The pairs are the end product: the user reads them and decides how to edit
+the reward.
 
 Claude is part of the system. The user-invocable skills below correspond to
 the numbered steps in the spec. Each skill that authors a Python file is
@@ -43,19 +44,34 @@ You can have many workspaces side by side; they share zero state.
                           .claude/skills/repair-round/SKILL.md.
 /repair-preferences   →  Claude reads every collected trajectory (as
                           features, the same encoding the human sees) plus
-                          the designed reward and stakeholder metrics, and
-                          *itself selects* the most-telling pairs (up to
-                          15) — this is the Claude-driven selection step,
-                          not an algorithm. It renders each as a preference
-                          label: feature key, anonymized A vs B, reward +
-                          metric scores side-by-side with explicit A≻B /
-                          B≻A labels, and a feature delta table. Plus
-                          per-pair "why they disagree" summaries and an
-                          overall pattern interpretation. Also snapshots the
-                          pairs so /repair-verify can later re-check them.
-                          (The legacy algorithmic selector still lives in
-                          find_informative_pairs.py for reference and for
-                          /repair-round's sufficiency probe.)
+                          the designed reward and the alternative-
+                          perspective metrics, and *itself selects* the
+                          most-telling comparisons — up to **5 trajectory
+                          pairs** plus up to **2 lottery comparisons**
+                          (certain trajectory C vs a p-probability lottery
+                          over A and B). This is the Claude-driven
+                          selection step, not an algorithm. Pairs render
+                          as preference labels (feature key, anonymized A
+                          vs B, reward + metric scores side-by-side with
+                          A≻B / B≻A labels, feature delta table). The
+                          renderer adds a "Designed reward function
+                          prefers this trajectory" badge below the
+                          reward-preferred side. Lotteries render with A
+                          and B side-by-side at the top (with their
+                          probabilities) and the certain trajectory C
+                          below; the question is shown with reward and
+                          other-perspective preferences. Each comparison
+                          also triggers a per-trajectory visualization
+                          (`workspaces/<name>/viz/round{i}/{pair,lottery}
+                          {j}/...`) via the workspace's `viz.py`; the
+                          rendered output prints the saved paths. Each
+                          comparison comes with a "why they disagree"
+                          summary and an overall pattern interpretation.
+                          Both kinds are snapshotted so /repair-verify
+                          can later re-check them. (The legacy
+                          algorithmic selector still lives in
+                          find_informative_pairs.py for reference and
+                          for /repair-round's sufficiency probe.)
 ```
 
 `/repair-init` runs once after `/repair-setup`. `/repair-round` is
@@ -63,6 +79,120 @@ append-only across invocations — each call adds the next k rounds and
 ends in `/repair-preferences`. `/repair-preferences` can also be re-run
 freely on its own; it just reloads everything from disk and re-scores
 under the current reward.
+
+## Web UI — the user-facing channel
+
+During every `/repair-*` skill, the user interacts with the system through
+a local web UI at **http://127.0.0.1:8000**, not the terminal.
+`/repair-setup` launches the server (idempotent) and clears any prior
+session feed. Every subsequent skill posts its narrative, code,
+comparison cards, and visualizations to the UI and asks every question
+there. Until then the user has nothing to look at.
+
+**Do not print user-facing narrative to the terminal during a `/repair-*`
+skill.** Use `python -m web_ui.cli post` for every message the user
+should see, and `python -m web_ui.cli ask` for every question the user
+should answer — replacing the `AskUserQuestion` tool. Keep your own
+chat / terminal output to brief operational status only ("collecting
+trajectories…", "round 1 complete", "awaiting answer"); the user reads
+the website. The single exception is the one-time URL hint that
+`/repair-setup` prints in the terminal so the user knows where to open
+their browser.
+
+### Message types (see `web_ui/cli/main.py` for full arg list)
+
+| Use for | `post --type` | Notes |
+|---|---|---|
+| Plain narrative paragraphs | `markdown` | headers, bold, lists, tables, inline code |
+| `designed_reward_fn.py` source | `code --language python --caption "designed_reward_fn.py" --content-file <path>` | code is shown in a dark monospace block |
+| A trajectory pair block | `comparison --label "PAIR 1/5" --content-file render.txt --viz '[{"src":"/workspace/<env>/viz/round{i}/pair{j}/A.mp4","caption":"Trajectory A","preferred":true}, {"src":"/workspace/<env>/viz/round{i}/pair{j}/B.mp4","caption":"Trajectory B"}]' --why "…"` | the `Why they disagree:` line is `--why`; `"preferred":true` adds a "Designed reward function prefers this trajectory" badge under that video |
+| A lottery comparison block | `comparison --label "LOTTERY 1/2" --layout lottery --content-file render.txt --viz '[{…"role":"A","probability":0.5}, {…"role":"B","probability":0.5}, {…"role":"C"}]' --why "…"` | `--layout lottery` puts A and B side-by-side on the top row (with their probability badges) and the role-C item below |
+| The feature key (right-hand sidebar) | `feature_key --features-file <json>` | each feature: `{"name":"…","description":"…"}`; sidebar only appears on the pairs/lotteries page |
+| Light status update | `status` | e.g. "Collecting trajectories…" |
+| Visual separator | `divider` | thin dashed line |
+
+Code blocks with `--language python` are syntax-highlighted in the
+browser (keywords, strings, comments, numbers, function/class names).
+
+Mp4/png paths used in `--viz` should start with `/workspace/<env>/…`;
+that URL is mapped by the server to `workspaces/<env>/…` on disk, so
+the captured-frame videos and rendered plots load directly.
+
+### "Claude is thinking" spinner + short status updates
+
+While a `/repair-*` skill is mid-step (status=`running`) and no
+question is pending, the website automatically shows a small "Claude
+is thinking…" spinner at the end of the feed. Skills don't have to
+toggle it explicitly — it follows the workspace `status` chip, which
+is `running` between actions and `awaiting` while a question or CTA
+is open.
+
+What skills *should* do: post **one-sentence** `--type status`
+messages at key transitions (e.g. "Authoring the next round.",
+"Rolling out trajectories.", "Selecting the most informative
+comparisons.", "Rendering the visualizations."). Keep them short —
+the spinner already conveys "still working"; the status line just
+labels *what* the work is.
+
+### Asking the user
+
+```bash
+ANSWER=$(python -m web_ui.cli ask \
+    --prompt "How would you like to specify the reward function?" \
+    --options '[{"label":"Describe it — I'\''ll implement","description":"…"},
+                {"label":"I'\''ll write it myself","description":"…"}]')
+VALUE=$(printf %s "$ANSWER" | python -c "import json,sys;print(json.load(sys.stdin)['value'])")
+```
+
+- Multi-select: add `--multi`; the parsed `value` is a JSON array.
+- Single-line: `--input text --placeholder "…"`.
+- Long-text (free-form markdown): `--input longtext --prefill-file <md>`.
+- **Form** (preferred for structured templates like the reward-design
+  template): `--fields '[{"name":…,"label":…,"description":…,"placeholder":…}, …]'`.
+  Renders one labelled textarea per field; the returned `value` is a JSON
+  object `{name: text, …}`.
+
+### Single "Continue" button (CTA)
+
+When a skill ends and the user should advance to the next step, post a
+**call-to-action button** instead of telling them to type a slash-
+command in the terminal:
+
+```bash
+ANSWER=$(python -m web_ui.cli cta \
+    --prompt "Setup is complete." \
+    --label  "Identify possible flaws" \
+    --value  "repair-init")
+NEXT=$(printf %s "$ANSWER" | python -c "import json,sys;print(json.load(sys.stdin)['value'])")
+```
+
+Then invoke the next skill via the `Skill` tool with `skill="$NEXT"`.
+The cta blocks until the user clicks; this is how skills chain through
+the website.
+
+### Hidden answered questions
+
+Once the user submits an answer (or clicks a CTA), the corresponding
+card is removed from the feed. The agent still receives the value
+through the `ask` / `cta` stdout — only the visual record disappears,
+keeping the feed focused on what's currently pending.
+
+`ask` long-polls until the user submits, then prints `{"value": "…",
+"notes": null}` on stdout. The agent reads `value` and acts on it. Do
+**not** call the `AskUserQuestion` tool inside a `/repair-*` skill.
+
+### Launch / lifecycle
+
+```bash
+python -m web_ui.cli launch                              # idempotent
+python -m web_ui.cli clear                               # reset the feed (fresh session)
+python -m web_ui.cli set workspace=<name> status=running # header chip
+python -m web_ui.cli stop                                # at session end (optional)
+```
+
+`launch` is safe to call repeatedly — it no-ops if the server is
+already running. `clear` is the right thing to call at the top of
+`/repair-setup` so each new session starts with an empty feed.
 
 ## User-facing tone
 
@@ -74,272 +204,67 @@ Skills follow these tone rules in every message they send the user:
   implementation details.
 - **Never refer to any behavior, reward, or trajectory as "correct" or
   "incorrect."** At most, say something is *possibly* correct/incorrect
-  or that it *appears* aligned/misaligned with a particular stakeholder.
+  or that it *appears* aligned/misaligned with a particular perspective.
   Whether a behavior is actually correct is always the user's call —
   the system surfaces evidence, not verdicts.
 - **Never name a candidate performance metric by its internal id**
   (e.g. `performance_metric_safety`). Either say "the candidate
-  performance metric" or describe the stakeholder perspective from the
-  docstring ("the safety reviewer's view", "the operations stakeholder").
+  performance metric" or describe the perspective from the docstring
+  ("the safety reviewer's view", "the operations perspective").
+- **Do not use the word "stakeholder" in anything posted to the user.**
+  Use "other perspectives" or describe the specific perspective.
 
 ## Skill chaining — always tell the user what to run next
 
-Every skill must end by telling the user what they can run next. Never
-finish a skill response without either (a) naming the next skill
-explicitly, or (b) using `AskUserQuestion` to let the user pick from
-the relevant options. The expected chain is:
+Every skill must end by telling the user, **on the web UI**, what they
+can run next. Never finish a skill without either (a) posting a
+markdown message that names the next skill explicitly, or (b) calling
+`python -m web_ui.cli ask` with the relevant options. **Do not** use
+the `AskUserQuestion` tool inside a `/repair-*` skill — the website is
+the channel. The expected chain is:
 
-- `/repair-setup` → tell the user to run `/repair-init`.
-- `/repair-init` → tell the user to run `/repair-round`.
-- `/repair-round` → after surfacing disagreements, **ask** the user
-  whether they want to (1) **Edit the reward function**, (2) **Add
-  another trajectory feature** to the set that encodes each trajectory,
-  (3) **View more trajectory pairs** from the evidence already
-  collected, or (4) **Finish and submit (not reversible)**. Use
-  `AskUserQuestion`. (The "Edit the reward function" option then asks
-  whether the user or Claude makes the edit; the Claude path prints the
-  reward-edit tip box and, in eval mode, applies the reward-edit gate.)
-- `/repair-preferences` → same closing question as `/repair-round`
-  (edit the reward / add another trajectory feature / view more
-  trajectory pairs / Finish and submit). Use `AskUserQuestion`.
-- `/repair-verify` → ask whether to look for new disagreements, collect
-  more evidence first, or **Finish and submit (not reversible)**. Use
-  `AskUserQuestion`.
+- `/repair-setup` → post that the user should run `/repair-init`.
+- `/repair-init` → post that the user should run `/repair-round`.
+- `/repair-round` → after surfacing disagreements on the website, **ask**
+  the user via `web_ui.cli ask` whether they want to (1) **Edit the
+  reward function**, (2) **Add another trajectory feature** to the set
+  that encodes each trajectory, (3) **View more comparisons (pairs or
+  lotteries)** from the evidence already collected, or (4) **Finish and
+  submit (not reversible)**. (The "Edit the reward function" option
+  then asks whether the user or Claude makes the edit; the Claude path
+  posts the reward-edit tip box to the web UI.)
+- `/repair-preferences` → same closing question as `/repair-round`,
+  asked via `web_ui.cli ask`.
+- `/repair-verify` → ask via `web_ui.cli ask` whether to look for new
+  disagreements, collect more evidence first, or **Finish and submit
+  (not reversible)**.
 
 ### Finish and submit (not reversible)
 
 When the user picks **Finish and submit**, treat the current
 `designed_reward_fn.py` as the final answer: write
 `workspaces/<name>/.repair_history/SUBMISSION.md` containing a UTC
-timestamp and the full current reward source, tell the user the design
-is submitted and the session is complete, and stop — do not offer
-further steps, run more rounds, or edit the reward afterward. Because it
-is irreversible, only do this when the user explicitly selects it.
+timestamp and the full current reward source, post a confirmation to
+the web UI (`python -m web_ui.cli post --type markdown --content "The
+reward function is submitted. Session complete."` and
+`python -m web_ui.cli set status=done`), and stop — do not offer
+further steps, run more rounds, or edit the reward afterward. Because
+it is irreversible, only do this when the user explicitly selects it.
 
-### Reward-edit tips (print when asked to edit the reward)
+### Reward-edit tips (post to the web UI when asked to edit the reward)
 
-Whenever the user asks Claude to modify the reward (the Claude branch of
-the "Edit the reward function" option), print this tip box before
-requesting or applying the edit:
+Whenever the user asks Claude to modify the reward (the Claude branch
+of the "Edit the reward function" option), post this tip box on the
+web UI before requesting or applying the edit:
 
-> 💡 **Tips for guiding a reward edit**
-> - Be concrete: name the term to change, and — if you can — the
->   preference label you want for each shown pair (e.g. "for pair 2,
->   A ≻ B should become B ≻ A").
-> - You can pin an edit to an outcome: e.g. "increase the above-target
->   speed penalty until the preference for pair 2 flips," and Claude will
->   solve for the smallest change that produces it.
+```bash
+python -m web_ui.cli post --type markdown --content "💡 **Tips for guiding a reward edit**
+- Be concrete: name the term to change, and — if you can — the preference label you want for each shown pair (e.g. \"for pair 2, A ≻ B should become B ≻ A\").
+- You can pin an edit to an outcome: e.g. \"increase the above-target speed penalty until the preference for pair 2 flips,\" and Claude will solve for the smallest change that produces it."
+```
 
 These rules apply to every skill in `.claude/skills/`. If a skill's own
 `SKILL.md` doesn't repeat them, they still apply.
-
-## Evaluation workspaces
-
-Some workspaces are **evaluation workspaces**, used to evaluate the
-repairer system against a human stakeholder. They follow the same
-runtime invariants as any other workspace, but they hand the
-reward-design task to the human as a *fixed assignment* instead of
-eliciting it, and they constrain how Claude is allowed to edit the
-reward function.
-
-### Marker
-
-A workspace is in evaluation mode iff `workspaces/<name>/eval_spec.md`
-exists. That file contains the reward-design criteria the human is
-required to design toward, written in plain language. Any future
-evaluation workspace follows the same shape: a pre-authored
-`env_config.py`, a pre-authored (intentionally misaligned)
-`designed_reward_fn.py` as the human's starting point, a populated
-`eval_spec.md`, and a matching `eval_scripts/<name>.py` at the repo root
-(the spec evaluator described below; one per env, shared across the
-human-eval and baseline copies of the workspace).
-
-### Information barrier (eval mode) — do not break
-
-In an evaluation workspace, `eval_spec.md` is the **human's private
-task**: the criteria they are being evaluated on their ability to
-*discover and articulate*. The detection machinery is supposed to
-surface **neutral** evidence — disagreements between the designed reward
-and *independent* stakeholder metrics — from which the human reasons. If
-the spec leaks into that machinery, the system stops surfacing evidence
-and starts handing the human the answer key, which invalidates the
-evaluation.
-
-Therefore, in eval mode:
-
-- `eval_spec.md` may be read **only** to **display it to the human** —
-  in `/repair-setup` (step 3 below) and as the criteria reminder shown
-  after the feature key during evidence presentation (`/repair-round`,
-  `/repair-preferences`). Both are human-facing reminders of the human's
-  own task. It must **not** otherwise be used by Claude: not when
-  authoring `trajectory_features.py`, `performance_metrics.py`, or the
-  data-collection policies, nor when selecting trajectory pairs or
-  writing the per-pair / overall "why they disagree" narrative. The
-  criteria reminder is assembled by the main thread and must never be
-  fed to the spec-blind subagent that selects pairs or writes the
-  narrative.
-- The candidate performance metrics must be **independent** stakeholder
-  perspectives, each justifiable from generic domain knowledge of the
-  environment alone. Drop any metric (or policy, or feature threshold)
-  that only makes sense if you have read the criteria.
-- Pair selection and all pair explanations must be framed purely as
-  "designed reward vs stakeholder X disagree" — **never** cite, quote,
-  paraphrase, or enumerate the criteria.
-
-Because the criteria are also named outside `eval_spec.md` —
-`eval_scripts/<name>.py`, the "Spec evaluation harness" subsection of
-this file, and the prose docstring at the top of the starting
-`designed_reward_fn.py` all state them — once any of those is in the
-working context the spec can no longer be un-seen. So in eval mode the
-spec-blind steps (authoring features/metrics/policies in `/repair-init`
-and `/repair-round`, and selecting + explaining pairs in
-`/repair-preferences`) **must be delegated to a subagent** whose context
-contains only: the env's obs/action semantics, the verified
-denormalization facts, and the designed reward's *operational* mechanics
-(what it computes, term by term) — and **never** `eval_spec.md`,
-`eval_scripts/<name>.py`, this file's criteria-naming text, or the
-criteria-naming docstring lines of `designed_reward_fn.py`. The
-main thread (which has seen the spec) must not steer the subagent toward
-the criteria. This barrier is the evidence-gathering analogue of the
-"Reward-edit gate" below.
-
-### Spec evaluation harness
-
-`eval_scripts/<name>.py` (one per evaluation env, at the repo root) scores
-the current `designed_reward_fn.py` against `eval_spec.md` for an
-evaluation workspace with a **ranking test**: the reward is aligned with
-the spec when every spec-satisfying trajectory out-scores every violating
-one (e.g. for the merge envs: no crash, nearest gap ≥ 10 m, average speed
-near 25 m/s). Because real rollouts rarely satisfy the strict criteria,
-it synthesizes a guaranteed-compliant set by **ablating** each collected
-trajectory toward compliant values, then checks whether the reward ranks
-all compliant trajectories above all real violating ones and reports the
-inversion count plus a YES/NO. The exact checks vary per env — see the
-docstring at the top of each `eval_scripts/<name>.py`.
-
-Each `eval_scripts/<name>.py` is **shared across the human-eval and
-baseline copies of the workspace**: pass
-`--workspace workspaces/<name>` to score the human-eval copy or
-`--workspace baseline_workspaces/<name>` to score the baseline copy.
-Because the eval scripts now live at the repo root rather than inside the
-workspace, a workspace reset never touches them — they're a separate
-artifact, not part of the workspace. Run it from the repo root with
-`python eval_scripts/<name>.py --workspace workspaces/<name>` (or
-`baseline_workspaces/<name>`).
-
-### `/repair-setup` behavior in eval mode
-
-When `/repair-setup <name>` is invoked on an evaluation workspace:
-
-1. Skip env elicitation — `env_config.py` is pre-authored.
-2. Skip reward-design elicitation — `designed_reward_fn.py` is
-   pre-authored as the human's *starting point*, intentionally
-   misaligned with the criteria in `eval_spec.md`.
-3. Display the contents of `eval_spec.md` to the human as their
-   reward-design task.
-4. Display the contents of `designed_reward_fn.py` inline as
-   "the reward function you've been given to revise."
-5. Run the standard smoke test from the regular `/repair-setup` flow.
-6. Offer the reward-edit interaction — the **same process** used after
-   `/repair-preferences` shows trajectory pairs: ask (via
-   `AskUserQuestion`) whether to revise the starting reward now and, if
-   so, whether the user or Claude makes the edit (plus a "continue
-   without editing" option). The Claude path prints the reward-edit tip
-   box and applies the reward-edit gate (see "Reward-edit tips" and
-   "Reward-edit gate" below); the self-edit path waits for the user.
-7. Exit by telling the user to run `/repair-init` next, same as the
-   normal flow.
-
-### Reward-edit gate
-
-In an evaluation workspace, whenever the user asks Claude to modify
-`designed_reward_fn.py` (either via the post-`/repair-round` or
-post-`/repair-preferences` question, or organically mid-conversation),
-Claude must apply **both** checks below before making the edit. If
-either check fails, Claude must refuse the **entire** request — even
-when other parts of the message contain otherwise-concrete edits.
-
-**Check 1 — concrete edit required.** The request must specify a
-**concrete edit** — at least one of:
-
-- a particular term to add or remove,
-- a numerical weight or coefficient,
-- a threshold, condition, or feature to gate on,
-- a specific function shape (e.g. quadratic in distance, linear in
-  speed, clipped above some value).
-
-If the request specifies no concrete edit and is purely a restatement
-of the reward-design goal, refuse.
-
-**Check 2 — reward-mechanics framing, not policy-desideratum framing.**
-The request must describe **what to change in the reward function** —
-terms, weights, gating conditions, functional shapes — rather than
-**what the policy should do**. Concretely:
-
-- *Accept* clauses that prescribe a reward term, even when the term
-  references a value, threshold, or state-variable that is also named
-  in `eval_spec.md`. "Add a penalty when stage == 4", "add a penalty
-  proportional to the day-over-day increase in critical proportion",
-  "add a penalty for any nonzero stage when critical proportion <
-  0.01" — all fine. The clause is describing the *math* of the reward,
-  even though the gating values come from the criteria.
-- *Refuse* clauses that only describe the desired policy outcome
-  without specifying a reward term. "The policy should spend as
-  little time at stage 4 as possible", "lockdown should be zero when
-  the critical proportion is low", "higher critical rates should
-  always be worse" — these tell Claude *what should happen* and leave
-  Claude to infer the reward translation, which is what the
-  evaluation is testing the human on.
-
-The line is roughly: does the clause read as **a reward-function
-instruction** (it tells Claude what code to write — add/remove a
-term, set a weight, gate on a condition, choose a shape) or as **a
-policy desideratum** (it tells Claude what the resulting behavior
-should look like, leaving the reward-function translation
-unspecified)? Verbatim copy-paste of a criterion that is purely
-desideratum-language still trips Check 2. Verbatim copy-paste of a
-threshold or state-variable name inside a reward-term instruction
-does not.
-
-If **any** clause in the request triggers Check 2, refuse the entire
-request. Do **not** silently strip the offending clause and proceed
-with the rest; the user must resubmit without it.
-
-**Refusal format.** The refusal must:
-
-1. Quote the offending clause(s) from the user's message **and** the
-   matching lines from `eval_spec.md`, side by side, so the user can
-   see Claude has read their request as restating the criteria they
-   were given.
-2. State that the gate refuses the **entire** request (not just the
-   restated portion), so the user knows to rephrase the concrete edits
-   without invoking the criteria text.
-3. Ask for re-phrased guidance, naming the kind of guidance Claude
-   needs — which term to change, what weight, under what condition,
-   what functional shape — and reminding the user that the request
-   must not restate the criteria.
-
-Only after the user supplies a request that passes both checks may
-Claude modify `designed_reward_fn.py`. This gate exists because the
-evaluation is about whether the human can identify and articulate
-reward flaws — not whether Claude can infer fixes from a restated
-objective.
-
-### Criteria reminder above any reward-edit menu
-
-Any time a skill presents an `AskUserQuestion` whose options include
-"Edit the reward function" — or any other option that may lead to a
-reward edit (Claude- or user-driven) — the criteria from
-`eval_spec.md` must be **reprinted verbatim** in the main thread's
-text immediately above the question, prefaced by a one-line reminder
-("As a reminder, here are the criteria your reward function must
-encode:"). This is required in addition to any earlier display of the
-criteria in the same response, so the user always has the criteria
-directly in front of them at the moment they decide what edit to
-request. The rule applies to every such menu in every skill —
-`/repair-setup`, `/repair-round`, `/repair-preferences`,
-`/baseline-setup`, `/baseline-evidence`. The reprint is human-facing
-only and must never reach a spec-blind subagent.
 
 ## File layout
 
@@ -364,17 +289,13 @@ automated_reward_repairer/
 │   ├── data_collection_policy_prompt.md
 │   └── performance_metrics_prompt.md
 │
-├── eval_scripts/                        # one per evaluation env (see "Spec evaluation harness")
-│   ├── merge_human_eval_1.py
-│   ├── merge_human_eval_2.py
-│   └── pandemic_human_eval_1.py
-│
 ├── .claude/skills/{repair-setup,repair-init,repair-round,repair-preferences,repair-verify}/SKILL.md
 │
 └── workspaces/
     └── <name>/                          # one directory per env (e.g. hopper)
         ├── env_config.py               # authored in /repair-setup
         ├── designed_reward_fn.py       # authored or stubbed in /repair-setup
+        ├── viz.py                      # optional: trajectory visualization hook
         ├── requirements.txt            # optional, env-specific deps
         │
         ├── gather_evidence/
@@ -385,8 +306,11 @@ automated_reward_repairer/
         │   ├── round_{k}_trajectories/            # pickle files, one per rollout
         │   └── round_{k}_trajectory_features/     # json files, one per rollout
         │
-        └── candidate_performance_metrics/
-            └── performance_metrics.py             # authored in /repair-init
+        ├── candidate_performance_metrics/
+        │   └── performance_metrics.py             # authored in /repair-init
+        │
+        └── viz/                                    # written by /repair-preferences
+            └── round{i}/{pair,lottery}{j}/        # per-comparison visualizations
 ```
 
 ## Invariants (do not break)
@@ -422,8 +346,34 @@ Paths below are relative to the workspace root unless noted.
 **`candidate_performance_metrics/performance_metrics.py`** exposes:
 - One or more functions whose names start with `performance_metric_`. Each:
   - Signature `(traj) -> float`, where `traj = [(obs, act, next_obs), ...]`.
-  - Docstring is the **stakeholder-perspective description** — shown to
-    the user when this metric flags a disagreement. Keep it one line.
+  - Docstring is the **perspective description** — shown to the user
+    when this metric flags a disagreement. Keep it one line.
+
+**`viz.py`** (optional — `/repair-preferences` skips visualization if absent):
+- `VIZ_EXT: str` — the file extension produced (e.g. `".png"`, `".mp4"`).
+- `visualize_trajectory(trajectory, metadata, out_path, source_path=None,
+  **_) -> None` — save a visualization for one trajectory to `out_path`
+  (already includes `VIZ_EXT`). `trajectory` is the same `[(obs, act,
+  next_obs), ...]` list that lives on disk; `metadata` is the dict stored
+  alongside it (may contain `seed`, `policy_class`, etc.); `source_path`
+  is the trajectory's `.pkl` path on disk — viz hooks that read sidecar
+  files (e.g. captured-frame videos) use this to locate them. Take
+  `**_` so future kwargs can be added without breakage. Implementations
+  should be workspace-appropriate (e.g. a per-feature time-series plot
+  for an observation-rich env, a captured-frame mp4 for an env with a
+  renderer).
+
+**Per-step frame capture (optional, opt-in):**
+- A workspace can declare `CAPTURE_FRAMES = True` in `env_config.py` to
+  ask the rollout runners to record one `env.render()` frame per step
+  and write an mp4 sibling to the trajectory pickle:
+  `gather_evidence/round_{k}_trajectory_videos/{same_basename}.mp4`.
+  When set, `make_env` must accept a `render_mode` kwarg (the runners
+  pass `render_mode="rgb_array"`). The video contains the actual rolled-
+  out frames — no after-the-fact replay — so a workspace `viz.py` can
+  surface it by simply locating the sidecar via
+  `runtime.trajectory_io.video_path_for(traj.pkl)` and copying it to
+  `out_path`.
 
 **Trajectory on disk (workspace-relative):**
 - File: `gather_evidence/round_{k}_trajectories/{policy_class}__traj_{i}.pkl`
@@ -432,6 +382,13 @@ Paths below are relative to the workspace root unless noted.
 **Features on disk (workspace-relative):**
 - File: `gather_evidence/round_{k}_trajectory_features/{same_basename}.json`
 - Payload: `{"features": [...], "names": [[short, desc], ...], "source": "..."}`.
+
+**Rollout budget per round:**
+- A single round writes **at most 100 trajectories total**. The
+  `runtime.run_round` / `runtime.run_round_parallel` CLIs clamp
+  `rollouts/policy` so `n_policies * rollouts_per_policy ≤ 100`. When
+  authoring a round's policies, account for this cap (e.g. with 5
+  policies each gets ≤ 20 rollouts).
 
 ## How the workspace flag works
 
@@ -471,10 +428,10 @@ call `activate()` right after argparse. Run them from the repo root.
 
 ## How to run the Python boilerplate
 
-All Python in this repo runs in the `llm` conda env — `gymnasium`,
-`highway_env`, and the other env dependencies are not installed in the
-base interpreter. Activate it before any boilerplate script or smoke
-test (the `/repair-*` skills already prepend this to their commands):
+All Python in this repo runs in the `llm` conda env — `gymnasium` and
+any per-workspace env dependencies live there, not in the base
+interpreter. Activate it before any boilerplate script or smoke test
+(the `/repair-*` skills already prepend this to their commands):
 
 ```
 source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm
@@ -491,11 +448,6 @@ python select_pairs.py --workspace workspaces/<name> --mode render \
 
 # legacy algorithmic selector (reference + /repair-verify snapshot check):
 python find_informative_pairs.py --workspace workspaces/<name> --top-overall 5 --margin 0.05
-
-# spec evaluation harness (one per eval env; run from repo root; the same
-# script scores either the human-eval or the baseline copy of the workspace):
-python eval_scripts/<name>.py --workspace workspaces/<name>
-python eval_scripts/<name>.py --workspace baseline_workspaces/<name>
 ```
 
 If `.current_workspace` is set, `--workspace` may be omitted.

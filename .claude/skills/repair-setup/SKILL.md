@@ -1,20 +1,21 @@
 ---
 name: repair-setup
-description: Step 0+1 of the Automated Reward Repairer. Sets up env_config.py and designed_reward_fn.py — either by eliciting a reward-design template from the user or by generating a stub for the user to fill in. Invoke when the user is starting a new repairer session.
+description: Step 0+1 of the Automated Reward Repairer. Launches the web UI, sets up env_config.py and designed_reward_fn.py — either by eliciting a reward-design template from the user on the website or by generating a stub for the user to fill in. Invoke when the user is starting a new repairer session.
 ---
 
 # /repair-setup — environment + reward function
 
 This skill handles steps (0) and (1) of the spec. See `CLAUDE.md` for the
-overall workflow and the workspace layout.
+overall workflow, workspace layout, and the **Web UI** contract (the
+user interacts through http://127.0.0.1:8000, not the terminal).
 
 ## Tone for messages to the user
 
-Treat the user as someone who will never read the codebase. Don't mention
-internal file names, directory structure, or boilerplate scripts when
-talking to them. Talk in terms of **outcomes** — "set up the environment",
-"identify flaws in your reward function" — not implementation. Save file
-paths for tool calls.
+Treat the user as someone who will never read the codebase. Don't
+mention internal file names, directory structure, or boilerplate scripts
+in anything you post to the website. Talk in terms of **outcomes** —
+"set up the environment", "identify flaws in your reward function" —
+not implementation. Save file paths for tool calls.
 
 **Never call any behavior, reward, or trajectory "correct" or
 "incorrect."** At most, frame things as *possibly* correct/incorrect or
@@ -22,96 +23,68 @@ paths for tool calls.
 is actually right is the user's call — the system surfaces evidence,
 not verdicts. (See `CLAUDE.md` for the full tone rules.)
 
-## Workspaces
+## Web UI is the only user-facing channel
 
-Each environment lives in its own workspace under `workspaces/<name>/`. The
-boilerplate in `runtime/` and `find_informative_pairs.py` is env-agnostic
-and is selected at runtime via `--workspace workspaces/<name>`.
-
-This skill (and every other `/repair-*` skill) takes the workspace name as
-`args` (e.g. `/repair-setup hopper`). After it runs it writes the name to
-`.current_workspace` at the repo root so subsequent skills can default.
-
-If the user didn't pass `args`, ask them for a workspace name before doing
-anything else. Use kebab-case (e.g. `hopper`, `lunar-lander`, `my-task`).
+Every message the user reads goes to the web UI via `python -m
+web_ui.cli post`. Every question goes via `python -m web_ui.cli ask`,
+and the agent reads the answer from the CLI's stdout. **Do not** call
+the `AskUserQuestion` tool here, and do not write narrative to the
+terminal beyond the one URL hint in Step 0a. See `CLAUDE.md` →
+"Web UI — the user-facing channel" for the full reference.
 
 ## What to do
 
-### 0. Resolve the workspace
-- `WORKSPACE = args` if provided, else read `.current_workspace`, else ask.
+### Step 0a — launch the web UI (must come first)
+
+```bash
+python -m web_ui.cli launch
+python -m web_ui.cli clear
+```
+
+Then print, **in the terminal only**, a single one-line hint so the
+user knows where to open their browser:
+
+> Open http://127.0.0.1:8000 — the rest of the session happens there.
+
+### Step 0b — resolve the workspace
+
+- `WORKSPACE = args` if provided, else read `.current_workspace`, else
+  ask the user *on the website*:
+  ```bash
+  python -m web_ui.cli ask --prompt "Which workspace name do you want to use? (kebab-case, e.g. hopper, lunar-lander, my-task)" --input text
+  ```
+  Read `value` from the returned JSON.
 - `WORKSPACE_DIR = workspaces/<WORKSPACE>`
 - `mkdir -p <WORKSPACE_DIR>/gather_evidence <WORKSPACE_DIR>/candidate_performance_metrics`
 - Create empty `__init__.py` in those two subdirectories.
 - Write `<WORKSPACE>` to `.current_workspace` at the repo root.
+- Tell the UI which workspace is active:
+  ```bash
+  python -m web_ui.cli set workspace=<WORKSPACE> status=running
+  ```
 
-### 0.5. Detect evaluation mode
+### Step 1 — identify the environment
 
-If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an **evaluation
-workspace** (see "Evaluation workspaces" in `CLAUDE.md`). Follow the
-eval flow below in place of steps 1 and 2, then continue with step 3.
-
-**Eval flow:**
-
-1. Confirm `<WORKSPACE_DIR>/env_config.py` and
-   `<WORKSPACE_DIR>/designed_reward_fn.py` both exist. If either is
-   missing, the eval workspace was not properly pre-authored — tell
-   the user, stop, and do not attempt to author them yourself.
-2. Read `<WORKSPACE_DIR>/eval_spec.md` and print its contents to the
-   user, prefaced by one short sentence like "Here is your reward-design
-   task." Do not paraphrase the spec, do not add commentary on the
-   criteria.
-3. Read `<WORKSPACE_DIR>/designed_reward_fn.py` and print its contents
-   inline in a fenced code block (language = python). Introduce it as
-   "the reward function you've been given as a starting point — your
-   job is to revise it until it satisfies the criteria above."
-4. Skip the rest of step 1 and all of step 2; run the sanity check
-   (step 3).
-5. **Offer the reward-edit interaction** before exiting — the *exact
-   same process* used after `/repair-preferences` shows trajectory
-   pairs. Before the question, **reprint the criteria from
-   `eval_spec.md` verbatim** in the main thread's text immediately
-   above the menu, prefaced by "As a reminder, here are the criteria
-   your reward function must encode:" — this is in addition to the
-   earlier display at step 2 of this flow, and is required because the
-   menu offers a reward-edit option (see "Criteria reminder above any
-   reward-edit menu" in `CLAUDE.md`). Then use `AskUserQuestion` to
-   ask whether the user wants to revise this starting reward now and,
-   if so, whether they will edit it themselves or have Claude make the
-   edit (offer options like "Edit it myself", "Have Claude edit it",
-   and "Continue without editing for now"). Act on the answer exactly
-   as the "Edit the reward function" path in Step 4 of
-   `repair-preferences/SKILL.md`:
-   - *Claude makes the edit:* first print the reward-edit tip box, then
-     apply the eval-mode reward-edit gate. The gate runs **two
-     checks**: (1) the request must specify a concrete edit; (2) every
-     clause must read as a reward-mechanics instruction (term, weight,
-     gating condition, functional shape) — **not** a policy-desideratum
-     description of what the policy should do. Clauses that prescribe
-     a reward term are fine even when they reference values/thresholds
-     also named in `eval_spec.md`; clauses that only describe the
-     desired behavior trip Check 2. If either check fails, refuse the
-     entire request, quote the offending clause alongside the matching
-     `eval_spec.md` line, and ask the user to rephrase. Only after
-     both checks pass may you apply the edit with `Edit` and show the
-     diff back. See "Reward-edit tips" and "Reward-edit gate" in
-     `CLAUDE.md`.
-   - *User edits it themselves:* tell them the system will wait; they
-     can run `/repair-init` when done.
-   - *Continue without editing:* proceed straight to the exit.
-6. Finish with step 4 (exit → `/repair-init`).
-
-Do **not** ask the user "describe it" vs. "write it yourself" in eval
-mode — that choice is pre-decided by the workspace author.
-
-### 1. Identify the environment
 Ask the user **which gym environment** they want to use. Accept either:
 - a gymnasium / gym id like `"Hopper-v4"` or `"CartPole-v1"`, or
 - a path to a custom env class (`module:ClassName`).
 
-If `<WORKSPACE_DIR>/env_config.py` already exists, ask before overwriting —
-the user may have hand-crafted it.
+If `<WORKSPACE_DIR>/env_config.py` already exists, confirm via the web UI
+before overwriting — the user may have hand-crafted it:
 
-Otherwise, write `<WORKSPACE_DIR>/env_config.py`. It must export:
+```bash
+python -m web_ui.cli ask --prompt "An environment is already set up for this workspace. Keep it, or replace it?" \
+    --options '[{"label":"Keep the existing one"},{"label":"Replace it"}]'
+```
+
+If env_config.py is missing or being replaced, ask for the env id /
+class via:
+
+```bash
+python -m web_ui.cli ask --prompt "Which environment do you want to use? (e.g. a gym id like 'Hopper-v4', or a 'module:ClassName' path.)" --input text
+```
+
+…then write `<WORKSPACE_DIR>/env_config.py` so it exports:
 - `make_env()` — returns the env. Use `gymnasium.make(...)` for ids, or
   import-and-instantiate for custom classes.
 - `OBS_DESCRIPTION` — multi-line string describing each observation
@@ -127,64 +100,110 @@ If the env requires a non-default pip install, also write
 
 Verify it imports cleanly (the leading `conda activate` is required —
 see "How to run the Python boilerplate" in `CLAUDE.md`):
-```
+
+```bash
 source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from env_config import make_env; e = make_env(); \
 print(e.observation_space, e.action_space)"
 ```
 
-To the user, say only that the environment is set up — don't recite file
-names.
+Post a one-line status update saying the environment is set up — do not
+list file names:
 
-### 2. Ask the user how they want to specify the reward
-
-> "Do you want to (a) describe what you want and let me implement the
-> reward function, or (b) write it yourself?"
-
-#### Branch 1a — "describe it"
-Display `prompts/reward_design_template.md` inline. **Above the
-template**, give the user a plain-language summary of what the
-observation and action spaces measure — one short paragraph for each.
-No technical jargon, no array indices, no normalisation details, no
-internal flags or wrapper conventions. Just *what the agent perceives*
-and *what it can do*, in everyday terms. Derive the summary from
-`OBS_DESCRIPTION` and `ACTION_DESCRIPTION` in `env_config.py`, but
-rewrite into plain English the user can read without prior context.
-Ask the user to fill the template in.
-
-Once they reply, write `<WORKSPACE_DIR>/designed_reward_fn.py` with:
-
-```python
-def designed_reward_fn(obs, act, next_obs) -> float:
-    ...
+```bash
+python -m web_ui.cli post --type status --content "The environment is set up."
 ```
 
-The function must:
-- Take a single transition (numpy obs, action, numpy next_obs) and return a
-  single float.
+### Step 2 — ask the user how they want to specify the reward
+
+This is the **first reward decision in every session** — always elicit
+the reward from the user. Do **not** assume a pre-existing
+`designed_reward_fn.py` as a default to show back; if one already
+exists in the workspace (e.g. a leftover from a prior session), it is
+overwritten by whatever the user specifies here. Ask the user how they
+want to author the reward:
+
+```bash
+python -m web_ui.cli ask --prompt "How would you like to specify the reward function?" \
+    --options '[
+      {"label":"Describe it — I will implement","description":"Fill in a short template; I translate it into Python and show it back for review."},
+      {"label":"I will write it myself","description":"I leave a stub file with the observation/action summary as a docstring; you fill in the body."}
+    ]'
+```
+
+Parse `value` to decide the branch.
+
+#### Branch 1a — "Describe it"
+
+Compose a *plain-English* one-paragraph summary of what the agent
+perceives and one paragraph of what it can do — rewritten from
+`OBS_DESCRIPTION` / `ACTION_DESCRIPTION`, with no array indices, no
+normalisation details, no internal flags. Post that summary, then ask
+the user to fill in the reward-design template *as a structured form*
+on the website — one labelled textarea per section:
+
+```bash
+# 1. Plain-language summary of obs + action (post as markdown).
+python -m web_ui.cli post --type markdown --content "<your two paragraphs>"
+
+# 2. Form-style question — three labelled boxes (achieve / avoid / tradeoff).
+python -m web_ui.cli ask --prompt "Fill in the reward design template — one box per section." \
+    --fields '[
+      {"name":"achieve",
+       "label":"What outcomes should the agent try to achieve?",
+       "description":"List specific desired outcomes — what successful behavior looks like.",
+       "placeholder":"e.g. reach the goal location; reach the goal quickly"},
+      {"name":"avoid",
+       "label":"What outcomes should the agent avoid?",
+       "description":"List specific bad outcomes the agent should not produce.",
+       "placeholder":"e.g. collisions with obstacles; excessive control effort"},
+      {"name":"tradeoff",
+       "label":"How should the agent trade off between different objectives?",
+       "description":"Describe when it is acceptable to prioritise one outcome over another.",
+       "placeholder":"e.g. never trade safety for speed; energy is fine if it means succeeding"}
+    ]'
+```
+
+The returned `value` is a JSON object `{"achieve": "...", "avoid": "...",
+"tradeoff": "..."}`. Use the three fields to author
+`<WORKSPACE_DIR>/designed_reward_fn.py`. The file must:
+- Take a single transition `(obs, action, next_obs)` and return a single
+  float.
 - Be a faithful translation of the user's filled template — every listed
-  desired outcome should contribute positively, every avoided outcome
+  desired outcome contributes positively, every avoided outcome
   negatively, with the trade-offs the user described.
 - Have a top-of-file comment containing the filled template verbatim, so
   the reward design is auditable from the source file.
 - **Be commented inline.** Every weight constant and every intermediate
-  variable that has a physical or semantic meaning gets a one-line
-  comment giving its **units** (m/s, fraction of steps, normalised
-  position, normalised velocity, dimensionless, etc.) and what it
-  represents. Each term that contributes to the returned sum gets a
-  brief comment naming the outcome it credits or penalizes — so the
-  user can audit the reward by reading the source without re-deriving
-  the semantics.
+  variable with a physical/semantic meaning gets a one-line comment
+  giving its **units** (m/s, fraction of steps, normalised position,
+  dimensionless, etc.) and what it represents. Each contributing term
+  gets a brief comment naming the outcome it credits or penalizes.
 
-**Show the reward function back to the user.** After writing the file,
-print its contents inline (wrap in a fenced code block, language = python)
-and add a one-line note explaining the key knobs you chose (e.g.,
-"I capped the primary-objective bonus and used a weight of −20 on the
-failure-state penalty"). Ask the user to skim it and confirm before
-proceeding. If they push back, edit and re-show.
+**Show the reward function back to the user on the website.** After
+writing the file:
+
+```bash
+python -m web_ui.cli post --type code --language python \
+    --caption "designed_reward_fn.py" \
+    --content-file workspaces/<WORKSPACE>/designed_reward_fn.py
+
+python -m web_ui.cli post --type markdown --content "Key knobs I chose: <one-line summary of the main weights, e.g. 'failure-state weight X vs +Y per step of progress (so a single failure dominates an entire episode of progress reward)'>"
+
+python -m web_ui.cli ask --prompt "Does the reward function above look right, or should I adjust it?" \
+    --options '[
+      {"label":"Looks good"},
+      {"label":"Adjust it","description":"Describe what to change next."}
+    ]'
+```
+
+If the user picks "Adjust it", follow up with a long-text question
+asking what to change, edit the file, re-post the new source, and
+re-ask for confirmation. Loop until confirmed.
 
 #### Branch 1b — "I'll write it myself"
+
 Write a stub `<WORKSPACE_DIR>/designed_reward_fn.py`:
 
 ```python
@@ -199,13 +218,20 @@ def designed_reward_fn(obs, act, next_obs) -> float:
     raise NotImplementedError("Fill in designed_reward_fn before running /repair-init.")
 ```
 
-Print the obs/action summary to the conversation so the user has it in
-context while writing. Tell the user where the stub is and that the
-system is ready when they're done filling it in.
+Post the obs/action summary plus a status message telling the user the
+stub is ready (do not name file paths):
 
-### 3. Sanity check
-After the file exists and (if 1a) is implemented, smoke-test it:
+```bash
+python -m web_ui.cli post --type markdown --content "<plain-English obs + action summary>"
+python -m web_ui.cli post --type status --content "A stub reward function is in place. Implement its body, then continue."
 ```
+
+### Step 3 — sanity check
+
+Smoke-test the reward (the result is for the agent only — do **not**
+post the raw output to the website):
+
+```bash
 source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from env_config import make_env; from designed_reward_fn import designed_reward_fn; \
@@ -215,17 +241,29 @@ a = e.action_space.sample(); \
 step = e.step(a); next_obs = step[0]; \
 print('reward sample:', designed_reward_fn(obs, a, next_obs))"
 ```
-If branch 1b, expect `NotImplementedError` and tell the user that's
-expected — they need to implement the body, then continue.
 
-### 4. Exit — always tell the user what to run next
-Tell the user, in plain language, that the environment and reward
-function are set up. Then **always** close with this line (or a very
-close variant):
+If branch 1b, `NotImplementedError` is expected — that's fine.
 
-> "To begin identifying possible flaws in the specified reward function,
-> run `/repair-init` next."
+### Step 4 — close out with a Continue button, then chain to /repair-init
 
-Do not finish this skill without explicitly naming `/repair-init` as the
-next step. Do not list which files exist or what `/repair-init` does
-internally.
+Don't tell the user to type a slash-command. Post a CTA button on the
+website; when the user clicks it, the agent invokes the next skill
+directly via the `Skill` tool.
+
+```bash
+ANSWER=$(python -m web_ui.cli cta \
+    --prompt "The environment and reward function are set up." \
+    --label  "Identify possible flaws" \
+    --value  "repair-init")
+NEXT=$(printf %s "$ANSWER" | python -c "import json,sys;print(json.load(sys.stdin)['value'])")
+```
+
+`cta` blocks until the user clicks. Once it returns, invoke the next
+skill in the same agent turn:
+
+```
+Skill(skill="$NEXT")     # i.e. Skill tool with skill="repair-init"
+```
+
+Do not finish the skill turn without either (a) posting a CTA that
+advances to the next step or (b) handing off via the Skill tool.

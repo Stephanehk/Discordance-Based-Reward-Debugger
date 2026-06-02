@@ -19,9 +19,9 @@
 # so the work is pure CPU and fans out cleanly over the cores requested above.
 #
 # Override any of these at submit time, e.g.:
-#   sbatch --export=ALL,WS=pandemic_human_eval_1,ROUND=2,NPER=3,WORKERS=24 \
+#   sbatch --export=ALL,WS=pandemic,ROUND=2,NPER=3,WORKERS=24 \
 #          slurm_scripts/baseline_pandemic_rollout_round.sh
-WS=${WS:-pandemic_human_eval_1}
+WS=${WS:-pandemic}
 ROUND=${ROUND:-1}
 NPER=${NPER:-3}
 WORKERS=${WORKERS:-${SLURM_CPUS_PER_TASK:-24}}

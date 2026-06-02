@@ -1,350 +1,417 @@
 ---
 name: repair-preferences
-description: Show the 15 most informative trajectory pairs as preference labels. For each pair: features of both trajectories, scores from the designed reward and the candidate performance metric, the A≻B / B≻A label each induces, and a short explanation of why the stakeholder disagrees. Ends with an overall interpretation of likely reward flaws.
+description: Show up to 5 trajectory pairs plus up to 2 lottery comparisons (certain trajectory C vs a p-probability lottery over A and B) as preference labels on the web UI. For each comparison: features, scores from the designed reward and the alternative-perspective metrics, the preference label each induces, a short explanation of why another perspective disagrees, and per-trajectory visualization paths. Ends with an overall interpretation of likely reward flaws.
 ---
 
-# /repair-preferences — show preference-label disagreements
+# /repair-preferences — show preference-label disagreements on the web UI
 
 ## ⚠ CORE CONTRACT (do not skip)
 
-**Up to 15 pretty-printed pairs — every disagreement returned by the
-script — MUST appear in your text response, verbatim, with a
-`**Why they disagree:**` summary line printed directly under each pair
-(interleaved, not in a single block after the last pair).** The bash
-tool result is invisible to the user — only what you type into the
-response is. If your response does not contain the pairs themselves
-(feature key + every PAIR block returned by the script, copied
-unchanged) with the per-pair summary line attached to each one, the
-skill has failed regardless of how good the overall interpretation is.
+**Every comparison the script returns — up to 5 PAIR blocks and up to 2
+LOTTERY blocks — MUST be posted to the web UI via `python -m web_ui.cli
+post --type comparison`, each with its own `--why` interpretation
+line.** The chat / terminal output the agent emits is **not** the
+deliverable; the website is. The render script's stdout is consumed by
+the agent, parsed, and forwarded to the UI — not pasted into the chat.
 
-The response must also include, **before** the pairs and in this order:
-(1) the overall-pattern paragraph, (2) the orientation line telling the
-user to view the pairs to note where the designed reward may be
-misaligned (and that they can edit the reward, request more features, or
-view more pairs next), (3) the feature key, and (4) a reminder of the
-reward-design criteria the reward must encode. These four leading
-elements and the closing `AskUserQuestion` are part of the contract —
-not optional.
+Before any comparison is posted, the response on the web UI must
+include — in this order:
 
-A correct response looks like (note the order — the overall pattern, an
-orientation line, the feature key, and a reminder of the reward-design
-criteria all come **before** the pairs):
+1. **Overall-pattern paragraph + 1–2 possible reward tweaks**, posted
+   via `post --type markdown`. Framed as "the reward *appears* to
+   prioritize X over Y" — never as "the reward is wrong".
+2. **Orientation line**, posted via `post --type status`, telling the
+   user the comparisons below show where the designed reward may be
+   misaligned (and that they'll be asked what to do next). Keep
+   *may be misaligned* — not "wrong".
+3. **Feature key**, posted via `post --type feature_key`. Renders in
+   the right-hand sidebar.
 
-````
-<overall pattern + 1–2 possible reward tweaks, ≤ 6 lines, framed as
-"the reward *appears* to prioritize X over Y" — never as "the reward
-is wrong">
+Then the comparisons (pairs first, then lotteries), each with its
+`--why` line.
 
-View the following trajectory pairs to note where the designed reward
-function may be misaligned. You'll be asked to edit the reward function
-afterwards; you can also request additional trajectory features to see
-more detail on these trajectories, or ask to view more trajectory pairs.
-
-```
-<feature key, copied verbatim>
-```
-
-<criteria reminder: "As a reminder, here are the criteria your reward
-function must encode:" followed by the reward-design criteria. In an
-evaluation workspace these are the criteria in `eval_spec.md` (shown to
-the human only — see the eval-mode note below); otherwise the filled
-reward-design template at the top of `designed_reward_fn.py`.>
-
-```
-<PAIR 1/15 block, copied verbatim — header through feature table.
- Do not change any text or numbers.>
-```
-**Why they disagree:** <1–2 sentences naming the trade-off the reward
-made, the feature deltas that drove it, and why this stakeholder would
-have chosen oppositely>
-
-```
-<PAIR 2/15 block, copied verbatim>
-```
-**Why they disagree:** ...
-
-...
-
-```
-<PAIR 15/15 block, copied verbatim>
-```
-**Why they disagree:** ...
-
-<AskUserQuestion call: edit the reward function / add another trajectory
-feature / view more trajectory pairs / Finish and submit>
-````
-
-Do not paraphrase the pairs. Do not lump the per-pair summary lines
-into a single section after the last pair — the summary line goes
-directly beneath the pair it explains. Do not skip the feature key.
-Do not skip the summary line on any pair. Do not skip the closing
-`AskUserQuestion` — the user must always be offered a next step.
-
-The script anonymizes trajectory identity in the printed header — each
-trajectory is shown as just "Trajectory A" / "Trajectory B" with no
-round, step count, or policy class. Do not re-introduce any of that
-information in your text. The user should read each pair on the
-merits of its features, not by recognizing where it came from.
+Finally, **always** close with the four-option `ask` (edit / add a
+feature / view more / finish and submit). The skill has not delivered
+its core output until that question is on the website.
 
 ## Tone for messages to the user
 
-The user will never read the codebase. Don't list file names, internal
-scripts, or boilerplate paths. **Never name a metric by its internal
-identifier** (e.g. `performance_metric_<short_name>`). Refer to "the
-candidate performance metric" or describe the stakeholder perspective
-from the docstring (e.g. "the safety reviewer's view", "the operations
-stakeholder").
+The user will never read the codebase. Don't include file names,
+internal scripts, or boilerplate paths in anything posted to the
+website. **Never name a metric by its internal identifier**
+(e.g. `performance_metric_<short_name>`). Refer to "the candidate
+performance metric" or describe the perspective from the docstring
+(e.g. "the safety reviewer's view", "the operations perspective").
+Do not use the word "stakeholder" in anything posted to the user — say
+"other perspectives" or describe the specific perspective.
 
 **Never call any behavior, reward, or trajectory "correct" or
 "incorrect."** At most, frame things as *possibly* correct/incorrect or
-"appears aligned/misaligned with the stakeholder's view." Whether
+"appears aligned/misaligned with this perspective's view." Whether
 something is actually right is the user's call — the system surfaces
-evidence, not verdicts. The same applies to your overall interpretation:
+evidence, not verdicts. The same applies to the overall interpretation:
 say "the reward *appears* to prioritize X over Y," not "the reward is
 wrong about Y." (See `CLAUDE.md` for the full tone rules.)
 
-## Eval mode — information barrier
+### Short status updates
 
-If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation
-workspace. Choosing which pairs to surface and writing the per-pair /
-overall "why they disagree" narrative must be **spec-blind**: do not read
-or condition on `eval_spec.md`, `eval_scripts/<name>.py`, or any
-criteria-naming text. Delegate the selection and narrative to a subagent
-given only the dumped trajectory table (which is spec-neutral) plus the
-designed reward's operational mechanics. Frame every disagreement as
-"designed reward vs stakeholder X," never citing the criteria. See
-"Information barrier (eval mode)" in `CLAUDE.md`.
+While the skill is running, post **one-sentence** status messages at
+key transitions (e.g. "Analysing the collected trajectories.",
+"Selecting the most informative comparisons.", "Rendering the
+visualizations.") via `python -m web_ui.cli post --type status`. The
+website automatically shows a "Claude is thinking" spinner whenever
+no question is pending, so you don't need to repeat that idea — just
+post a single-sentence label when something interesting changes.
 
-The criteria reminder (element 4 above) is the **one** human-facing
-exception: the main thread — which has already seen `eval_spec.md` at
-setup — re-displays those criteria to the human verbatim as a reminder.
-This is display only; it must never feed the spec-blind subagent that
-selects pairs or writes the narrative, and the per-pair / overall text
-must still never cite, quote, or paraphrase the criteria. Assemble the
-final response in the main thread: the subagent returns the overall
-pattern + pairs (spec-blind); the main thread prepends the orientation
-line, the feature key, and the `eval_spec.md` criteria reminder.
+## Web UI is the only user-facing channel
+
+The web UI was launched by `/repair-setup`. Every user-visible message
+here goes through `python -m web_ui.cli post`; every question goes
+through `python -m web_ui.cli ask`. **Do not** call the
+`AskUserQuestion` tool. See `CLAUDE.md` → "Web UI — the user-facing
+channel" for the reference.
+
+If the server isn't running, bring it up first:
+`python -m web_ui.cli launch`.
 
 ## Resolve the workspace
 
 The skill takes the workspace name as `args` (e.g. `/repair-preferences hopper`).
 If `args` is empty, read `.current_workspace` at the repo root; if that
-doesn't exist, tell the user to run `/repair-setup` first.
+doesn't exist, post a message asking the user to run `/repair-setup`
+first and stop. Set the UI header:
+
+```bash
+python -m web_ui.cli set workspace=<WORKSPACE> status=running
+```
 
 ## Preconditions
 
 - At least one round of evidence has been collected for this workspace.
-  If none, tell the user to run `/repair-round` first.
+  If none, post a message asking the user to run `/repair-round` first
+  and stop.
 
 ## Procedure
 
-### 1. Select the pairs to surface — you choose them, not an algorithm
+### 1. Select the comparisons — you choose them, not an algorithm
 
-Pair selection is **Claude-driven**. You read every collected trajectory
-(summarised by the same features the human sees), look at the designed
-reward and every stakeholder metric, and pick the pairs you judge most
-useful for the human to see. The legacy algorithmic selector lives in
-`find_informative_pairs.py` and is no longer used for this step.
+Comparison selection is **Claude-driven**. You read every collected
+trajectory (summarised by the same features the user sees on the
+website), look at the designed reward and every alternative-perspective
+metric, and pick the comparisons most useful for the user to see. The
+legacy algorithmic selector lives in `find_informative_pairs.py` and is
+no longer used for this step.
 
-**Blind selection (do not read the reward-design criteria).** In an
-evaluation workspace the ground-truth reward-design goal lives in
-`eval_spec.md`. The selector must stay blind to it: when choosing pairs,
-use **only** the dumped trajectory table — features, the designed-reward
-total, and the stakeholder metrics. Do **not** open `eval_spec.md`, and
-do not rely on the reward-design criteria recalled from earlier in the
-conversation. The whole point of surfacing disagreements is to let the
-*human* discover the reward's flaws; a selector that already knows the
-target would be choosing the answer, not evidence.
+Two kinds of comparisons are available:
+
+- **Pairs** (`{a, b}`): a head-to-head A-vs-B comparison.
+- **Lottery comparisons** (`{c, a, b, p}`): a certain trajectory C vs a
+  `p`-vs-`(1−p)` lottery over A and B. Use when you want to expose
+  curvature or risk-attitude disagreements that a head-to-head can't.
+
+Pick the **top 5 most informative pairs** and the **top 2 most
+informative lotteries**. Favor diversity — don't repeat the same
+trade-off twice; each comparison should illuminate a distinct way the
+reward might be misaligned.
 
 **1a. Dump the trajectory table.**
 
-```
+```bash
 source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python select_pairs.py --workspace workspaces/<WORKSPACE> --mode dump
 ```
 
 This writes `workspaces/<WORKSPACE>/.repair_history/_trajectory_table.txt`:
-one row per trajectory, with a stable id (`T001`, …), its total under the
-designed reward, every stakeholder metric, and every feature.
+one row per trajectory, with a stable id (`T001`, …), its total under
+the designed reward, every alternative-perspective metric, and every
+feature.
 
 **1b. Read the table and reason about it.** Read that file with the Read
 tool. Each row is a trajectory encoded as features — the same encoding
-the human reads — which is what lets you reason about what happened.
-Identify pairs where the designed reward ranks the two trajectories
-oppositely to a stakeholder the human plausibly cares about, or that
-otherwise best expose how the reward trades off the outcomes that
-matter. Favor a set that is **diverse**: different stakeholders,
-different behaviors, different reward terms stressed — not many
-near-identical pairs. It's fine to include pairs where you're unsure
-which trajectory a stakeholder prefers or how to read the trade-off —
-uncertain pairs are often the most informative for the human. Use the
-internal `src` column only to judge diversity; never reveal round,
-policy, or step counts to the user.
+the user reads — which is what lets you reason about what happened.
 
-Select the pairs you judge most useful — **up to 15**.
+For **pairs**, identify head-to-head comparisons where the designed
+reward ranks the two trajectories oppositely to another perspective the
+user plausibly cares about, or that otherwise best expose how the
+reward trades off the outcomes that matter.
+
+For **lotteries**, identify triples (C, A, B) where: A is a clearly
+good outcome under some perspective's lens, B is a clearly bad outcome
+under that lens, and C is a midpoint that is not obviously good or
+bad. By convention let `p` be the probability of the **good** branch
+(A) and `(1−p)` the probability of the **bad** branch (B). Then pick
+a `p ∈ [0, 1]` (free real, not restricted to round values) such that
+the comparison between `return(C)` and `p·return(A) + (1−p)·return(B)`
+under the designed reward is most informative about whether the
+reward is too risk-seeking or too risk-averse relative to that
+perspective.
+
+**Pick `p` so the choice between C and the lottery is genuinely
+difficult — *don't* default to a fixed number.** "Genuinely difficult"
+means: the designed reward gives a clear, definite preference, but a
+reasonable human reading the lottery could plausibly disagree.
+
+How to find such a `p` for a given `(C, A, B)`:
+
+1. Compute the designed-reward indifference point
+   `p* = (return(C) − return(B)) / (return(A) − return(B))`. At this
+   `p`, the reward sees C and the lottery as tied — uninformative.
+2. Move slightly off `p*` so the reward picks a side with a small but
+   real margin. The interesting region is usually on the C-preferring
+   side — designed says "prefer C," but the human's intuition might
+   still pick the lottery because the bad branch is rare or the good
+   branch is much more aligned with their stated objective.
+3. The right `(1−p)` is whatever makes that side genuinely tempting —
+   often quite small (a few percent or less) when B carries a large
+   negative reward, but it depends entirely on the magnitudes in the
+   trajectories you picked. Don't hardcode 5%, 0.5, or any other
+   round number. Compute it.
+4. Always justify the chosen `p` in the selection file by explaining
+   what makes *this specific* `p` the hard one for the human.
+
+If you want to surface two lotteries, prefer two *different shapes*
+(different C/A/B trajectories, or a fundamentally different trade-off)
+over two values of `p` on the same shape — sweeping `p` on one shape
+is a single question rendered twice.
+
+You **must justify** your choice of `p` in the selection file —
+explain in one sentence why this specific `p` makes the disagreement
+legible.
+
+For both kinds, favor diversity across perspectives, behaviors, and
+reward terms. Use the internal `src` column only to judge diversity;
+never reveal round, policy, or step counts to the user. Aim for up to
+5 distinct pairs and up to 2 distinct lotteries; fewer is fine if you
+can't find that many genuinely informative ones.
 
 **1c. Write the selection and render it.** Write a selection file to
 `workspaces/<WORKSPACE>/.repair_history/_selection.json`:
 
 ```json
-{"pairs": [{"a": "T012", "b": "T034"}, {"a": "T100", "b": "T077"}]}
+{
+  "pairs": [
+    {"a": "T012", "b": "T034"},
+    {"a": "T100", "b": "T077"}
+  ],
+  "lotteries": [
+    {"c": "T020", "a": "T005", "b": "T088", "p": 0.5,
+     "justification": "p=0.5 puts the expected reward of the lottery just above C, exposing whether the safety reviewer would still pick C to avoid B's downside"}
+  ]
+}
 ```
 
 Then render:
 
-```
+```bash
 source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python select_pairs.py --workspace workspaces/<WORKSPACE> --mode render \
        --selection workspaces/<WORKSPACE>/.repair_history/_selection.json
 ```
 
-The render step orients A = the reward-preferred side, lists the
-stakeholder perspectives that prefer B, prints each pair in the
-preference-label format, and saves a snapshot so `/repair-verify` can
-recheck it. Its printed output is the deliverable you reprint in Step 2.
+The render step orients A = the reward-preferred side for pairs, lists
+the other perspectives that prefer B, prints each pair in the
+preference-label format, and for each comparison the workspace's
+`viz.py` saves per-trajectory visualizations to
+`workspaces/<WORKSPACE>/viz/round{snap_id}/{pair,lottery}{rank}/…` and
+prints those paths.
+
+For lotteries it also computes `return(C)` and `p·return(A) +
+(1−p)·return(B)` under the designed reward, prints the lottery as a
+question (certain trajectory C vs the lottery), and lists the other
+perspectives whose preference disagrees with the reward's.
+
+The render also writes a **ready-to-post UI payload** to
+`workspaces/<WORKSPACE>/.repair_history/_ui_payload/` (printed at the end
+of its stdout as `[ui_payload] …`): a `manifest.json` listing every card
+in render order, one `*.content.txt` per card (the exact block to post,
+already stripped of the trailing visualizations list), one `*.viz.json`
+per card (the `--viz` argument, with this round's visuals — `src` URLs,
+`preferred`, and lottery `role`/`probability` — already filled in), and a
+`feature_key.json`. The bundle is regenerated on every render, so its
+visuals always belong to the round just rendered. You supply only the
+per-round judgment text (the overall-pattern paragraph and each card's
+`--why`); you do **not** hand-build viz JSON, content files, or the
+feature key any more. Use it in Step 2.
+
+The render's stdout (and these payload files) are the source the agent
+forwards to the web UI in Step 2; nothing is copy-pasted into the chat.
 
 (If the table holds fewer than 3 trajectories that form any useful
-disagreeing pair, jump to Step 3 and tell the user there's not yet
-enough evidence to surface diverse disagreements.)
+disagreeing comparison, jump to Step 3 and post a status message saying
+there's not yet enough evidence to surface diverse disagreements.)
 
-### 2. Reprint every returned pair verbatim, interleaved with per-pair summaries
+### 2. Forward the deliverable to the web UI
 
-See the CORE CONTRACT above. This is the load-bearing step.
+This is the load-bearing step. Carry out all of the following before
+moving on.
 
-1. Start with the feature key inside a fenced code block.
-2. Then for **every** pair returned by the script, in the order the
-   script returned them:
-   a. Print the pair's `PAIR …` block **verbatim** inside its own
-      fenced code block — header through the feature table. Do not
-      change any text or numbers, including the `PAIR k/N` header.
-   b. Immediately after that code block (still in the same response,
-      no other content in between), write a `**Why they disagree:**`
-      line followed by 1–2 sentences. Look at the largest entries in
-      the `Δ (B−A)` column — those are the features driving the
-      disagreement. **Frame the explanation as a trade-off the reward
-      made.** Phrase as: "the reward *appears* to prioritize
-      <reward-term> over <stakeholder-priority>, scoring A higher
-      because <feature shift>; this stakeholder would have chosen the
-      opposite trade-off because <their priority>."
+**2a. Overall pattern paragraph** (post first, before any comparison):
 
-Do not lump the per-pair summary line into a single section at the
-end. The summary line goes directly under the pair it explains.
+```bash
+python -m web_ui.cli post --type markdown --content "<your overall pattern + 1–2 possible reward tweaks, ≤ 6 lines, framed as 'the reward *appears* to prioritize X over Y — if that wasn't intended, one option is …'. Never 'the reward is wrong about X.'>"
+```
+
+**2b. Orientation status:**
+
+```bash
+python -m web_ui.cli post --type status --content "View the trajectory comparisons below to note where the designed reward function may be misaligned. You'll be asked what to do next."
+```
+
+**2c. Feature key in the right sidebar.** Post the feature key the render
+already emitted — don't reconstruct it:
+
+```bash
+python -m web_ui.cli post --type feature_key \
+    --features-file workspaces/<WORKSPACE>/.repair_history/_ui_payload/feature_key.json
+```
+
+**2d. Each comparison** (pairs first, in render order; then lotteries).
+Read
+`workspaces/<WORKSPACE>/.repair_history/_ui_payload/manifest.json` and
+post one comparison per entry in its `cards` list, **in order**. Every
+card already carries this round's `content_file`, `viz_file` (the exact
+`--viz` argument, with the round-specific `src` URLs, `preferred` badge,
+and lottery `role`/`probability` already filled in), `label`, and
+`layout`. You add **only** the `--why` judgment line:
+
+```bash
+# pair card (layout is null):
+python -m web_ui.cli post --type comparison \
+    --label "<card.label>" \
+    --content-file "<card.content_file>" \
+    --viz "$(cat <card.viz_file>)" \
+    --why "<1–2 sentences naming the trade-off the reward made. For pairs: look at the largest entries in the Δ (B−A) column — those features drive the disagreement. Phrase as: 'the reward *appears* to prioritize <reward-term> over <other-perspective-priority>, scoring A higher because <feature shift>; this perspective would have chosen the opposite trade-off because <their priority>.'>"
+
+# lottery card (layout is "lottery"): add --layout lottery
+python -m web_ui.cli post --type comparison \
+    --label "<card.label>" --layout lottery \
+    --content-file "<card.content_file>" \
+    --viz "$(cat <card.viz_file>)" \
+    --why "<1–2 sentences naming the risk-attitude or curvature trade-off between C and the lottery. Phrase as: 'the reward *appears* to treat the lottery as worth more than C (i.e. it is risk-seeking between A's upside and B's downside relative to this perspective's view); this perspective prefers C because <their priority — usually downside aversion or upside skepticism>.'>"
+```
+
+Pass `--layout <card.layout>` only when the card's `layout` is non-null
+(lotteries). Omit `--viz` only when a card's `viz_file` is null (the
+workspace has no `viz.py`, so no visuals were produced). The `--why`
+line is the one piece you author per card; it differs each round, just
+as the visuals do.
 
 Don't name a metric by its internal id; either say "the candidate
-performance metric" or refer to the stakeholder perspective ("the
-safety reviewer's view", "the operations stakeholder", etc.). Do not
-re-introduce policy class names — the script intentionally hides them.
-Do not truncate, summarise, or paraphrase any pair. If the script
-saved a snapshot path on the last line, you can omit that — it's an
-internal detail.
+performance metric" or refer to the perspective ("the safety
+reviewer's view", etc.). Do not use the word "stakeholder". Do not
+re-introduce policy class names or round numbers — the payload
+intentionally hides them. Do not edit the `content_file` — post it
+exactly as the render produced it.
 
-### 3. Lead with the overall interpretation, orientation, feature key, and criteria reminder
+### 3. Always close by asking the user what to do next
 
-These four elements open the response, **before** the pairs, in this
-order. (You still compute the overall pattern after reading the pairs;
-it just gets placed first.)
+Use `python -m web_ui.cli ask` with exactly these four options (or
+wording very close to them):
 
-**3a. Overall interpretation — name the trade-off, not the verdict.**
-A short (≤ 6 lines) interpretation that:
-- names the **pattern** common to the disagreements
-- points to the **reward term** or **implicit priority** that drove
-  the trade-off (by referencing what the reward credits/penalizes —
-  not by file path or variable name)
-- suggests 1–2 concrete tweaks the user *could* make to close the gap
+```bash
+python -m web_ui.cli ask --prompt "What would you like to do next?" \
+    --options '[
+      {"label":"Edit the reward function","description":"Modify the reward to reflect what you actually want, based on the disagreements above."},
+      {"label":"Add another trajectory feature","description":"Add a new feature to the trajectory summary so the comparisons show more detail."},
+      {"label":"View more comparisons","description":"Surface additional pairs or lotteries from the evidence already collected."},
+      {"label":"Finish and submit (not reversible)","description":"Lock in the current reward function as the final answer. This ends the session."}
+    ]'
+```
 
-**Stay descriptive, never prescriptive.** Don't say "the reward is
-wrong about X" or "the reward should be Y." Say "the reward *appears*
-to prioritize X over Y — if that wasn't intended, one option is …".
-Whether the trade-off is acceptable is the user's call.
+Read `value` from the returned JSON.
 
-**3b. Orientation line.** One short paragraph (reword freely, keep it
-neutral): "View the following trajectory pairs to note where the
-designed reward function may be misaligned. You'll be asked to edit the
-reward function afterwards; you can also request additional trajectory
-features to see more detail on these trajectories, or ask to view more
-trajectory pairs." Do **not** say "where the reward is wrong" — keep the
-*may be misaligned* phrasing (the neutrality rule still holds).
+### 4. Act on the answer
 
-**3c. Feature key** — the fenced feature-key block from the render.
+- **Edit the reward function** → ask whether the user wants to make the
+  edit themselves or have Claude make it:
 
-**3d. Criteria reminder.** Right after the feature key, remind the user
-of the criteria their reward must encode: a line like "As a reminder,
-here are the criteria your reward function must encode:" followed by the
-criteria. In a normal workspace these are the filled reward-design
-template at the top of `designed_reward_fn.py`. In an **evaluation**
-workspace they are the criteria in `eval_spec.md`, displayed to the
-human verbatim (human-facing only — see the eval-mode note above; this
-display must never reach the spec-blind selection/narrative subagent).
+  ```bash
+  python -m web_ui.cli ask --prompt "Who should make the reward edit?" \
+      --options '[{"label":"You (Claude) make it","description":"I describe the change in the next message; Claude applies it and reshows the file."},
+                  {"label":"I will make it myself","description":"I edit the file directly and continue when ready."}]'
+  ```
 
-### 4. Always close by asking the user what to do next
-
-Before the question, **reprint the criteria the reward must encode**
-immediately above the menu, prefaced by "As a reminder, here are the
-criteria your reward function must encode:" — verbatim from
-`eval_spec.md` in an evaluation workspace, or verbatim from the filled
-reward-design template at the top of `designed_reward_fn.py`
-otherwise. This is in addition to the criteria reminder shown earlier
-at step 3d, and is required because the menu offers a reward-edit
-option (see "Criteria reminder above any reward-edit menu" in
-`CLAUDE.md`). In eval mode the reprint is human-facing only and must
-never reach the spec-blind selection/narrative subagent.
-
-Then use `AskUserQuestion` with exactly these four options (or wording
-very close to them):
-
-- **Edit the reward function** — change `designed_reward_fn.py` to
-  address the disagreements above.
-- **Add another trajectory feature** — add a new feature to the set
-  that encodes each trajectory, then re-present the evidence with it
-  visible.
-- **View more trajectory pairs** — surface additional, distinct
-  disagreeing pairs from the evidence already collected.
-- **Finish and submit (not reversible)** — finalize the current reward
-  as the submission. See "Finish and submit" in `CLAUDE.md`.
-
-Phrase the question in user-friendly language ("How would you like to
-proceed?" or "Where to next?"). Do **not** mention `/repair-round`,
-`/repair-preferences`, or any other command name in the question text
-itself — but do feel free to act on the answer by running the relevant
-skill.
-
-Act on the answer:
-- "Edit the reward function" → ask whether the user wants to make the
-  edit themselves or have Claude make it.
-  - *Claude makes the edit:* first print the reward-edit tip box (see
-    "Reward-edit tips" in `CLAUDE.md`), and **in eval mode apply the
-    reward-edit gate first** (see "Reward-edit gate" in `CLAUDE.md`).
-    The gate runs **two checks**: (1) the request must specify a
-    concrete edit; (2) every clause must read as a reward-mechanics
-    instruction (term, weight, gating condition, functional shape) —
-    **not** a policy-desideratum description of what the policy should
-    do. Clauses that prescribe a reward term are fine even when they
-    reference values/thresholds also named in `eval_spec.md`; clauses
-    that only describe the desired behavior trip Check 2. If either
-    check fails, refuse the entire request, quote the offending clause
-    alongside the matching `eval_spec.md` line, and ask the user to
-    rephrase. Only after both checks pass may you apply the edit with
-    `Edit`, show the diff back, then re-score: re-run this skill
+  - *Claude makes the edit:* first post the reward-edit tip box (below)
+    to the web UI, then ask the user to describe the change via a
+    long-text question, apply the edit with `Edit`, post the new
+    source as a code message, and re-score: re-run this skill
     (trajectories on disk are unchanged, so it just re-scores under
-    the new reward) or suggest `/repair-verify` to re-check the
-    previously-surfaced pairs.
-  - *User edits it themselves:* tell the user the system will wait; when
-    they're done they can run `/repair-verify` to re-check the
-    previously-surfaced pairs, **or** `/repair-round` to gather fresh
-    evidence under the new reward.
-- "Add another trajectory feature" → ask the user what feature they want
-  (or implement the one they named). Add it to
-  `gather_evidence/trajectory_features.py` (in eval mode keep the
-  implementation spec-blind — derive it from env semantics, not the
-  criteria), re-run `runtime.compute_features` over every existing round
-  so all trajectories carry the new feature, then re-present the
-  evidence (Steps 1–4) with the feature visible.
-- "View more trajectory pairs" → re-run Step 1 to select additional
-  pairs distinct from those already shown, and present them (Steps 2–4).
-- "Finish and submit (not reversible)" → follow "Finish and submit" in
-  `CLAUDE.md`: write the submission record and stop.
+    the new reward) or suggest `/repair-verify`.
+  - *User edits it themselves:* post a status message saying the
+    system is waiting; when they're ready they can run `/repair-verify`
+    to re-check the previously-surfaced pairs, **or** `/repair-round`
+    to gather fresh evidence under the new reward.
+
+- **Add another trajectory feature** → ask the user, via a long-text
+  question, what feature they want. Edit
+  `gather_evidence/trajectory_features.py`, re-run
+  `runtime.compute_features` over every existing round so all
+  trajectories carry the new feature, then re-present the evidence
+  (Steps 1–3) with the feature visible.
+
+- **View more comparisons (pairs or lotteries)** → behaviour depends on
+  whether this is the *first* "View more" click in a row or the
+  *second* consecutive one (since the last reward edit, feature add,
+  or fresh /repair-round).
+
+  **Second consecutive click → hand off to /repair-round.** Once
+  another batch of within-evidence comparisons has already been
+  surfaced, the existing trajectories are largely exhausted of
+  distinct disagreements. Don't re-select from disk a third time —
+  instead invoke `Skill(skill="repair-round")`. The reward function
+  is unchanged, so the new round's policies will see the *same*
+  designed reward that produced the disagreements the user is still
+  trying to resolve; that's the intended effect ("run another round
+  without modifying the reward"). Reset the within-a-row counter
+  whenever the user edits the reward, adds a feature, or a /repair-
+  round happens for any other reason.
+
+  **First click → re-select within existing evidence (this step's
+  default).** Re-run Step 1, but with one crucial extra constraint:
+  **treat every previously-shown trajectory as one whose designed-
+  reward ranking the user has now agreed with**. By pressing "view
+  more comparisons", the user has implicitly confirmed that the
+  designed reward got it right on everything you've shown so far —
+  re-showing those same rankings (or ones that depend on them)
+  wastes their time.
+
+  Concretely:
+  - Walk through every previously-saved snapshot
+    (`workspaces/<WORKSPACE>/.repair_history/pref_round_*.json`) and
+    enumerate every trajectory that has appeared in a pair or lottery
+    so far. Those are the "agreed" trajectories.
+  - **Do not surface a new pair whose disagreement could already be
+    inferred from the agreed set.** If the user already saw a pair
+    "A ≻ B" along some axis (e.g. one outcome-class beats another by
+    a particular feature) and agreed, don't surface another pair
+    that re-instantiates the same axis with near-equivalent
+    trajectories — the user has effectively endorsed that trade-off.
+  - **Prefer pairs that introduce at least one trajectory the user
+    hasn't seen yet**, and that surface a *new axis* of disagreement
+    (a new perspective, a new feature, a finer-grained trade-off).
+  - For lotteries the same idea applies: the user has agreed with the
+    reward's preference between the trajectories used in past
+    lotteries, so a new lottery should explore a different `(C, A, B,
+    p)` shape — e.g. a different bad-event probability that probes
+    risk-aversion at a different point on the curvature.
+
+  Then present the new selection per Steps 2–3.
+
+- **Finish and submit (not reversible)** → follow "Finish and submit"
+  in `CLAUDE.md`: write the submission record, post a confirmation to
+  the web UI (`post --type markdown --content "The reward function is
+  submitted. Session complete."`) plus `set status=done`, and stop.
+
+#### Reward-edit tip box (post when Claude is about to edit the reward)
+
+```bash
+python -m web_ui.cli post --type markdown --content "💡 **Tips for guiding a reward edit**
+- Be concrete: name the term to change, and — if you can — the preference label you want for each shown pair (e.g. \"for pair 2, A ≻ B should become B ≻ A\").
+- You can pin an edit to an outcome: e.g. \"increase this penalty until the preference for pair 2 flips,\" and Claude will solve for the smallest change that produces it."
+```
 
 ## When the user edits the reward and asks you to recheck
 
 Re-run this skill; trajectories on disk are unchanged, so the
-disagreement finder simply re-scores them under the new reward.
+disagreement finder simply re-scores them under the new reward and the
+new comparisons get posted to the web UI.

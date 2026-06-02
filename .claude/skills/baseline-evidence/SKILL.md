@@ -24,18 +24,6 @@ behavior, reward, or trajectory "correct" or "incorrect"** — at most *possibly
 correct/incorrect or "appears aligned/misaligned with what you described."
 (See `CLAUDE.md` for the full tone rules; they apply here too.)
 
-## Eval mode — information barrier
-
-If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation workspace.
-Authoring the reward-maximizing policy and writing the per-trajectory
-descriptions shown to the user must be **spec-blind**: do not read or condition
-on `eval_spec.md`, `eval_scripts/<name>.py`, or any criteria-naming text.
-Delegate those judgment steps to a subagent whose context holds only the env
-semantics, the verified denormalization facts, and the designed reward's
-operational mechanics. Describe trajectories purely by their observed
-behavior/features, never citing the criteria. See "Information barrier" in
-`BASELINE.md` and `CLAUDE.md`.
-
 ## Resolve the workspace
 
 Takes the workspace name as `args` (e.g. `/baseline-evidence hopper`). If
@@ -72,7 +60,7 @@ task text. The file must define **exactly one** policy class (whose name starts
 with `DataCollectionPolicy`) plus `POLICIES = [ThatClass]`, conforming to the
 invariants in `CLAUDE.md`. The class approximates the argmax of the expected
 return under the **current** `designed_reward_fn`, implemented directly with no
-training. In eval mode, delegate this authoring to a spec-blind subagent.
+training.
 
 ### Step 3 — roll out + featurize
 
@@ -125,7 +113,7 @@ snapshot for provenance.
 This is the load-bearing deliverable. The bash output is invisible to the
 user — only what you type into your response is.
 
-**Open the response with these four leading elements, in order** (before any
+**Open the response with these three leading elements, in order** (before any
 trajectory):
 1. A short (≤ 6 lines) **overall read** of what the reward *appears* to
    incentivize, referencing the features the maximizer drove (what the reward
@@ -138,11 +126,6 @@ trajectory):
    features for more detail on these trajectories, or ask to view more
    trajectories." (Keep *may be misaligned* — not "wrong.")
 3. The **feature key** inside a fenced code block.
-4. A **criteria reminder**: "As a reminder, here are the criteria your reward
-   function must encode:" followed by the criteria the reward must encode (the
-   filled reward-design template; in an evaluation workspace, the criteria in
-   `eval_spec.md`, displayed to the human verbatim — human-facing only, never
-   fed to the spec-blind policy/description subagent).
 
 Then, for **every** trajectory the render step returned, in order:
    a. Print its `TRAJECTORY k/N` block **verbatim** inside its own fenced code
@@ -152,12 +135,11 @@ Then, for **every** trajectory the render step returned, in order:
       does:`** line followed by 1-2 sentences describing the behavior purely
       from its features and reward total (e.g. "spends most steps at high
       speed and accumulates a large reward total; the closeness feature stays
-      near zero throughout"). Stay descriptive — never "correct"/"incorrect",
-      and in eval mode never cite the criteria.
+      near zero throughout"). Stay descriptive — never "correct"/"incorrect".
 
 Do not paraphrase or truncate any trajectory block. Do not skip the feature
-key or the criteria reminder. Do not re-introduce round/rollout/policy
-provenance — the render step intentionally anonymizes it.
+key. Do not re-introduce round/rollout/policy provenance — the render step
+intentionally anonymizes it.
 
 ### Step 6 — always close by asking the user what to do next
 
@@ -173,45 +155,21 @@ proceed?"). Do **not** mention command names in the question text.
   reward-maximizing behavior.
 - **Finish and submit (not reversible)** — finalize the current reward.
 
-Before the `AskUserQuestion`, **reprint the criteria the reward must encode**
-immediately above the menu, prefaced by "As a reminder, here are the criteria
-your reward function must encode:" — verbatim from `eval_spec.md` in an
-evaluation workspace, or verbatim from the filled reward-design template at the
-top of `designed_reward_fn.py` otherwise. This is in addition to the criteria
-reminder shown earlier with the trajectory blocks, and is required because the
-menu offers a reward-edit option (see "Criteria reminder above any reward-edit
-menu" in `CLAUDE.md` / `BASELINE.md`). In eval mode the reprint is human-facing
-only and must never reach the spec-blind subagent.
-
 Act on the answer:
 - **Edit the reward function** → ask whether the user wants to make the edit
   themselves or have Claude make it.
   - *Claude makes the edit:* first print the reward-edit tip box (see
-    "Reward-edit tips" in `CLAUDE.md`). **In eval mode, apply the reward-edit
-    gate first** (see "Reward-edit gate" in `CLAUDE.md` / `BASELINE.md`). The
-    gate runs **two checks**: (1) the request must specify a concrete edit
-    (a term, weight, threshold, or functional shape); (2) every clause must
-    read as a reward-mechanics instruction (term, weight, gating condition,
-    functional shape) — **not** a policy-desideratum description of what
-    the policy should do. Clauses that prescribe a reward term are fine
-    even when they reference values/thresholds also named in
-    `eval_spec.md`; clauses that only describe the desired behavior trip
-    Check 2. If either check fails, refuse the **entire** request, quote
-    the offending clause alongside the matching `eval_spec.md` line, and
-    ask the user to rephrase. Only after both checks pass may you modify
-    `designed_reward_fn.py`. Apply edits with `Edit`, show the diff back,
-    then suggest running `/baseline-evidence` to roll out a fresh maximizer
-    under the new reward.
+    "Reward-edit tips" in `CLAUDE.md`), then apply edits with `Edit`, show
+    the diff back, and suggest running `/baseline-evidence` to roll out a
+    fresh maximizer under the new reward.
   - *User edits it themselves:* tell the user the system will wait; when
     they're done they can run `/baseline-evidence` to roll out a fresh maximizer
     under the new reward and see how the behavior changed.
 - **Add another trajectory feature** → ask the user what feature they want (or
   implement the one they named). Add it to
-  `gather_evidence/trajectory_features.py` (in eval mode keep the
-  implementation spec-blind — derive it from env semantics, not the criteria),
-  re-run `runtime.compute_features` over every existing round so all
-  trajectories carry the new feature, then re-present the trajectories
-  (Steps 4–5) with the feature visible.
+  `gather_evidence/trajectory_features.py`, re-run `runtime.compute_features`
+  over every existing round so all trajectories carry the new feature, then
+  re-present the trajectories (Steps 4–5) with the feature visible.
 - **View more trajectories** → select additional trajectories distinct from
   those already shown (Step 4) and present them (Step 5). If the collected
   rollouts are exhausted, re-enter this skill as round k+1 (a fresh maximizer
@@ -222,7 +180,6 @@ Act on the answer:
   the session is complete, and stop. Do not offer further steps or edit the
   reward afterward. Only do this when the user explicitly selects it.
 
-Skipping the four leading elements (overall read, orientation line, feature
-key, criteria reminder), the verbatim trajectory blocks, the per-trajectory
-note, or the closing `AskUserQuestion` is not optional — they are the core
-deliverable.
+Skipping the three leading elements (overall read, orientation line, feature
+key), the verbatim trajectory blocks, the per-trajectory note, or the closing
+`AskUserQuestion` is not optional — they are the core deliverable.

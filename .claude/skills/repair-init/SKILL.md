@@ -6,15 +6,19 @@ description: Steps 2 + 6 of the Automated Reward Repairer. One-time after /repai
 # /repair-init — set up the misalignment-detection scaffolding
 
 This skill is run **once** after `/repair-setup`. It builds the
-trajectory-feature summarizer and the set of stakeholder performance
-metrics that the system uses to detect reward misspecification.
+trajectory-feature summarizer and the set of alternative-perspective
+performance metrics that the system uses to detect reward
+misspecification.
 
 ## Tone for messages to the user
 
-Treat the user as someone who will never read the codebase. Don't mention
-internal file names, directory structure, or boilerplate scripts when
-talking to them. Talk in terms of outcomes — "set up the trajectory
-summary", "identify stakeholder perspectives" — not file paths.
+Treat the user as someone who will never read the codebase. Don't
+mention internal file names, directory structure, or boilerplate scripts
+in anything posted to the website. Talk in terms of outcomes —
+"set up the trajectory summary", "identify other perspectives" — not
+file paths. Do not use the word "stakeholder" in messages posted to
+the user; say "other perspectives" or describe the specific
+perspective.
 
 **Never call any behavior, reward, or trajectory "correct" or
 "incorrect."** At most, frame things as *possibly* correct/incorrect or
@@ -22,26 +26,32 @@ summary", "identify stakeholder perspectives" — not file paths.
 is actually right is the user's call — the system surfaces evidence,
 not verdicts. (See `CLAUDE.md` for the full tone rules.)
 
-## Eval mode — information barrier
+## Web UI is the only user-facing channel
 
-If `<WORKSPACE_DIR>/eval_spec.md` exists, this is an evaluation
-workspace. The features and performance metrics this skill authors must
-be **spec-blind**: do not read or condition on `eval_spec.md`,
-`eval_scripts/<name>.py`, or any criteria-naming text. Delegate the
-authoring to a subagent whose context holds only the env's obs/action
-semantics, the verified denormalization facts, and the designed reward's
-operational mechanics — never the criteria. Metrics must be independent
-stakeholder perspectives justifiable from the environment alone. See
-"Information barrier (eval mode)" in `CLAUDE.md`.
+The web UI was launched by `/repair-setup`. Every message the user
+reads here goes through `python -m web_ui.cli post`; every question
+goes through `python -m web_ui.cli ask`. **Do not** call the
+`AskUserQuestion` tool, and do not narrate to the terminal. See
+`CLAUDE.md` → "Web UI — the user-facing channel" for the full
+reference.
+
+If the server isn't running for some reason (the user invoked
+`/repair-init` without first running `/repair-setup`, etc.), bring it
+up first: `python -m web_ui.cli launch`.
 
 ## Resolve the workspace
 
 The skill takes the workspace name as `args` (e.g. `/repair-init hopper`).
 If `args` is empty, read `.current_workspace` at the repo root; if that
-doesn't exist, tell the user to run `/repair-setup` first.
+doesn't exist, post a message telling the user to run `/repair-setup`
+first and stop.
 
 `WORKSPACE_DIR = workspaces/<WORKSPACE>`. All files this skill writes go
-into `<WORKSPACE_DIR>/...`.
+into `<WORKSPACE_DIR>/...`. Update the UI header:
+
+```bash
+python -m web_ui.cli set workspace=<WORKSPACE> status=running
+```
 
 ## Preconditions
 
@@ -50,26 +60,31 @@ into `<WORKSPACE_DIR>/...`.
   `designed_reward_fn(obs, act, next_obs)` returns a float (not
   `NotImplementedError`).
 
-If either is missing or broken, tell the user to run `/repair-setup` first.
+If either is missing or broken, post a message asking the user to run
+`/repair-setup` first and stop.
 
 ## Before authoring — don't overwrite existing work
 
 `/repair-init` is normally a one-time step, but it may be invoked on a
 workspace where these files already exist. Before authoring either file,
-check whether it is already present:
+check whether it is present:
 
 - `<WORKSPACE_DIR>/gather_evidence/trajectory_features.py`
 - `<WORKSPACE_DIR>/candidate_performance_metrics/performance_metrics.py`
 
-If **either** exists, do not silently overwrite it. Use `AskUserQuestion`
-to ask the user, per existing file, whether to **keep** the existing one
-or **overwrite** it with a freshly authored version. Frame this in plain
-language — "you already have a trajectory summary set up" / "you already
-have stakeholder perspectives set up" — not by filename. Then:
+If **either** exists, do not silently overwrite. Ask the user via the
+web UI, in plain language — "you already have a trajectory summary set
+up" / "you already have other perspectives set up" — not by
+filename. Example:
+
+```bash
+python -m web_ui.cli ask --prompt "A trajectory summary is already set up for this workspace. Keep it, or replace it with a freshly authored one?" \
+    --options '[{"label":"Keep the existing one"},{"label":"Replace it"}]'
+```
 
 - **Keep** → skip authoring that file; leave it untouched (and skip its
   smoke test, since it is unchanged).
-- **Overwrite** → author it fresh as described below.
+- **Replace it** → author it fresh as described below.
 
 If neither file exists, proceed straight to authoring with no prompt.
 
@@ -87,11 +102,12 @@ Must conform to the invariants in `CLAUDE.md`:
   `pretty_print_features(self, features) -> None`.
 - `feature_names` and the list returned by `get_traj_features` must be the
   same length and in the same order.
-- Features can be trajectory-level (e.g. "fraction of steps spent stationary")
-  or transition-aggregates (e.g. "mean action magnitude").
+- Features can be trajectory-level (e.g. "fraction of steps spent
+  stationary") or transition-aggregates (e.g. "mean action magnitude").
 
 Smoke-test after writing (run from the repo root):
-```
+
+```bash
 source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from gather_evidence.trajectory_features import Trajectory2Features; \
@@ -102,6 +118,9 @@ f = Trajectory2Features(); v = f.get_traj_features([(obs,a,next_obs)]*5); \
 print(len(v), '==', len(f.feature_names)); f.pretty_print_features(v)"
 ```
 
+The result is for the agent's verification only — do **not** post the
+raw smoke-test output to the website.
+
 ## Step 6: write `<WORKSPACE_DIR>/candidate_performance_metrics/performance_metrics.py`
 
 Read `prompts/performance_metrics_prompt.md` for the verbatim task text.
@@ -111,23 +130,38 @@ Must conform to the invariants:
 - One or more module-level functions whose names start with
   `performance_metric_`. Signature `(traj) -> float`.
 - Each function's **docstring is one short line** describing the
-  stakeholder perspective ("Energy efficiency: lower action magnitude is
+  alternative perspective ("Energy efficiency: lower action magnitude is
   preferred"). This docstring is what the user sees during pair printing.
 - Pick a count that fits the env — typically 3–6 diverse perspectives.
-  Aim for genuinely different stakeholders, not minor variants of the
+  Aim for genuinely different perspectives, not minor variants of the
   designed reward.
 
-Smoke-test: import the module and call each metric on a random trajectory.
+Smoke-test by importing the module and calling each metric on a random
+trajectory.
 
-## Exit — always tell the user what to run next
+## Step 7: confirm to the user via the web UI
 
-Tell the user, in plain language, that the system is now ready to look
-for possible misalignment. **Always** close with this line (or a very
-close variant):
+Post a short status update naming what was set up — talk in terms of
+outcomes (trajectory summary, other perspectives), never file
+names:
 
-> "To collect evidence of possible misalignment in your reward function,
-> run `/repair-round` next."
+```bash
+python -m web_ui.cli post --type status --content "The trajectory summary and other perspectives are in place."
+```
 
-Do not finish this skill without explicitly naming `/repair-round` as
-the next step. Do not list which files were authored or describe their
-contents.
+## Exit — Continue button that chains to /repair-round
+
+Post a CTA button on the website and invoke the next skill when the
+user clicks it.
+
+```bash
+ANSWER=$(python -m web_ui.cli cta \
+    --prompt "The system is ready to look for possible misalignment." \
+    --label  "Collect evidence of possible misalignment" \
+    --value  "repair-round")
+NEXT=$(printf %s "$ANSWER" | python -c "import json,sys;print(json.load(sys.stdin)['value'])")
+```
+
+Then call the `Skill` tool with `skill="$NEXT"` (i.e. `repair-round`).
+Do not finish the turn without either posting the CTA or handing off
+via the Skill tool. Do not describe which files were authored.

@@ -6,4 +6,9 @@ venv/
 .DS_Store
 workspaces/*/gather_evidence/round_*_trajectories/
 workspaces/*/gather_evidence/round_*_trajectory_features/
+workspaces/*/gather_evidence/round_*_trajectory_videos/
+workspaces/*/viz/
 .current_workspace
+
+# Run logs (SLURM stdout/stderr)
+run_logs/

@@ -4,7 +4,22 @@ from __future__ import annotations
 import os
 import pickle
 import glob
+import re
 from typing import Iterator
+
+
+def video_path_for(traj_path: str) -> str:
+    """Sibling video path for a trajectory pickle.
+
+    `gather_evidence/round_{k}_trajectories/X.pkl`
+        →
+    `gather_evidence/round_{k}_trajectory_videos/X.mp4`
+    """
+    d, fname = os.path.split(traj_path)
+    parent, sub = os.path.split(d)
+    new_sub = re.sub(r"trajectories$", "trajectory_videos", sub)
+    base = os.path.splitext(fname)[0]
+    return os.path.join(parent, new_sub, base + ".mp4")
 
 
 def save_trajectory(path: str, trajectory: list, metadata: dict) -> None:

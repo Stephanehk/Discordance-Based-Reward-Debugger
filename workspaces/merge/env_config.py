@@ -23,10 +23,22 @@ wrapping, downstream consumers can read ``next_obs[0, 0] < 0.5`` to
 detect that the most recent step ended in a crash.
 """
 
+import os
+
+# pygame uses SDL for rendering; silence its audio backend on headless nodes
+# (no audio device → harmless but noisy ALSA warnings on every render call).
+os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
+
 import gymnasium as gym
 import numpy as np
 
 import highway_env  # noqa: F401  (registers the env ids)
+
+
+# Opt into per-step frame capture during rollouts so /repair-preferences can
+# show a video of what actually happened (rather than an after-the-fact replay
+# in a freshly-randomised traffic env). Honoured by runtime/run_round*.py.
+CAPTURE_FRAMES = True
 
 
 OBS_DESCRIPTION = """\
@@ -79,5 +91,8 @@ class _CrashFlagWrapper(gym.Wrapper):
         return obs, reward, terminated, truncated, info
 
 
-def make_env():
-    return _CrashFlagWrapper(gym.make("merge-v0"))
+def make_env(render_mode: str | None = None):
+    kwargs = {}
+    if render_mode is not None:
+        kwargs["render_mode"] = render_mode
+    return _CrashFlagWrapper(gym.make("merge-v0", **kwargs))

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Automated Reward Repairer</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="dot"></div>
+      <span class="brand">Automated Reward Repairer</span>
+    </div>
+    <div class="topbar-right">
+      <span class="muted">workspace</span>
+      <span id="workspace" class="chip">—</span>
+      <span class="muted">·</span>
+      <span id="status" class="chip status">idle</span>
+    </div>
+  </header>
+
+  <div class="page-shell">
+    <main id="feed" class="feed">
+      <div class="empty-state" id="emptyState">
+        <h1>Ready</h1>
+        <p>The pipeline will push messages here as it runs. Trigger a step from your terminal (e.g. <code>/repair-setup</code>).</p>
+      </div>
+      <div id="thinking" class="thinking" aria-live="polite" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="thinking-label">Claude is thinking…</span>
+      </div>
+    </main>
+
+    <aside id="sidebar" class="sidebar" aria-hidden="true">
+      <div id="sidebarKey" class="sidebar-card"></div>
+    </aside>
+  </div>
+
+  <template id="tpl-text">
+    <article class="msg msg-text">
+      <div class="msg-body"></div>
+    </article>
+  </template>
+
+  <template id="tpl-markdown">
+    <article class="msg msg-md">
+      <div class="msg-body md"></div>
+    </article>
+  </template>
+
+  <template id="tpl-status">
+    <article class="msg msg-status">
+      <div class="msg-body"></div>
+    </article>
+  </template>
+
+  <template id="tpl-divider">
+    <hr class="divider" />
+  </template>
+
+  <template id="tpl-feature-key">
+    <div class="key-card">
+      <header class="key-head">
+        <span class="label">Feature key</span>
+      </header>
+      <div class="key-body">
+        <table class="key-table"><tbody></tbody></table>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-code">
+    <article class="msg msg-code">
+      <header class="msg-head">
+        <span class="lang"></span>
+        <span class="caption muted"></span>
+      </header>
+      <pre class="code-block"><code></code></pre>
+    </article>
+  </template>
+
+  <template id="tpl-comparison">
+    <article class="msg msg-cmp">
+      <header class="msg-head">
+        <span class="label"></span>
+      </header>
+      <pre class="cmp-block"></pre>
+      <div class="cmp-viz"></div>
+      <div class="cmp-why muted"></div>
+    </article>
+  </template>
+
+  <template id="tpl-lottery">
+    <article class="msg msg-cmp msg-lottery">
+      <header class="msg-head">
+        <span class="label"></span>
+      </header>
+      <pre class="cmp-block"></pre>
+      <div class="lot-viz">
+        <div class="lot-row lot-ab"></div>
+        <div class="lot-row lot-c"></div>
+      </div>
+      <div class="cmp-why muted"></div>
+    </article>
+  </template>
+
+  <template id="tpl-image">
+    <article class="msg msg-img">
+      <div class="caption muted"></div>
+      <img alt="" />
+    </article>
+  </template>
+
+  <template id="tpl-video">
+    <article class="msg msg-vid">
+      <div class="caption muted"></div>
+      <video controls preload="metadata"></video>
+    </article>
+  </template>
+
+  <template id="tpl-question">
+    <article class="msg msg-q">
+      <header class="msg-head">
+        <span class="label">Question</span>
+        <span class="qstatus muted"></span>
+      </header>
+      <div class="q-prompt"></div>
+      <div class="q-body"></div>
+    </article>
+  </template>
+
+  <template id="tpl-cta">
+    <article class="msg msg-cta">
+      <div class="cta-prompt muted"></div>
+      <button type="button" class="btn btn-cta"></button>
+    </article>
+  </template>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

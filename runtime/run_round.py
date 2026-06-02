@@ -13,9 +13,9 @@ import os
 import sys
 
 from runtime.workspace import add_workspace_arg, activate
-from runtime.env_loader import load_env, load_env_config
-from runtime.rollout import rollout_policy
-from runtime.trajectory_io import save_trajectory
+from runtime.env_loader import load_env, load_env_config, capture_frames_enabled
+from runtime.rollout import rollout_one_episode
+from runtime.trajectory_io import save_trajectory, video_path_for
 from runtime.compute_features import compute_features_for_round
 
 
@@ -36,6 +36,9 @@ def discover_policies(round_k: int) -> list[type]:
     return classes
 
 
+MAX_TOTAL_ROLLOUTS = 100
+
+
 def pick_rollouts_per_policy(max_steps: int, override: int | None) -> int:
     if override is not None:
         return override
@@ -44,6 +47,14 @@ def pick_rollouts_per_policy(max_steps: int, override: int | None) -> int:
     if max_steps <= 1000:
         return 20
     return 10
+
+
+def cap_rollouts(n_policies: int, n_per: int) -> int:
+    """Clamp so that n_policies * n_per <= MAX_TOTAL_ROLLOUTS."""
+    if n_policies <= 0:
+        return n_per
+    capped = min(n_per, max(1, MAX_TOTAL_ROLLOUTS // n_policies))
+    return capped
 
 
 def main():
@@ -66,19 +77,26 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
 
     policy_classes = discover_policies(k)
+    n_per = cap_rollouts(len(policy_classes), n_per)
+    capture = capture_frames_enabled()
     print(f"[run_round] round={k}  policies={len(policy_classes)}  "
-          f"rollouts/policy={n_per}  max_steps={max_steps}")
+          f"rollouts/policy={n_per}  total={len(policy_classes) * n_per}  "
+          f"(cap={MAX_TOTAL_ROLLOUTS})  max_steps={max_steps}  "
+          f"capture_frames={capture}")
 
-    env = load_env()
+    env = load_env(render_mode=("rgb_array" if capture else None))
     try:
         for policy_cls in policy_classes:
             policy = policy_cls(env)
             cls_name = policy_cls.__name__
             print(f"[run_round]   rolling out {cls_name} ...")
-            trajs = rollout_policy(env, policy, n_episodes=n_per, max_steps=max_steps)
-            for i, traj in enumerate(trajs):
-                path = os.path.join(out_dir, f"{cls_name}__traj_{i:03d}.pkl")
-                save_trajectory(path, traj, {
+            for i in range(n_per):
+                traj_path = os.path.join(out_dir, f"{cls_name}__traj_{i:03d}.pkl")
+                video_path = video_path_for(traj_path) if capture else None
+                traj = rollout_one_episode(
+                    env, policy, max_steps, record_video_path=video_path,
+                )
+                save_trajectory(traj_path, traj, {
                     "round": k,
                     "policy_class": cls_name,
                     "rollout_index": i,

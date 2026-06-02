@@ -1,13 +1,35 @@
 """Env loading + gym/gymnasium compatibility shims."""
 from __future__ import annotations
 
+import inspect
+
 from typing import Any, Tuple
 
 
-def load_env():
-    """Build the env via the user's env_config.make_env()."""
+def load_env(*, render_mode: str | None = None, seed: int | None = None):
+    """Build the env via the user's env_config.make_env().
+
+    Passes `render_mode` and/or `seed` to make_env only if its signature
+    accepts them — preserves backward compat with workspaces whose make_env
+    takes no kwargs.
+    """
     from env_config import make_env
-    return make_env()
+    try:
+        params = inspect.signature(make_env).parameters
+    except (TypeError, ValueError):
+        params = {}
+    kwargs = {}
+    if render_mode is not None and "render_mode" in params:
+        kwargs["render_mode"] = render_mode
+    if seed is not None and "seed" in params:
+        kwargs["seed"] = seed
+    return make_env(**kwargs)
+
+
+def capture_frames_enabled() -> bool:
+    """True if the active workspace opts into per-step frame capture."""
+    import env_config
+    return bool(getattr(env_config, "CAPTURE_FRAMES", False))
 
 
 def load_env_config() -> dict:

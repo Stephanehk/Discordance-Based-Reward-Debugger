@@ -9,10 +9,10 @@
 - `env_config.py` (`make_env()`, `OBS_DESCRIPTION`, `ACTION_DESCRIPTION`).
 - `designed_reward_fn.py` — what the reward credits/penalizes. This is the
   thing whose flaws we want to surface.
-- `candidate_performance_metrics/performance_metrics.py` — the stakeholder
-  metrics that `/repair-preferences` will later use to detect
-  disagreements with the designed reward. Useful as one source of policy
-  ideas (see Guidance below), but not the only one.
+- `candidate_performance_metrics/performance_metrics.py` — the
+  alternative-perspective metrics that `/repair-preferences` will later
+  use to detect disagreements with the designed reward. Useful as one
+  source of policy ideas (see Guidance below), but not the only one.
 - `gather_evidence/trajectory_features.py` — the features through which
   the user reads trajectories. Behaviors that vary along these features
   are more legible.
@@ -62,11 +62,11 @@ and construct a policy that will score *very differently* on it than
 under `designed_reward_fn`. Two flavors:
 
 - **High designed reward, low metric.** A policy that scores well under
-  `designed_reward_fn` while doing badly on a stakeholder metric — the
-  classic Goodhart / reward-exploit case.
+  `designed_reward_fn` while doing badly on one of the other metrics —
+  the classic Goodhart / reward-exploit case.
 - **Low designed reward, high metric.** A policy that the designed
-  reward dislikes, but that a stakeholder metric considers good —
-  surfaces cases where the reward under-credits genuinely desirable
+  reward dislikes, but that another perspective's metric considers good
+  — surfaces cases where the reward under-credits genuinely desirable
   behavior.
 
 Name and document such policies by the

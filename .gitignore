@@ -12,3 +12,7 @@ workspaces/*/viz/
 
 # Run logs (SLURM stdout/stderr)
 run_logs/
+
+# Web UI server runtime state
+web_ui/server.log
+web_ui/.server.pid

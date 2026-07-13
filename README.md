@@ -137,8 +137,6 @@ currently says.
 
 ## Methods
 
-![Method overview](docs/method_diagram.png)
-
 The premise: a misspecified reward gives itself away by *ranking two
 concrete runs the wrong way round*. So the system (1) collects runs
 diverse enough to contain such a ranking, (2) scores every run from
@@ -302,7 +300,7 @@ automated_reward_repairer/
 │
 ├── web_ui/                    # the local page: FastAPI server + the CLI skills post through
 ├── slurm_scripts/             # cluster rollouts for slow environments
-├── docs/method_diagram.mmd    # source of the diagram above
+├── docs/method_diagram.mmd    # diagram of the whole method (Mermaid source)
 │
 └── workspaces/<name>/         # everything about one environment + one reward
     ├── env_config.py                    # make_env(), obs/action descriptions, horizon

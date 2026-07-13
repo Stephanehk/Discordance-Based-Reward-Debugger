@@ -1,159 +1,150 @@
-"""Designed reward for the robosuite Wipe task.
+"""Repaired reward for the robosuite Wipe task (Panda arm, OSC_POSE control).
 
-Pulled verbatim from robosuite's own default shaped reward for the
-``Wipe`` environment (``robosuite.environments.manipulation.wipe.Wipe.reward``)
-with the constants from ``DEFAULT_WIPE_CONFIG``. This is the initial
-reward to repair — every weight and term below is editable.
+The agent controls a Panda arm holding a wiping pad and must clean small
+"dirt" markers off a table over a 500-step episode.
 
-The per-step reward components are appended to the observation by
-``env_config._WipeRewardEnv``; see ``OBS_DESCRIPTION`` for the trailing
-10-slot layout. ``designed_reward_fn`` reads those slots and combines
-them into the env's default formula:
+------------------------------------------------------------------------
+OBSERVATION (1-D float32 vector, length = proprio_dim + 10)
+------------------------------------------------------------------------
+Trailing 10 channels carry per-step reward components (extracted from sim
+internals at step time). Index them off the END of the vector:
+  next_obs[-10] = total_wiped         - cumulative # markers wiped so far
+  next_obs[ -9] = new_wiped           - # markers wiped on this step
+  next_obs[ -8] = mean_distance       - mean dist from wiper to remaining dirt
+  next_obs[ -7] = has_gripper_contact - 1.0 iff wiper is touching the table
+  next_obs[ -6] = ncon                - # of active MuJoCo contacts
+  next_obs[ -5] = total_force_ee      - max end-effector force magnitude (N)
+  next_obs[ -4] = mean_ee_acc         - mean |end-effector acceleration|
+  next_obs[ -3] = collision_or_qlim   - 1.0 if arm collided / hit joint limit
+  next_obs[ -2] = num_markers         - constant: total dirt markers spawned
+  next_obs[ -1] = horizon             - constant: episode horizon (500)
 
-  - If the arm collided with the table or hit a joint limit this step,
-    the per-step reward is clamped to ``ARM_LIMIT_COLLISION_PENALTY``
-    and no other terms apply.
+------------------------------------------------------------------------
+WHAT CHANGED vs. the robosuite default shaped reward, and why
+------------------------------------------------------------------------
+The default shaped Wipe reward paid two large *per-step proxy* terms that
+accrue every step regardless of whether any dirt is removed:
 
-  - Otherwise:
-      + UNIT_WIPED_REWARD for every dirt marker wiped on this step.
-      + DISTANCE_MULTIPLIER * (1 - tanh(DISTANCE_TH_MULTIPLIER * d))
-        reaching reward (only while dirt remains; d = mean distance
-        from the wiper to the remaining markers).
-      + WIPE_CONTACT_REWARD when the wiper is touching the table.
-      - EXCESS_FORCE_PENALTY_MUL * total_force_ee when the end-effector
-        force exceeds PRESSURE_THRESHOLD_MAX (otherwise, if it exceeds
-        PRESSURE_THRESHOLD with > 1 sim contact, a small force-bonus
-        applies; with > 50 contacts there is an additional bonus).
-      - EE_ACCEL_PENALTY * mean |end-effector acceleration|.
-      + TASK_COMPLETE_REWARD if all markers have been wiped.
+  * a distance-shaping term  DISTANCE_MULTIPLIER * (1 - tanh(k * mean_dist))
+    — up to +5/step just for hovering the pad near the remaining dirt, and
+  * a press-into-table bonus  (contact + 0.01*force, +extra when ncon>50)
+    — paid for keeping the pad pressed on the table.
 
-The unnormalised sum is then scaled by the env's reward-normalisation
-factor (``HORIZON / (num_markers * UNIT_WIPED_REWARD + HORIZON *
-(WIPE_CONTACT_REWARD + TASK_COMPLETE_REWARD))``), matching the env's
-own normalisation so per-step magnitudes stay comparable to what the
-underlying robosuite ``step`` returns.
+Because both accrue without cleaning, a policy that gently rests / drifts
+on the table can bank more reward than one that actually removes dirt.
+That is exactly what the shown comparisons exposed: resting near the dirt
+(0 cleaned) outscoring a real 22-marker wipe; a 25-marker gentle press
+outscoring a 47-marker sweep; a 38-marker gentle run outscoring a
+53-marker sweep; and four lotteries where a certain low/zero-cleaning
+trajectory was preferred over a gamble that cleans most of the table.
+
+This repaired reward makes **actual dirt removal the dominant driver** by
+removing the two farmable proxy terms. It keeps:
+  * the per-marker cleaning reward (the true outcome),
+  * the collision / joint-limit gate,
+  * the excess-force penalty (so genuinely over-forceful wiping is still
+    discouraged — this is what keeps a gentle equal-cleaning wipe ranked
+    above a high-force one), and
+  * the task-completion bonus.
+
+The end-effector acceleration penalty is retained with its original
+weight (0 by default) so the structure is unchanged there.
+------------------------------------------------------------------------
 """
 
 import numpy as np
 
+# Reward weights, pulled straight from robosuite's default Wipe config.
+try:
+    from robosuite.environments.manipulation.wipe import DEFAULT_WIPE_CONFIG as _CFG
+except Exception:  # pragma: no cover
+    _CFG = {
+        "arm_limit_collision_penalty": -10.0,
+        "wipe_contact_reward": 0.01,
+        "unit_wiped_reward": 50.0,
+        "ee_accel_penalty": 0.0,
+        "excess_force_penalty_mul": 0.05,
+        "distance_multiplier": 5.0,
+        "distance_th_multiplier": 5.0,
+        "pressure_threshold": 0.5,
+        "pressure_threshold_max": 60.0,
+        "num_markers": 100,
+    }
 
-# Weights — DEFAULT_WIPE_CONFIG values from robosuite's Wipe env.
-ARM_LIMIT_COLLISION_PENALTY = -10.0  # per-step penalty when the arm collides
-                                     # with the table or saturates a joint limit;
-                                     # nullifies all other reward terms this step.
-WIPE_CONTACT_REWARD          =  0.01 # per-step bonus when the wiper is touching
-                                     # the table (encourages staying on-surface).
-UNIT_WIPED_REWARD            = 600.0 # per dirt marker cleaned this step.
-                                     # Raised from the env's default of 50 in two
-                                     # passes. The 50→75 bump fixed the Goodhart
-                                     # where 0–3-wipe pulsed trajectories beat 12–
-                                     # 16-wipe ones. After a fresh round surfaced
-                                     # zero-motion 500-step trajectories scoring
-                                     # +10 reward while real low-yield cleaning
-                                     # earned only +5–7, this second bump (75→600)
-                                     # is the smallest weight that flips both that
-                                     # zero-motion-beats-4-wipes preference *and*
-                                     # the associated lottery where a 5% chance of
-                                     # real cleaning beats a sure 4-marker pass.
-                                     # The lottery flip in particular is what
-                                     # requires the multiplier this high — the
-                                     # 95%-idle branch is reward-inflated and only
-                                     # dominates the lottery up to U ≈ 488.
-EE_ACCEL_PENALTY             =  0.0  # multiplier on mean |EE acceleration|;
-                                     # zero in the default config.
-EXCESS_FORCE_PENALTY_MUL     =  0.05 # per-N penalty when force exceeds the
-                                     # safe upper bound (PRESSURE_THRESHOLD_MAX).
-DISTANCE_MULTIPLIER          =  5.0  # max reaching reward when the wiper sits
-                                     # directly on the dirt centroid.
-DISTANCE_TH_MULTIPLIER       =  5.0  # sharpness of the tanh inside the
-                                     # reaching reward (higher = tighter falloff).
+ARM_LIMIT_COLLISION_PENALTY = float(_CFG["arm_limit_collision_penalty"])
+WIPE_CONTACT_REWARD = float(_CFG["wipe_contact_reward"])
+UNIT_WIPED_REWARD = float(_CFG["unit_wiped_reward"])
+EE_ACCEL_PENALTY = float(_CFG["ee_accel_penalty"])
+EXCESS_FORCE_PENALTY_MUL = float(_CFG["excess_force_penalty_mul"])
+PRESSURE_THRESHOLD_MAX = float(_CFG["pressure_threshold_max"])
 
-# Force thresholds (Newtons) — robosuite Wipe defaults.
-PRESSURE_THRESHOLD     =  0.5
-PRESSURE_THRESHOLD_MAX = 60.0
-
-# Task-complete bonus formula from the env: encourages finishing over
-# loitering at maximum contact reward for the whole horizon.
+# task_complete_reward exactly as computed in Wipe.__init__.
 TASK_COMPLETE_REWARD = UNIT_WIPED_REWARD * (WIPE_CONTACT_REWARD + 0.5)
 
-# If True, scale the per-step reward by the env's normalisation factor so
-# the totals are comparable to what robosuite's own ``step`` returns.
-APPLY_REWARD_NORMALIZATION = True
+# env_config builds the env with reward_scale=1.0.
 REWARD_SCALE = 1.0
 
 
-# ----- Layout of the appended reward-component channels in obs ---------------
-# Must match ``env_config._WipeRewardEnv._reward_components``.
-IDX_TOTAL_WIPED        = -10
-IDX_NEW_WIPED          = -9
-IDX_MEAN_DISTANCE      = -8
-IDX_HAS_CONTACT        = -7
-IDX_NCON               = -6
-IDX_TOTAL_FORCE_EE     = -5
-IDX_MEAN_EE_ACC        = -4
-IDX_COLLISION_OR_QLIM  = -3
-IDX_NUM_MARKERS        = -2
-IDX_HORIZON            = -1
-# -----------------------------------------------------------------------------
-
-
 def designed_reward_fn(obs, act, next_obs) -> float:
-    """Return the per-step designed reward for one (obs, act, next_obs) step."""
+    """Repaired Wipe reward: cleaning-dominant, no farmable proxy terms.
+
+    Per non-colliding step the reward is
+        UNIT_WIPED_REWARD * new_wiped                 # true outcome (dominant)
+      + WIPE_CONTACT_REWARD  if in contact            # tiny, negligible
+      - EXCESS_FORCE_PENALTY_MUL * force  if force>60 # discourage over-forcing
+      - EE_ACCEL_PENALTY * mean_ee_acc                # weight 0 by default
+      + TASK_COMPLETE_REWARD  once all markers wiped
+    A collision / joint-limit hit replaces the whole step with the fixed
+    penalty, as in the original. The distance-shaping and press-into-table
+    bonuses of the default reward are intentionally omitted.
+    """
     s = np.asarray(next_obs, dtype=np.float64)
 
-    # If the arm collided with the table or hit a joint limit, the env
-    # returns ``arm_limit_collision_penalty`` for the step and discards
-    # every other component. Mirror that branch.
-    if s[IDX_COLLISION_OR_QLIM] > 0.5:
-        unnormalised = ARM_LIMIT_COLLISION_PENALTY
+    total_wiped = s[-10]
+    new_wiped = s[-9]
+    has_gripper_contact = s[-7] > 0.5
+    ncon = s[-6]
+    total_force_ee = s[-5]
+    mean_ee_acc = s[-4]
+    collision_or_qlim = s[-3] > 0.5
+    num_markers = s[-2]
+    horizon = s[-1]
+
+    reward = 0
+
+    # Collisions / joint-limit hits zero out all other reward this step.
+    if collision_or_qlim:
+        reward = ARM_LIMIT_COLLISION_PENALTY
     else:
-        new_wiped       = float(s[IDX_NEW_WIPED])
-        total_wiped     = float(s[IDX_TOTAL_WIPED])
-        mean_distance   = float(s[IDX_MEAN_DISTANCE])
-        has_contact     = s[IDX_HAS_CONTACT] > 0.5
-        ncon            = float(s[IDX_NCON])
-        total_force_ee  = float(s[IDX_TOTAL_FORCE_EE])
-        mean_ee_acc     = float(s[IDX_MEAN_EE_ACC])
-        num_markers     = float(s[IDX_NUM_MARKERS])
+        # Reward each dirt marker actually removed this step (the true outcome).
+        reward += UNIT_WIPED_REWARD * new_wiped
 
-        unnormalised = 0.0
+        # Tiny flat contact reward (kept from the default; negligible).
+        if ncon != 0 and has_gripper_contact:
+            reward += WIPE_CONTACT_REWARD
 
-        # +UNIT_WIPED_REWARD per dirt marker cleaned during this step.
-        unnormalised += UNIT_WIPED_REWARD * new_wiped
-
-        # Reaching reward — only while dirt remains.
-        if total_wiped < num_markers:
-            unnormalised += DISTANCE_MULTIPLIER * (
-                1.0 - np.tanh(DISTANCE_TH_MULTIPLIER * mean_distance)
-            )
-
-        # Wiper-on-table contact bonus.
-        if ncon != 0 and has_contact:
-            unnormalised += WIPE_CONTACT_REWARD
-
-        # Force-related terms (excessive-force penalty OR press-down bonus).
+        # Penalty for excessive end-effector force. Over-forceful wiping is
+        # still discouraged, which is what keeps a gentle wipe ranked above a
+        # high-force one at equal cleaning. (No press-into-table bonus below
+        # the threshold — that proxy is removed.)
         if total_force_ee > PRESSURE_THRESHOLD_MAX:
-            unnormalised -= EXCESS_FORCE_PENALTY_MUL * total_force_ee
-        elif total_force_ee > PRESSURE_THRESHOLD and ncon > 1:
-            unnormalised += WIPE_CONTACT_REWARD + 0.01 * total_force_ee
-            if ncon > 50:
-                unnormalised += 10.0 * WIPE_CONTACT_REWARD
+            reward -= EXCESS_FORCE_PENALTY_MUL * total_force_ee
 
-        # Smoothness penalty (zero in the default config).
-        unnormalised -= EE_ACCEL_PENALTY * mean_ee_acc
+        # Penalize large accelerations (weight 0 by default).
+        reward -= EE_ACCEL_PENALTY * mean_ee_acc
 
-        # Task-complete bonus if the table is now clean.
+        # Final bonus if the whole table is clean.
         if total_wiped >= num_markers:
-            unnormalised += TASK_COMPLETE_REWARD
+            reward += TASK_COMPLETE_REWARD
 
-    if APPLY_REWARD_NORMALIZATION:
-        horizon = float(s[IDX_HORIZON])
-        num_markers = float(s[IDX_NUM_MARKERS])
-        denom = (
-            num_markers * UNIT_WIPED_REWARD
-            + horizon * (WIPE_CONTACT_REWARD + TASK_COMPLETE_REWARD)
-        )
-        norm = horizon / denom if denom > 0 else 1.0
-        return float(REWARD_SCALE * norm * unnormalised)
+    # Normalize per-step rewards by the theoretical best episode return, exactly
+    # as the env does. (Distance/press terms are gone from the numerator above
+    # but the normalization constant is unchanged, matching the env's formula.)
+    reward_normalization_factor = horizon / (
+        num_markers * UNIT_WIPED_REWARD
+        + horizon * (WIPE_CONTACT_REWARD + TASK_COMPLETE_REWARD)
+    )
+    if REWARD_SCALE:
+        reward *= REWARD_SCALE * reward_normalization_factor
 
-    return float(REWARD_SCALE * unnormalised)
+    return float(reward)

@@ -9,6 +9,9 @@
 - `env_config.py` (`make_env()`, `OBS_DESCRIPTION`, `ACTION_DESCRIPTION`).
 - `designed_reward_fn.py` — what the reward credits/penalizes. This is the
   thing whose flaws we want to surface.
+- `.repair_history/_reward_analysis.md` — the reward decomposition: the
+  per-term breakdown and the exploit hypotheses `H1, H2, …` your policies
+  must make occur.
 - `candidate_performance_metrics/performance_metrics.py` — the
   alternative-perspective metrics that `/repair-preferences` will later
   use to detect disagreements with the designed reward. Useful as one
@@ -55,6 +58,16 @@ informative strategies, and a good round usually mixes a few of them.
 Use whichever fits the env, the reward, and what prior rounds have
 already covered:
 
+**Required in every round** (these are not optional among the strategies
+below):
+1. A policy that **maximizes the current `designed_reward_fn`**.
+2. At least one **Strategy B exploit probe** per still-untested exploit
+   hypothesis `H1, H2, …` in `_reward_analysis.md` — a policy that
+   decouples a rewarded proxy from the true outcome it stands in for.
+   Name and document each by the term and hypothesis id it targets.
+
+Strategies A, C, and D below are optional additions on top of those two.
+
 ### Strategy A — Target a performance metric
 
 Pick a specific metric in `candidate_performance_metrics/performance_metrics.py`
@@ -75,17 +88,30 @@ metric they target and the direction of disagreement, e.g.
 *"High designed reward, low smoothness metric — maximises the primary
 objective while ignoring control-smoothness."*
 
-### Strategy B — Directly target flaws in the designed reward
+### Strategy B — Directly target flaws in the designed reward (required)
 
-Read `designed_reward_fn.py` and the filled reward-design template, then
-construct policies that probe specific suspected flaws — independent of
-any one metric. Examples:
+Work from the reward decomposition (`_reward_analysis.md`) and the code
+body of `designed_reward_fn.py`. For each exploit hypothesis `H1, H2, …`
+not yet exercised by prior rounds, construct a policy that makes it
+*occur*. The most informative kind, and the one to reach for first:
 
-- **Reward exploits / Goodharting.** Maximize one rewarded term over all others, exploit dense terms while ignoring sparse ones, accumulate
+- **Decouple a proxy from its true outcome.** Find a term that rewards a
+  proxy for what the user actually wants — any quantity the reward credits
+  that is correlated with the goal but not identical to it — and write a
+  policy that **drives that proxy term high while never achieving the true
+  outcome it stands in for**. This is the case that most reliably exposes
+  misspecification.
+- **Reward exploits / Goodharting.** Maximize one rewarded term over all
+  others, exploit dense terms while ignoring sparse ones, accumulate
   small per-step rewards via behavior the user didn't envision.
 - **Specification-gap behaviors.** Achieve outcomes the user listed
   while violating *un*-listed common-sense norms (excessive jitter,
   destructive side effects, near-misses with avoided outcomes).
+
+Name and document each policy by the reward term and hypothesis id it
+targets, e.g. a class whose docstring reads
+*"H[n]: drives [proxy term] high while never achieving [true outcome] —
+decouples the proxy from task success."*
 
 ### Strategy C — Cover unexplored parts of the state space
 

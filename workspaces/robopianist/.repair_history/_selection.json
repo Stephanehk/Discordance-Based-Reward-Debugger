@@ -1,0 +1,38 @@
+{
+  "pairs": [
+    {
+      "a": "T025",
+      "b": "T035",
+      "characteristics": ["any_false_press_rate", "key_f1", "false_press_count", "idle_rate", "mean_hand_power"],
+      "note": "CONFOUND-FREE flagship: both trajectories spend almost no energy (power 1.1 vs 8.9), so energy is NOT the driver. The reward still prefers the do-nothing hover (+752) over the trajectory that engages the keys in time with the song (+659). The only reason: the hover banks the free 0.5/step no-wrong-key credit on all 451 steps, while the engager forfeits it on the ~33% of steps it actually plays -- and gains almost nothing (F1 0.01) for doing so. The reward pays more to never touch the piano than to play it."
+    },
+    {
+      "a": "T027",
+      "b": "T029",
+      "characteristics": ["any_false_press_rate", "false_press_count", "idle_rate", "mean_hand_power", "key_f1"],
+      "note": "Reward prefers the still hover (+751) over a low-energy single-hand attempt that engages the keys in time (+671). Even with negligible energy difference (1.1 vs 4.6) and no collisions, the reward gives zero credit for engaging and simply docks the no-wrong-key credit whenever the hand touches a key."
+    },
+    {
+      "a": "T021",
+      "b": "T033",
+      "characteristics": ["any_false_press_rate", "false_press_count", "key_f1", "idle_rate", "mean_fingering_dist"],
+      "note": "Hovering the fingers just ABOVE the keys (never pressing) scores higher (+746) than actually pressing them in time with the song (+651). Proximity-without-playing beats real engagement -- the reward rewards looking like you might play more than playing."
+    }
+  ],
+  "lotteries": [
+    {
+      "c": "T035",
+      "a": "T025",
+      "b": "T005",
+      "p": 0.78,
+      "justification": "New shape (certain option is a low-energy timed key-engager, never used as C before). Reward returns: C=TimedPress +659.49, A=Neutral hover +752.07 (good branch), B=Slam +293.12 (bad branch). Indifference p* = (659.49-293.12)/(752.07-293.12) = 0.798. At p=0.78 the lottery EV = 0.78*752.07 + 0.22*293.12 = 651.1, so the reward prefers certain C by ~8. A person is offered: keep a trajectory that quietly plays the keys in rhythm, or gamble on 78% pure stillness vs 22% keyboard-mashing. The reward is nearly indifferent; a musician would likely keep the engager, a minimize-mistakes view might gamble on the stillness."
+    },
+    {
+      "c": "T029",
+      "a": "T025",
+      "b": "T033",
+      "p": 0.18,
+      "justification": "New shape -- all three options are low-energy and the return range is tight, probing risk attitude at very low good-branch probability. Reward returns: C=RightHandTimedPress +670.79, A=Neutral hover +752.07 (good branch), B=TimedPress (two hands) +651.49 (bad branch). Indifference p* = (670.79-651.49)/(752.07-651.49) = 0.192. At p=0.18 the lottery EV = 0.18*752.07 + 0.82*651.49 = 669.6, so the reward prefers certain C by ~1.2 -- essentially a coin-toss-level preference. Certain single-hand engagement vs an 18%/82% gamble between doing nothing and two-hand engagement. The reward resolves a near-tie purely on expected return, where a person might have a firm preference about which style of (non-)playing they want."
+    }
+  ]
+}

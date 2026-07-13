@@ -4,7 +4,9 @@ Wraps `pandemic_simulator.environment.PandemicGymEnv`, a gymnasium env in
 which the agent is a public-health authority choosing, once per simulated
 day, how strict the population-wide COVID regulations should be. The
 underlying agent-based simulator advances a town of people through an
-infection model and reports back testing-based summaries of the outbreak.
+infection model and reports back the true global infection summary of the
+outbreak (the actual share of the population in each infection category,
+including deaths).
 """
 
 import sys
@@ -42,7 +44,7 @@ def make_env():
     The agent picks one of five regulation stages (0 = no restrictions ...
     4 = full lockdown) each simulated day; the simulator runs a day of
     person-to-person contact under that regulation and returns the updated
-    testing summary as the observation.
+    true infection summary as the observation.
     """
     ps.init_globals(seed=next(_seed_counter))
     env = PandemicGymEnv.from_config(
@@ -66,9 +68,13 @@ def make_env():
 # Indices 3-7 and 8-12 are each a 5-way split over infection categories in the
 # fixed order [critical, dead, infected, none, recovered], reported as the
 # proportion of the town's population in each category (the categories sum to 1).
+# These are the TRUE infection summary (the simulator's ground-truth population
+# state), so the dead fields reflect actual mortality, not testing detections.
 OBS_DESCRIPTION = """\
 Observation: numpy array of shape (history, 1, 13). Use the latest row,
-obs[-1, 0], a length-13 vector:
+obs[-1, 0], a length-13 vector. The infection categories report the TRUE
+population state (ground-truth shares, not testing-detected counts), so the
+dead fields reflect actual mortality:
 
   [0]  time_day           - fraction of a year elapsed ((day*24 + hour)/(365*24)),
                             so it grows ~0.0027 per simulated day.

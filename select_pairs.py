@@ -416,9 +416,12 @@ def _do_render(records, metrics, selection_path: str, workspace_dir: str) -> int
         for rank, cand in enumerate(selected_pairs, 1):
             rec_a = records[cand.a_idx]
             rec_b = records[cand.b_idx]
+            # Optional per-pair ranking of characteristics (short_names, most→
+            # least informative about why the reward's preference may be wrong).
+            order = pairs_entries[rank - 1].get("characteristics")
             content = _capture_and_echo(
                 fip._print_pair_preference_labels,
-                rank, total, rec_a, rec_b, cand.disagreements, 0.0,
+                rank, total, rec_a, rec_b, cand.disagreements, 0.0, order,
             )
             viz_items: list[dict] = []
             if viz_mod is not None:
@@ -435,13 +438,14 @@ def _do_render(records, metrics, selection_path: str, workspace_dir: str) -> int
                         print(f"    Trajectory A: {_ws_display_path(workspace_dir, a_saved)}")
                     if b_saved:
                         print(f"    Trajectory B: {_ws_display_path(workspace_dir, b_saved)}")
-                # A is always the reward-preferred side (render orients it so).
+                # A is always the reward-preferred side (render orients it so),
+                # so it is captioned as the designed reward's preferred trajectory.
                 if a_saved:
                     viz_items.append({"src": _viz_url(ws_name, a_saved),
-                                      "caption": "Trajectory A", "preferred": True})
+                                      "caption": "Designed reward function's preferred trajectory"})
                 if b_saved:
                     viz_items.append({"src": _viz_url(ws_name, b_saved),
-                                      "caption": "Trajectory B"})
+                                      "caption": "The alternative trajectory"})
             cards.append({
                 "kind": "pair", "rank": rank, "label": f"PAIR {rank}/{total}",
                 "layout": None, "content": content, "viz": viz_items,

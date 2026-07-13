@@ -1,0 +1,25 @@
+{
+  "pairs": [
+    {
+      "a": "T109",
+      "b": "T076",
+      "characteristics": ["mean_descent_rate", "engine_on_frac", "final_horiz_dist", "mean_tilt"],
+      "note": "New trajectories: T109 is one of the reward's actual positive-scored favorites (fast fall ~94 m/s then a brief late brake), yet it still races toward the ground far faster than T076, the genuinely gentlest full descent (~32 m/s all the way). The reward scores T109 ~1230 points better. Even the reward's best-liked behavior is not the careful descent a person might want."
+    },
+    {
+      "a": "T091",
+      "b": "T087",
+      "characteristics": ["engine_on_frac", "mean_descent_rate", "final_horiz_dist", "mean_tilt"],
+      "note": "New trajectories at the engine-effort extreme: T091 fires its engine only 8% of the time (a brief late brake after a fast fall) and lands close, while T087 burns its engine 88% of the way down to descend under control — and is scored ~970 points worse. The reward penalizes sustained powered control."
+    }
+  ],
+  "lotteries": [
+    {
+      "c": "T078",
+      "a": "T093",
+      "b": "T088",
+      "p": 0.42,
+      "justification": "A fresh-curvature lottery (p* = 0.37, distinct from the earlier lotteries' 0.08, 0.65, 0.75). C = T078 is a certain engine-controlled gentle-ish descent (reward -980.9; ~34 m/s, ends 59 m from pad). Good branch A = T093 (reward +45.1; fast fall then a hard late brake, lands ~5 m from pad); bad branch B = T088 (reward -1584.4; a powered attempt that drifts to ~123 m). p* = (R_C - R_B)/(R_A - R_B) = (-980.93 + 1584.41)/(45.14 + 1584.41) = 0.370. I set p = 0.42, just above p*, so the designed reward slightly prefers the 42%/58% gamble (EV -900 > -981) — it would rather gamble than accept a certain controlled descent. A person who values a predictable controlled landing would likely keep the certain descent C, a reversal at a new point on the risk curve."
+    }
+  ]
+}

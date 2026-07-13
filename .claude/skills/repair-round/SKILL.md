@@ -22,12 +22,11 @@ website. Talk about what the system is **doing** in plain language
 tool calls.
 
 **Never call any behavior, reward, or trajectory "correct" or
-"incorrect."** At most, frame things as *possibly* correct/incorrect or
-"appears aligned/misaligned with another perspective's view." Whether
-something is actually right is the user's call. (See `CLAUDE.md` for
-the full tone rules.) Do not use the word "stakeholder" in messages
-posted to the user — say "other perspectives" or describe the
-specific perspective (e.g. "the safety reviewer's view").
+"incorrect."** At most, frame things as *possibly* correct/incorrect.
+Whether something is actually right is the user's call. (See `CLAUDE.md`
+for the full tone rules.) The alternative-perspective metrics are
+under-the-hood selection signals only — never mention a perspective,
+metric, or "stakeholder" in anything posted to the user.
 
 ### Short status updates
 
@@ -107,6 +106,15 @@ k = (max(nums) + 1) if nums else 1
 
 Write `<WORKSPACE_DIR>/gather_evidence/data_collection_policy_round_{k}.py`.
 
+**First, build or refresh the reward decomposition.** Following
+`prompts/reward_decomposition_prompt.md`, write/update
+`<WORKSPACE_DIR>/.repair_history/_reward_analysis.md` (the per-term
+breakdown and exploit hypotheses `H1, H2, …`); reuse it if its stamped
+hash already matches the current reward, otherwise regenerate it (see
+`CLAUDE.md` → "Reward introspection" for the reuse rule). The round you
+author next exists to make those hypotheses *occur* in real
+trajectories.
+
 Read `prompts/data_collection_policy_prompt.md` for the verbatim task
 text. Context to use when writing:
 - `env_config.OBS_DESCRIPTION` and `ACTION_DESCRIPTION`
@@ -139,15 +147,22 @@ states the *hypothesis* it tests.
 must be a policy that maximizes the expected sum of rewards with
 respect to the *current* `designed_reward_fn`.
 
-How many policies per round? 3-5 for round 1 (broad coverage, including
-the required maximizer); 1-3 for later rounds (focused on a specific
+**Required exploit probes:** in addition to the maximizer, every round
+must include at least one policy that targets a still-untested exploit
+hypothesis `H1, H2, …` from the reward decomposition. Each such policy's docstring names
+the reward term and the hypothesis id (`H#`) it probes. Across the
+rounds of a workspace, every hypothesis must eventually get a probe;
+bias each new round toward the hypotheses not yet exercised.
+
+How many policies per round? 3-9 for round 1 (broad coverage, including
+the required maximizer); 2-5 for later rounds (focused on a specific
 gap — but still re-include the maximizer under the current reward,
 since the reward may have changed since the prior round).
 
 ### Step 3 — roll out + featurize
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
 python -m runtime.run_round --workspace workspaces/<WORKSPACE> --round K
 ```
 
@@ -170,20 +185,24 @@ rubric below.
 
 The evidence is **sufficient** when *all* of the following hold:
 
-1. **Every reward term has been exercised by at least one trajectory.**
-   Read `designed_reward_fn.py` to enumerate the terms. For each, look in
-   the feature aggregates for a trajectory where that term clearly fired.
-   Examples:
+1. **Every reward term AND every exploit hypothesis has been exercised
+   by at least one trajectory.** Use the reward decomposition
+   (`_reward_analysis.md`) to enumerate both. For each *term*, look in
+   the feature aggregates for a trajectory where that term clearly fired:
    - a binary failure-state term needs a trajectory whose corresponding
      feature equals 1.0
    - a per-step penalty needs a trajectory whose fraction-of-steps-firing
      feature is meaningfully above zero
    - a sparse terminal-bonus term needs at least one trajectory that
      reaches the bonus condition
-   If a term is silent across **all** trajectories, the evidence is
-   incomplete — design a round targeting it.
+   For each *exploit hypothesis* `H#`, the evidence must contain at least
+   one trajectory that **instantiates** it — i.e. the proxy feature fired
+   while the true-outcome feature did not (the proxy-vs-outcome decoupling
+   is actually present, not just hypothesized). If a term is silent, or a
+   hypothesis is never instantiated, across **all** trajectories, the
+   evidence is incomplete — design a round targeting it.
 
-2. **There is meaningful spread across rollouts** on the key features.
+2. **The trajectories are meaningfully diverse** on the key features.
    "Meaningful spread" ≈ (max − min) / typical-scale > 0.3 on at least
    half the features. If every policy collapses to the same behavior, add
    policies that diverge.
@@ -196,7 +215,17 @@ The evidence is **sufficient** when *all* of the following hold:
    fewer than 5 exist, the rollouts didn't generate enough diverging
    behavior.
 
-If any of (1)/(2)/(3) fails AND we haven't hit the 3-round cap, run
+4. **You covered every behavior you suspected would uncover a flaw in
+   `designed_reward_fn.py`.** Beyond the enumerated exploit hypotheses,
+   if — after you read the reward function— you can still name a behavior you
+   suspect would expose a flaw (a way to Goodhart, a corner of the
+   state space the reward may mishandle, a specification gap) and no
+   collected trajectory realizes it, the evidence is incomplete. Design a
+   round that produces that behavior. The evidence is sufficient on this
+   axis only when you can no longer name an untried behavior you'd expect
+   to reveal a flaw.
+
+If any of (1)/(2)/(3)/(4) fails AND we haven't hit the 3-round cap, run
 another round targeting the failing axis.
 
 ## Targeting the gap
@@ -236,7 +265,10 @@ Follow `repair-preferences/SKILL.md` precisely, but in summary:
    must justify `p` in the selection JSON), write the selection JSON,
    and render them with `select_pairs.py --mode render`. Favor
    diversity — each comparison shown should illuminate a distinct
-   trade-off in the reward.
+   trade-off in the reward. For each pair, add a `"characteristics"`
+   list — the characteristic `short_name`s ranked most→least informative
+   about why the designed reward's preference may be wrong for that pair;
+   the display shows them in that order.
 
    **For lotteries: convention is `p` = probability of the good branch
    (A), `(1−p)` = probability of the bad branch (B). Pick `p` so the
@@ -252,50 +284,42 @@ Follow `repair-preferences/SKILL.md` precisely, but in summary:
    (different C/A/B or a different trade-off) over two values of `p`
    on the same shape.
 
-2. **Post the lead-in to the web UI**, in this order:
-   - Overall-pattern paragraph + 1–2 possible reward tweaks
-     ("if you didn't intend X over Y, one option is …"), framed as
-     trade-offs, never as "the reward is wrong":
-     ```bash
-     python -m web_ui.cli post --type markdown --content "<overall pattern + tweaks>"
-     ```
-   - Orientation status: `python -m web_ui.cli post --type status --content "View the comparisons below to note where the designed reward function may be misaligned. You'll be asked what to do next."` (keep *may be misaligned* — not "wrong").
-   - Feature key in the right sidebar — post the file the render emitted,
-     don't reconstruct it:
-     ```bash
-     python -m web_ui.cli post --type feature_key \
-         --features-file workspaces/<WORKSPACE>/.repair_history/_ui_payload/feature_key.json
-     ```
-
-3. **Post every rendered comparison from the emitted payload.** The
+2. **Post every rendered comparison from the emitted payload.** The
    render writes a ready-to-post bundle to
    `workspaces/<WORKSPACE>/.repair_history/_ui_payload/`. Read its
    `manifest.json` and post one comparison per entry in `cards`, in
-   order (pairs first, then lotteries). Each card already carries this
-   round's `content_file`, `viz_file` (the exact `--viz` argument —
-   `src` URLs, the `preferred` badge for pairs, and `role`/`probability`
-   for lotteries are already filled in), `label`, and `layout`. You add
-   **only** the `--why` line, which differs each round just as the
-   visuals do:
+   order (pairs first, then lotteries). Post **only** the comparisons —
+   no feature key, overall summary, pattern paragraph, or misalignment
+   orientation. Each card carries this round's `content_file`, `viz_file`
+   (the exact `--viz` argument — `src` URLs, the `preferred` badge for
+   pairs, and `role`/`probability` for lotteries already filled in),
+   `label`, and `layout`:
    ```bash
+   # pair card: post the render's sentences verbatim.
    python -m web_ui.cli post --type comparison \
        --label "<card.label>" \
        --content-file "<card.content_file>" \
        --viz "$(cat <card.viz_file>)" \
-       --why "<1–2 sentences naming the trade-off the reward made, framed as trade-offs, not as verdicts.>"
+       --why "<1 sentence naming the trade-off between the two trajectories — what the preferred one gains and gives up. Don't mention perspectives or metrics.>"
+
+   # lottery card: you author --content (the content_file is empty); add --layout lottery.
+   python -m web_ui.cli post --type comparison \
+       --label "<card.label>" --layout lottery \
+       --content "<2–3 sentences on how Trajectory A (good branch), Trajectory B (bad branch), and certain Trajectory C differ. Be QUANTITATIVE: state the actual characteristic values (with units) from the table, not qualitative interpretations like 'safe', 'smooth', or 'aggressive'. Don't mention perspectives or metrics.>" \
+       --viz "$(cat <card.viz_file>)" \
+       --why "<1 sentence naming the risk-attitude trade-off between C and the lottery. Don't mention perspectives or metrics.>"
    ```
-   Add `--layout lottery` only for cards whose `layout` is `"lottery"`.
    Omit `--viz` only when a card's `viz_file` is null (no `viz.py` in the
    workspace). Don't hand-build viz JSON or re-derive the `src` paths —
    they're already in `viz_file` and are correct for this round.
 
-4. **Always close with the four-option next-step question** posted to
+3. **Always close with the four-option next-step question** posted to
    the web UI:
    ```bash
    python -m web_ui.cli ask --prompt "What would you like to do next?" \
        --options '[
          {"label":"Edit the reward function","description":"Modify the reward to reflect what you actually want, based on the disagreements above."},
-         {"label":"Add another trajectory feature","description":"Add a new feature to the trajectory summary so the comparisons show more detail."},
+         {"label":"Add another characteristic","description":"Add a new characteristic to the trajectory summary so the comparisons show more detail."},
          {"label":"View more comparisons","description":"Surface additional pairs or lotteries from the evidence already collected."},
          {"label":"Finish and submit (not reversible)","description":"Lock in the current reward function as the final answer. This ends the session."}
        ]'

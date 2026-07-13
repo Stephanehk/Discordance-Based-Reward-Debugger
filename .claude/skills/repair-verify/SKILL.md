@@ -1,14 +1,14 @@
 ---
 name: repair-verify
-description: Check whether the updated reward function resolves the disagreements surfaced by past /repair-preferences runs. For every saved pair and lottery comparison, recompute the designed reward under the current reward function and report on the web UI whether the reward now agrees with that perspective. Posts any comparisons that still disagree. Use after the user edits the reward and wants to confirm the fix.
+description: Check whether the updated reward function resolves the disagreements surfaced by past /repair-preferences runs. For every saved pair and lottery comparison, recompute the designed reward under the current reward function and report on the web UI whether each surfaced disagreement is now resolved. Posts any comparisons that still disagree. Use after the user edits the reward and wants to confirm the fix.
 ---
 
 # /repair-verify — confirm the reward fix addresses past disagreements
 
 Whenever `/repair-preferences` runs, it saves a snapshot of the
 surfaced trajectory pairs and lottery comparisons (which trajectories,
-the probability `p` for lotteries, which perspective, which side that
-perspective preferred). This skill loads every past snapshot,
+the probability `p` for lotteries, and the surfaced preference). This
+skill loads every past snapshot,
 recomputes the designed reward on each pair and lottery under the
 **current** reward function, and reports which comparisons the new
 reward now agrees with — and which still disagree — by posting to the
@@ -17,20 +17,17 @@ web UI.
 ## Tone for messages to the user
 
 The user will never read the codebase. Don't post internal file names,
-snapshot paths, or script names. Don't name metrics by their internal
-identifiers (say "the candidate performance metric" or describe the
-perspective). Don't use the word "stakeholder" — say "other
-perspectives" or describe the specific perspective. Speak in terms of
+snapshot paths, or script names. The alternative-perspective metrics are
+under-the-hood signals only — never mention a perspective, metric, or
+"stakeholder" in anything posted to the user. Speak in terms of
 outcomes: "every past disagreement is resolved" or "1 pair still
 disagrees — here it is".
 
 **Never call any behavior, reward, or trajectory "correct" or
-"incorrect."** A pair being "resolved" means the reward now agrees
-with that perspective on that pair — not that the reward is "right."
-Say "the updated reward now agrees with this perspective" or "appears
-to align with the surfaced preference," not "the reward is correct now."
-Whether the reward is actually right is the user's call. (See
-`CLAUDE.md` for the full tone rules.)
+"incorrect."** A pair being "resolved" means the reward's preference
+now matches the surfaced one — not that the reward is "right." Whether
+the reward is actually right is the user's call. (See `CLAUDE.md` for
+the full tone rules.)
 
 ## Web UI is the only user-facing channel
 
@@ -60,7 +57,7 @@ python -m web_ui.cli set workspace=<WORKSPACE> status=running
 ### 1. Run the verifier
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
 python find_informative_pairs.py --workspace workspaces/<WORKSPACE> --check-snapshots
 ```
 
@@ -111,39 +108,31 @@ python -m web_ui.cli post --type status --content "Every past disagreement is no
 ### 3b. If some comparisons still disagree
 
 Repost each unresolved comparison to the web UI exactly as
-`/repair-preferences` would post a freshly-surfaced one — including
-the feature key (right sidebar), each comparison's preformatted block,
-its `--why` interpretation, and (where applicable) inline viz from the
-captured-frame mp4s / saved pngs.
+`/repair-preferences` would post a freshly-surfaced one — for pairs the
+render's sentences, for lotteries your authored summary, each with its
+`--why` interpretation and (where applicable) inline viz. Do **not**
+post a feature key.
 
 For each unresolved pair / lottery:
 
 ```bash
-# Pair (still disagrees): mark the reward-preferred side with preferred:true.
+# Pair (still disagrees): A is the reward-preferred side; post the render's sentences.
 python -m web_ui.cli post --type comparison \
     --label "PAIR k/N still disagrees" \
-    --content-file <path to the still-disagreeing block from the script's output> \
-    --viz '[{"src":"/workspace/<WORKSPACE>/viz/round{i}/pair{j}/A.mp4","caption":"Trajectory A","preferred":true},
-            {"src":"/workspace/<WORKSPACE>/viz/round{i}/pair{j}/B.mp4","caption":"Trajectory B"}]' \
-    --why "<1–2 sentences naming the trade-off the reward made.>"
+    --content-file <path to the still-disagreeing pair's sentences from the script's output> \
+    --viz '[{"src":"/workspace/<WORKSPACE>/viz/round{i}/pair{j}/A.mp4","caption":"Designed reward function preferred trajectory"},
+            {"src":"/workspace/<WORKSPACE>/viz/round{i}/pair{j}/B.mp4","caption":"The alternative trajectory"}]' \
+    --why "<1 sentence naming the trade-off between the two trajectories. Don't mention perspectives or metrics.>"
 
-# Lottery (still disagrees): use --layout lottery with role + probability.
+# Lottery (still disagrees): you author --content; use --layout lottery with role + probability.
 python -m web_ui.cli post --type comparison \
     --label "LOTTERY k/M still disagrees" \
     --layout lottery \
-    --content-file <path to the still-disagreeing block> \
+    --content "<2–3 sentences on how Trajectory A (good branch), Trajectory B (bad branch), and certain Trajectory C differ. Be QUANTITATIVE: state the actual characteristic values (with units) from the table, not qualitative interpretations like 'safe', 'smooth', or 'aggressive'. Don't mention perspectives or metrics.>" \
     --viz '[{"src":"/workspace/<WORKSPACE>/viz/round{i}/lottery{j}/A.mp4","caption":"Trajectory A","role":"A","probability":<p>},
             {"src":"/workspace/<WORKSPACE>/viz/round{i}/lottery{j}/B.mp4","caption":"Trajectory B","role":"B","probability":<1-p>},
             {"src":"/workspace/<WORKSPACE>/viz/round{i}/lottery{j}/C.mp4","caption":"Certain (C)","role":"C"}]' \
-    --why "<1–2 sentences naming the risk-attitude or curvature trade-off between C and the lottery.>"
-```
-
-After every unresolved comparison is posted, add a short overall
-interpretation (≤ 4 lines) that names the pattern in the remaining
-disagreement(s) and proposes 1 concrete reward tweak:
-
-```bash
-python -m web_ui.cli post --type markdown --content "<pattern + 1 concrete tweak>"
+    --why "<1 sentence naming the risk-attitude trade-off between C and the lottery. Don't mention perspectives or metrics.>"
 ```
 
 ### 4. (skipped — flows into 5)
@@ -166,9 +155,8 @@ Read `value` from the returned JSON.
 ### 6. Act on the user's answer
 
 - **Look for new disagreements** → run `/repair-preferences` (follow
-  its full contract — overall pattern, feature key sidebar, comparisons
-  with `--why` lines, closing four-option question — all posted to the
-  web UI).
+  its full contract — comparisons with `--why` lines, closing
+  four-option question — all posted to the web UI).
 - **Collect more evidence first** → run `/repair-round`, which itself
   auto-continues into the `/repair-preferences` deliverable.
 - **Finish and submit (not reversible)** → follow "Finish and submit"

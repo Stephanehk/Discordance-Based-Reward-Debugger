@@ -6,8 +6,9 @@ The user has a gym/gymnasium environment and a manually written (or
 LLM-elicited) reward function `designed_reward_fn(obs, act, next_obs) -> float`.
 This system surfaces *evidence of reward misspecification* by collecting
 diverse trajectories, scoring them with both the designed reward and a set
-of alternative-perspective performance metrics, and showing the user
-**trajectory pairs where the two disagree on which trajectory is better**.
+of alternative-perspective performance metrics (used only under the hood
+to select comparisons), and showing the user **trajectory pairs where the
+designed reward and a metric disagree on which trajectory is better**.
 The pairs are the end product: the user reads them and decides how to edit
 the reward.
 
@@ -50,24 +51,34 @@ You can have many workspaces side by side; they share zero state.
                           pairs** plus up to **2 lottery comparisons**
                           (certain trajectory C vs a p-probability lottery
                           over A and B). This is the Claude-driven
-                          selection step, not an algorithm. Pairs render
-                          as preference labels (feature key, anonymized A
-                          vs B, reward + metric scores side-by-side with
-                          A≻B / B≻A labels, feature delta table). The
-                          renderer adds a "Designed reward function
-                          prefers this trajectory" badge below the
-                          reward-preferred side. Lotteries render with A
-                          and B side-by-side at the top (with their
+                          selection step, not an algorithm. Each pair
+                          renders with the two trajectory videos on top
+                          (A = the reward-preferred side, captioned "Your
+                          preferred trajectory"; B = "The alternative
+                          trajectory"), a "why they
+                          disagree" line underneath, and then a
+                          "Designed reward function's preferred
+                          trajectory has a" header (in a
+                          purple box) followed by a bulleted "higher/
+                          lower/same {characteristic} ({a} vs. {b}, unit)"
+                          per characteristic, **ranked most→least
+                          informative** about why the reward's preference
+                          may be wrong (the selection JSON's per-pair
+                          `characteristics` list sets the order).
+                          The first pair is expanded; the rest (and all
+                          lotteries) start collapsed. There is no feature
+                          key. The alternative-perspective metrics drive
+                          selection under the hood but are never shown to
+                          the user. Lotteries render with A and B
+                          side-by-side at the top (with their
                           probabilities) and the certain trajectory C
-                          below; the question is shown with reward and
-                          other-perspective preferences. Each comparison
-                          also triggers a per-trajectory visualization
+                          below, plus an authored plain-English summary of
+                          how A, B, and C differ. Each comparison also
+                          triggers a per-trajectory visualization
                           (`workspaces/<name>/viz/round{i}/{pair,lottery}
                           {j}/...`) via the workspace's `viz.py`; the
-                          rendered output prints the saved paths. Each
-                          comparison comes with a "why they disagree"
-                          summary and an overall pattern interpretation.
-                          Both kinds are snapshotted so /repair-verify
+                          rendered output prints the saved paths. Both
+                          kinds are snapshotted so /repair-verify
                           can later re-check them. (The legacy
                           algorithmic selector still lives in
                           find_informative_pairs.py for reference and
@@ -79,6 +90,55 @@ append-only across invocations — each call adds the next k rounds and
 ends in `/repair-preferences`. `/repair-preferences` can also be re-run
 freely on its own; it just reloads everything from disk and re-scores
 under the current reward.
+
+## Reward introspection — every stage reads the reward first
+
+Three stages author env-specific artifacts: `/repair-init` (trajectory
+features), `/repair-round` (data-collection policies), and
+`/repair-preferences` (comparison selection). **Before doing its work,
+each of these stages must read the designed reward's internals and
+reason explicitly about how its own output will help surface that
+reward's flaws.**
+
+`/repair-init` does this by reading the reward source directly (it
+enumerates the reward terms via `prompts/trajectory_features_prompt.md`);
+it does **not** write the decomposition file. The persisted *reward
+decomposition* is the shared mechanism for the two later stages —
+`/repair-round` and `/repair-preferences` — which generate or refresh it
+before authoring policies / selecting comparisons.
+
+### The reward decomposition artifact
+
+Path: `workspaces/<name>/.repair_history/_reward_analysis.md`. It is an
+**internal** analysis file — never shown to the user, never posted to
+the web UI.
+
+It holds a term-by-term breakdown of the reward plus a numbered list of
+**exploit hypotheses** `H1, H2, …`. The authoring spec — exactly what
+goes in the file, including its `<!-- reward-hash: … -->` stamp — is the
+frozen prompt `prompts/reward_decomposition_prompt.md`; the stages that
+need the decomposition author it from there.
+
+A stage that needs the decomposition computes the current reward hash; if
+`_reward_analysis.md` exists and its stamped hash matches, it reuses the
+file, otherwise it regenerates it (per the prompt), overwriting any prior
+version. This keeps the decomposition tied to the *current* reward across
+edits and re-runs.
+
+The hypothesis IDs `H1, H2, …` are the connective tissue between the two
+decomposition stages: policies (`/repair-round`) make each hypothesis
+*occur*, and selection (`/repair-preferences`) surfaces the comparisons
+where a hypothesis *actually drove the reward's preference*. Each of
+those stages states which hypotheses it covers. (Stage a's features make
+each reward *term* measurable — separating proxies from true outcomes —
+working from the reward source rather than these hypothesis IDs, so that
+feature authoring stays self-contained.)
+
+This file is regenerated whenever the reward changes (e.g. after the
+user edits it), so later rounds and re-runs always reason about the
+*current* reward. Nothing about it — terms, hypotheses, or the word
+"exploit" — is ever posted to the user; the web-UI tone rules below
+still apply.
 
 ## Web UI — the user-facing channel
 
@@ -105,9 +165,8 @@ their browser.
 |---|---|---|
 | Plain narrative paragraphs | `markdown` | headers, bold, lists, tables, inline code |
 | `designed_reward_fn.py` source | `code --language python --caption "designed_reward_fn.py" --content-file <path>` | code is shown in a dark monospace block |
-| A trajectory pair block | `comparison --label "PAIR 1/5" --content-file render.txt --viz '[{"src":"/workspace/<env>/viz/round{i}/pair{j}/A.mp4","caption":"Trajectory A","preferred":true}, {"src":"/workspace/<env>/viz/round{i}/pair{j}/B.mp4","caption":"Trajectory B"}]' --why "…"` | the `Why they disagree:` line is `--why`; `"preferred":true` adds a "Designed reward function prefers this trajectory" badge under that video |
-| A lottery comparison block | `comparison --label "LOTTERY 1/2" --layout lottery --content-file render.txt --viz '[{…"role":"A","probability":0.5}, {…"role":"B","probability":0.5}, {…"role":"C"}]' --why "…"` | `--layout lottery` puts A and B side-by-side on the top row (with their probability badges) and the role-C item below |
-| The feature key (right-hand sidebar) | `feature_key --features-file <json>` | each feature: `{"name":"…","description":"…"}`; sidebar only appears on the pairs/lotteries page |
+| A trajectory pair block | `comparison --label "PAIR 1/5" --content-file render.txt --viz '[{"src":"/workspace/<env>/viz/round{i}/pair{j}/A.mp4","caption":"Designed reward function preferred trajectory"}, {"src":"/workspace/<env>/viz/round{i}/pair{j}/B.mp4","caption":"The alternative trajectory"}]' --why "…"` | videos on top, the `Why they disagree:` line (`--why`) underneath, then one sentence per characteristic from `--content-file`; the first pair is expanded and the rest collapsed |
+| A lottery comparison block | `comparison --label "LOTTERY 1/2" --layout lottery --content "<plain-English summary of how A, B, C differ>" --viz '[{…"role":"A","probability":0.5}, {…"role":"B","probability":0.5}, {…"role":"C"}]' --why "…"` | `--layout lottery` puts A and B side-by-side on the top row (with their probability badges) and the role-C item below; the lottery's `--content` is an authored **quantitative** summary of how A, B, C differ — actual characteristic values, not qualitative words (the renderer leaves it empty) |
 | Light status update | `status` | e.g. "Collecting trajectories…" |
 | Visual separator | `divider` | thin dashed line |
 
@@ -203,16 +262,12 @@ Skills follow these tone rules in every message they send the user:
   evidence of misalignment", "surfacing the disagreements"), not
   implementation details.
 - **Never refer to any behavior, reward, or trajectory as "correct" or
-  "incorrect."** At most, say something is *possibly* correct/incorrect
-  or that it *appears* aligned/misaligned with a particular perspective.
+  "incorrect."** At most, say something is *possibly* correct/incorrect.
   Whether a behavior is actually correct is always the user's call —
   the system surfaces evidence, not verdicts.
-- **Never name a candidate performance metric by its internal id**
-  (e.g. `performance_metric_safety`). Either say "the candidate
-  performance metric" or describe the perspective from the docstring
-  ("the safety reviewer's view", "the operations perspective").
-- **Do not use the word "stakeholder" in anything posted to the user.**
-  Use "other perspectives" or describe the specific perspective.
+- **The alternative-perspective metrics are under-the-hood selection
+  signals only.** Never mention a perspective, candidate performance
+  metric, metric id, or "stakeholder" in anything posted to the user.
 
 ## Skill chaining — always tell the user what to run next
 
@@ -227,7 +282,7 @@ the channel. The expected chain is:
 - `/repair-init` → post that the user should run `/repair-round`.
 - `/repair-round` → after surfacing disagreements on the website, **ask**
   the user via `web_ui.cli ask` whether they want to (1) **Edit the
-  reward function**, (2) **Add another trajectory feature** to the set
+  reward function**, (2) **Add another characteristic** to the set
   that encodes each trajectory, (3) **View more comparisons (pairs or
   lotteries)** from the evidence already collected, or (4) **Finish and
   submit (not reversible)**. (The "Edit the reward function" option
@@ -259,8 +314,8 @@ web UI before requesting or applying the edit:
 
 ```bash
 python -m web_ui.cli post --type markdown --content "💡 **Tips for guiding a reward edit**
-- Be concrete: name the term to change, and — if you can — the preference label you want for each shown pair (e.g. \"for pair 2, A ≻ B should become B ≻ A\").
-- You can pin an edit to an outcome: e.g. \"increase the above-target speed penalty until the preference for pair 2 flips,\" and Claude will solve for the smallest change that produces it."
+- Be concrete: name the term to change, and — if you can — which trajectory should come out ahead for each shown pair (e.g. \"for pair 2, the alternative trajectory should become the preferred one\").
+- You can pin an edit to an outcome: e.g. \"increase this penalty until the preference for pair 2 flips,\" and Claude will solve for the smallest change that produces it."
 ```
 
 These rules apply to every skill in `.claude/skills/`. If a skill's own
@@ -285,6 +340,7 @@ automated_reward_repairer/
 │
 ├── prompts/                             # frozen prompt text consumed by skills
 │   ├── reward_design_template.md
+│   ├── reward_decomposition_prompt.md
 │   ├── trajectory_features_prompt.md
 │   ├── data_collection_policy_prompt.md
 │   └── performance_metrics_prompt.md
@@ -346,8 +402,8 @@ Paths below are relative to the workspace root unless noted.
 **`candidate_performance_metrics/performance_metrics.py`** exposes:
 - One or more functions whose names start with `performance_metric_`. Each:
   - Signature `(traj) -> float`, where `traj = [(obs, act, next_obs), ...]`.
-  - Docstring is the **perspective description** — shown to the user
-    when this metric flags a disagreement. Keep it one line.
+  - Docstring is the **perspective description** — used under the hood to
+    reason about disagreements; never shown to the user. Keep it one line.
 
 **`viz.py`** (optional — `/repair-preferences` skips visualization if absent):
 - `VIZ_EXT: str` — the file extension produced (e.g. `".png"`, `".mp4"`).
@@ -428,14 +484,44 @@ call `activate()` right after argparse. Run them from the repo root.
 
 ## How to run the Python boilerplate
 
-All Python in this repo runs in the `llm` conda env — `gymnasium` and
-any per-workspace env dependencies live there, not in the base
+Python in this repo runs in the `llm` conda env by default — `gymnasium`
+and most per-workspace env dependencies live there, not in the base
 interpreter. Activate it before any boilerplate script or smoke test
 (the `/repair-*` skills already prepend this to their commands):
 
 ```
 source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm
 ```
+
+### Per-workspace conda env (do not just default to `llm`)
+
+Some workspaces import env packages that are **not** in `llm` and must
+run under their own conda env. Before running `runtime.run_round`,
+`runtime.run_round_parallel`, `select_pairs.py`,
+`find_informative_pairs.py`, or any env smoke test **for a given
+workspace**, activate that workspace's env instead of `llm`:
+
+| Workspace | conda env |
+|---|---|
+| `rocket_landing` | `llm` (PyFlyt installed here) |
+| `robopianist` | `robopianist` (dm_control; needs `MUJOCO_GL=egl`) |
+| `metaworld_drawer_open`, `metaworld_hammer`, `drawer-open-v3` | `metaworld` |
+| `pointmaze_umaze` | `llm_rd` |
+| everything else | `llm` |
+
+The authoritative per-workspace value is the one-line
+`workspaces/<name>/.conda_env` marker file, when present (its contents
+are the env name); fall back to `llm` if the file is absent. So the
+generic run command is:
+
+```
+ENV=$(cat workspaces/<name>/.conda_env 2>/dev/null || echo llm)
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate "$ENV"
+```
+
+The `web_ui.cli` commands work under any env, so posting to the web UI
+does not require switching. Only the env-touching boilerplate above
+needs the workspace's env.
 
 ```
 # from the repo root, with `llm` active:

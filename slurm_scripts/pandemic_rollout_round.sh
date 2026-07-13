@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=next
 #SBATCH --account=next
-#SBATCH --nodelist=next7
+#SBATCH --nodelist=next6
 #SBATCH --time=8:00:00
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=24
@@ -21,7 +21,7 @@
 #          slurm_scripts/pandemic_rollout_round.sh
 WS=${WS:-pandemic}
 ROUND=${ROUND:-1}
-NPER=${NPER:-3}
+NPER=${NPER:-6}
 WORKERS=${WORKERS:-${SLURM_CPUS_PER_TASK:-24}}
 
 source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh

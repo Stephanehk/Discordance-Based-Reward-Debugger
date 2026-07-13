@@ -9,6 +9,7 @@
   const sidebar = document.getElementById("sidebar");
   const sidebarKey = document.getElementById("sidebarKey");
   const thinkingEl = document.getElementById("thinking");
+  let pairCount = 0;  // only the first pair card is expanded by default
 
   function setEmpty(hide) { empty.style.display = hide ? "none" : ""; }
   function setState(s) {
@@ -273,6 +274,9 @@
   }
 
   function showFeatureKey(m) {
+    // A feature-key post marks the start of a fresh batch of comparisons, so
+    // the next pair becomes the one expanded by default.
+    pairCount = 0;
     // Feature keys aren't placed in the chronological feed — they live in the
     // right sidebar, which is only revealed once a key has been posted.
     sidebarKey.innerHTML = "";
@@ -370,7 +374,7 @@
     if ((m.layout || "").toLowerCase() === "lottery") return renderLottery(m);
     const el = tpl("comparison");
     el.querySelector(".label").textContent = m.label || "Comparison";
-    el.querySelector(".cmp-block").textContent = m.content || "";
+    // Videos on top, then "why they disagree", then one line per characteristic.
     const vizDiv = el.querySelector(".cmp-viz");
     (m.viz || []).forEach(v => vizDiv.appendChild(_makeVizFigure(v)));
     if (m.why) {
@@ -379,13 +383,30 @@
     } else {
       el.querySelector(".cmp-why").remove();
     }
+    const chars = el.querySelector(".cmp-chars");
+    const lines = (m.content || "").split("\n").map(s => s.trim()).filter(Boolean);
+    // First line is the lead-in header ("Your preferred trajectory has a");
+    // the remaining lines are the bulleted "higher/lower/same …" items.
+    if (lines.length) {
+      const head = document.createElement("div");
+      head.className = "cmp-chars-head";
+      head.innerHTML = inline(lines[0]);
+      chars.parentNode.insertBefore(head, chars);
+      lines.slice(1).forEach(line => {
+        const li = document.createElement("li");
+        li.innerHTML = inline(line);   // renders **higher**/**lower**/**same** as bold
+        chars.appendChild(li);
+      });
+    }
+    // Only the first pair is expanded; later pairs start collapsed.
+    pairCount++;
+    if (pairCount === 1) el.querySelector(".cmp-details").open = true;
     return el;
   }
 
   function renderLottery(m) {
     const el = tpl("lottery");
     el.querySelector(".label").textContent = m.label || "Lottery";
-    el.querySelector(".cmp-block").textContent = m.content || "";
     const abRow = el.querySelector(".lot-ab");
     const cRow = el.querySelector(".lot-c");
     // Items with role "A"/"B" go on the top row, "C" on the bottom row.
@@ -401,6 +422,17 @@
       topItems = items.slice(0, 2);
       bottomItems = items.slice(2, 3);
     }
+    // A and B are complementary (B = 1 - A), but each percentage is rounded
+    // independently below, which can sum to 101% (e.g. p=0.995 → 100% + 1%).
+    // Derive B's displayed percent from A's so they always sum to 100.
+    const aItem = topItems.find(v => /^A$/i.test(String(v.role || "")));
+    const bItem = topItems.find(v => /^B$/i.test(String(v.role || "")));
+    if (aItem && bItem &&
+        aItem.probability != null && bItem.probability != null) {
+      const pctA = Math.round(Number(aItem.probability) * 100);
+      aItem.probability = pctA / 100;
+      bItem.probability = (100 - pctA) / 100;
+    }
     topItems.forEach(v => abRow.appendChild(_makeVizFigure(v)));
     bottomItems.forEach(v => cRow.appendChild(_makeVizFigure(v)));
     if (!topItems.length) abRow.remove();
@@ -411,6 +443,13 @@
     } else {
       el.querySelector(".cmp-why").remove();
     }
+    const block = el.querySelector(".cmp-block");
+    (m.content || "").split("\n").map(s => s.trim()).filter(Boolean).forEach(line => {
+      const p = document.createElement("p");
+      p.innerHTML = inline(line);
+      block.appendChild(p);
+    });
+    // Lotteries always start collapsed.
     return el;
   }
 
@@ -640,6 +679,7 @@
   }
 
   function clearFeed() {
+    pairCount = 0;
     [...feed.querySelectorAll(".msg, .divider")].forEach(n => n.remove());
     hideFeatureKey();
     setEmpty(false);

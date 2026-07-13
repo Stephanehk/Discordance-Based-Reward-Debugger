@@ -276,19 +276,61 @@ body.has-key .sidebar { display: block; }
 
 /* ===== Comparison block ===== */
 .msg-cmp .label { color: #4f46e5; }
-.cmp-block {
-  margin: 0;
-  padding: 14px 16px;
-  background: #f3f5fb;
-  color: #1a1d29;
-  border-radius: 10px;
-  overflow-x: auto;
-  font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
-  font-size: 12.5px;
-  line-height: 1.55;
-  white-space: pre;
-  border: 1px solid #e3e6ef;
+.cmp-details > summary {
+  cursor: pointer;
+  list-style: none;
+  justify-content: flex-start;
+  margin-bottom: 0;
 }
+.cmp-details[open] > summary { margin-bottom: 10px; }
+.cmp-details > summary::-webkit-details-marker { display: none; }
+.cmp-details > summary::before {
+  content: "▸";
+  color: #4f46e5;
+  margin-right: 8px;
+  font-size: 12px;
+}
+.cmp-details[open] > summary::before { content: "▾"; }
+/* Lead-in header — larger font, inside the soft purple box. */
+.cmp-chars-head {
+  margin: 12px 0 10px;
+  padding: 10px 14px;
+  background: #f5f3ff;
+  border: 1px solid #e9d5ff;
+  border-left: 3px solid #7c3aed;
+  border-radius: 9px;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #2a2540;
+}
+/* Characteristics as a plain bulleted list (no boxes), smaller than the header. */
+.cmp-chars {
+  list-style: disc;
+  margin: 0;
+  padding-left: 22px;
+  color: #2a2540;
+}
+.cmp-chars li {
+  margin: 4px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.cmp-chars li::marker { color: #7c3aed; }
+.cmp-chars strong { color: #6d28d9; }
+/* Lottery plain-English summary of how A, B, C differ. */
+.cmp-block {
+  margin: 12px 0 0;
+  padding: 11px 14px;
+  background: #f5f3ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 9px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #2a2540;
+}
+.cmp-block p { margin: 0 0 6px; }
+.cmp-block p:last-child { margin-bottom: 0; }
+.cmp-block strong { color: #6d28d9; }
 .cmp-viz {
   display: flex;
   flex-wrap: wrap;

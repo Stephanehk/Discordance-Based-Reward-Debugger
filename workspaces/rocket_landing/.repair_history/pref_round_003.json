@@ -1,0 +1,69 @@
+{
+  "snapshot_id": 3,
+  "timestamp": "2026-07-10T16:28:05",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_3_trajectories/DataCollectionPolicySuicideBurnLate__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_002.pkl",
+      "snapshot_reward_a": 45.13833836473154,
+      "snapshot_reward_b": -1311.5508721088331,
+      "disagreements": [
+        {
+          "perspective": "Safety: touch down as slowly as possible (avoid a hard impact).",
+          "metric_a": -93.28563864928883,
+          "metric_b": -56.10993445678126
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_3_trajectories/DataCollectionPolicySuicideBurnLate__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_3_trajectories/DataCollectionPolicySuicideBurnSoft__traj_000.pkl",
+      "snapshot_reward_a": 99.58673699220078,
+      "snapshot_reward_b": 70.20937919477959,
+      "disagreements": [
+        {
+          "perspective": "Precision: land as close to the pad center as possible.",
+          "metric_a": -14.052678774065793,
+          "metric_b": -9.103477384367025
+        },
+        {
+          "perspective": "Safety: touch down as slowly as possible (avoid a hard impact).",
+          "metric_a": -92.1977346387211,
+          "metric_b": -68.75140346435958
+        }
+      ]
+    }
+  ],
+  "lotteries": [
+    {
+      "rank": 1,
+      "traj_c_path": "gather_evidence/round_3_trajectories/DataCollectionPolicySuicideBurnSoft__traj_003.pkl",
+      "traj_a_path": "gather_evidence/round_3_trajectories/DataCollectionPolicySuicideBurnLate__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_3_trajectories/DataCollectionPolicySuicideBurnLate__traj_001.pkl",
+      "p": 0.8,
+      "snapshot_reward_c": 41.558230713268244,
+      "snapshot_reward_lottery": 52.86437459094622,
+      "snapshot_reward_prefers_c": false,
+      "disagreements": [
+        {
+          "perspective": "Precision: land as close to the pad center as possible.",
+          "metric_c": -5.289128686527366,
+          "metric_lottery": -18.897129216438948,
+          "prefers": "C"
+        },
+        {
+          "perspective": "Safety: touch down as slowly as possible (avoid a hard impact).",
+          "metric_c": -67.96797791957984,
+          "metric_lottery": -92.16366896339854,
+          "prefers": "C"
+        }
+      ],
+      "justification": "A new lottery shape probing risk over braking timing among the fast-fall-then-brake landings (a dimension the earlier lotteries did not touch). C = T104 is a certain soft landing that eases off sooner (reward +41.6; gentler near-ground approach). Good branch A = T095 (reward +99.6; brakes very late, lands close but stays fast near the ground); bad branch B = T092 (reward -134.0; a late brake that ends ~38 m out). p* = (R_C - R_B)/(R_A - R_B) = (41.56 + 134.03)/(99.59 + 134.03) = 0.752. I set p = 0.80, just above p*, so the designed reward slightly prefers the 80%/20% gamble (EV +52.9 > +41.6) \u2014 it would rather gamble on braking late than accept a certain gentler landing. A person prioritising a soft, controlled arrival would likely keep the certain gentler landing C, reversing the reward at a new point on the risk curve."
+    }
+  ]
+}

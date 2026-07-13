@@ -62,7 +62,7 @@
   <template id="tpl-feature-key">
     <div class="key-card">
       <header class="key-head">
-        <span class="label">Feature key</span>
+        <span class="label">Characteristics</span>
       </header>
       <div class="key-body">
         <table class="key-table"><tbody></tbody></table>
@@ -82,26 +82,26 @@
 
   <template id="tpl-comparison">
     <article class="msg msg-cmp">
-      <header class="msg-head">
-        <span class="label"></span>
-      </header>
-      <pre class="cmp-block"></pre>
-      <div class="cmp-viz"></div>
-      <div class="cmp-why muted"></div>
+      <details class="cmp-details">
+        <summary class="msg-head"><span class="label"></span></summary>
+        <div class="cmp-viz"></div>
+        <div class="cmp-why muted"></div>
+        <ul class="cmp-chars"></ul>
+      </details>
     </article>
   </template>
 
   <template id="tpl-lottery">
     <article class="msg msg-cmp msg-lottery">
-      <header class="msg-head">
-        <span class="label"></span>
-      </header>
-      <pre class="cmp-block"></pre>
-      <div class="lot-viz">
-        <div class="lot-row lot-ab"></div>
-        <div class="lot-row lot-c"></div>
-      </div>
-      <div class="cmp-why muted"></div>
+      <details class="cmp-details">
+        <summary class="msg-head"><span class="label"></span></summary>
+        <div class="lot-viz">
+          <div class="lot-row lot-ab"></div>
+          <div class="lot-row lot-c"></div>
+        </div>
+        <div class="cmp-why muted"></div>
+        <div class="cmp-block"></div>
+      </details>
     </article>
   </template>
 

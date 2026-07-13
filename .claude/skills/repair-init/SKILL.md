@@ -88,6 +88,20 @@ python -m web_ui.cli ask --prompt "A trajectory summary is already set up for th
 
 If neither file exists, proceed straight to authoring with no prompt.
 
+## Step 1.5: read the reward function before authoring
+
+Feature authoring is **reward function aware**: before writing the feature set,
+read `<WORKSPACE_DIR>/designed_reward_fn.py` (the design-template comment
+and the code body) and enumerate the terms it uses to produce a reward. The
+features you write must let the user see how each term changes (the verbatim
+requirement is in `prompts/trajectory_features_prompt.md`).
+
+This stage does **not** write the persisted reward decomposition
+(`CLAUDE.md` → "Reward introspection"); that artifact is produced later,
+by `/repair-round` and `/repair-preferences`, where the policy-authoring
+and selection logic need it. Keeping feature authoring driven only by the
+reward source (not the decomposition) is deliberate.
+
 ## Step 2: write `<WORKSPACE_DIR>/gather_evidence/trajectory_features.py`
 
 Read `prompts/trajectory_features_prompt.md` for the verbatim task text.
@@ -105,10 +119,14 @@ Must conform to the invariants in `CLAUDE.md`:
 - Features can be trajectory-level (e.g. "fraction of steps spent
   stationary") or transition-aggregates (e.g. "mean action magnitude").
 
+The mandatory reward-term coverage requirement (every term measured;
+proxy and true outcome exposed separately; feature→term mapping comment)
+lives in `prompts/trajectory_features_prompt.md` — follow it there.
+
 Smoke-test after writing (run from the repo root):
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from gather_evidence.trajectory_features import Trajectory2Features; \
 from env_config import make_env; e = make_env(); \

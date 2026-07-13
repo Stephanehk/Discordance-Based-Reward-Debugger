@@ -1,0 +1,109 @@
+{
+  "snapshot_id": 1,
+  "timestamp": "2026-07-10T16:06:27",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNosedivePlummet__traj_008.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicySoftControlledDescent__traj_009.pkl",
+      "snapshot_reward_a": -65.5650865562552,
+      "snapshot_reward_b": -549.0048861423516,
+      "disagreements": [
+        {
+          "perspective": "Safety: touch down as slowly as possible (avoid a hard impact).",
+          "metric_a": -98.82556333932637,
+          "metric_b": -55.243277939851126
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyCenteredPlummet__traj_006.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_002.pkl",
+      "snapshot_reward_a": -72.30376220069124,
+      "snapshot_reward_b": -839.5619785785631,
+      "disagreements": [
+        {
+          "perspective": "Safety: touch down as slowly as possible (avoid a hard impact).",
+          "metric_a": -82.59644933275825,
+          "metric_b": -52.4296792497182
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyThrashControls__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_009.pkl",
+      "snapshot_reward_a": -37.5519314899063,
+      "snapshot_reward_b": -679.9092559452299,
+      "disagreements": [
+        {
+          "perspective": "Comfort/regulator: prefer smooth control, avoid jerky action changes.",
+          "metric_a": -2.0901328963147643,
+          "metric_b": -0.2205683977503029
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNosedivePlummet__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_001.pkl",
+      "snapshot_reward_a": -64.40000697905428,
+      "snapshot_reward_b": -871.3175647292014,
+      "disagreements": [
+        {
+          "perspective": "Safety: touch down as slowly as possible (avoid a hard impact).",
+          "metric_a": -100.00000000000001,
+          "metric_b": -45.29102988250071
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNosedivePlummet__traj_003.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicySoftControlledDescent__traj_004.pkl",
+      "snapshot_reward_a": -82.74914626091069,
+      "snapshot_reward_b": -1323.2315389770945,
+      "disagreements": [
+        {
+          "perspective": "Safety: touch down as slowly as possible (avoid a hard impact).",
+          "metric_a": -100.00000000000001,
+          "metric_b": -26.10417596690128
+        }
+      ]
+    }
+  ],
+  "lotteries": [
+    {
+      "rank": 1,
+      "traj_c_path": "gather_evidence/round_2_trajectories/DataCollectionPolicySoftControlledDescent__traj_001.pkl",
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyThrashControls__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyThrashControls__traj_003.pkl",
+      "p": 0.11,
+      "snapshot_reward_c": -851.4262367887234,
+      "snapshot_reward_lottery": -828.6174646280375,
+      "snapshot_reward_prefers_c": false,
+      "disagreements": [
+        {
+          "perspective": "Precision: land as close to the pad center as possible.",
+          "metric_c": -25.082471432556492,
+          "metric_lottery": -70.91701511433838,
+          "prefers": "C"
+        },
+        {
+          "perspective": "Comfort/regulator: prefer smooth control, avoid jerky action changes.",
+          "metric_c": -0.10032779297599306,
+          "metric_lottery": -2.0812060166631965,
+          "prefers": "C"
+        }
+      ],
+      "justification": "C = T072 is a certain engine-controlled gentle descent (reward -851.4; ~29 m/s descent, engine on 65% of steps, ends 25 m from pad). The lottery is over two uncontrolled full-magnitude thrash trajectories: good branch A = T033 (reward -37.5; ends 10.8 m from pad) and bad branch B = T034 (reward -926.4; drifts to 78.4 m). The designed-reward indifference point is p* = (R_C - R_B)/(R_A - R_B) = (-851.43 + 926.39)/(-37.55 + 926.39) = 0.084. I set p = 0.11, just above p*, so the designed reward slightly prefers the gamble (EV -828.6 > -851.4) \u2014 it is willing to take an 11%/89% coin-flip on an uncontrolled fall rather than accept a certain controlled descent, purely because the good branch T033 scores so extraordinarily high. A person focused on landing safely would very likely reverse this and keep the certain controlled descent, making the small reward-margin a genuine risk-attitude disagreement."
+    }
+  ]
+}

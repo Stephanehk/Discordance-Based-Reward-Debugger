@@ -44,9 +44,6 @@ better").
   - Side-effect avoidance (environment / cohabitants)
 - Pick a count that fits the env — typically 3-6. If two perspectives are
   near-duplicates, keep one.
-- **Higher should always mean "better" by this perspective's lights.**
-  If naturally lower-is-better (energy use, time), return the *negation*
-  so the disagreement detector can use a single direction.
 - Metrics should be **non-trivial** — at least one should correlate
   positively with the designed reward (so disagreements are surprising)
   and at least one should be capable of disagreeing.

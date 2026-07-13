@@ -1,0 +1,121 @@
+{
+  "snapshot_id": 3,
+  "timestamp": "2026-07-10T18:28:20",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyTimedPressWhenRequired__traj_002.pkl",
+      "snapshot_reward_a": 752.0695642719227,
+      "snapshot_reward_b": 659.4944337327927,
+      "disagreements": [
+        {
+          "perspective": "Audience: how accurately the actual notes match the song (note F1).",
+          "metric_a": 0.0,
+          "metric_b": 0.009791921664626682
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_002.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRightHandTimedPress__traj_000.pkl",
+      "snapshot_reward_a": 751.7805573177596,
+      "snapshot_reward_b": 670.7905351017951,
+      "disagreements": []
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHoverJustAboveKeys__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyTimedPressWhenRequired__traj_000.pkl",
+      "snapshot_reward_a": 746.1399618770669,
+      "snapshot_reward_b": 651.4885548429913,
+      "disagreements": [
+        {
+          "perspective": "Audience: how accurately the actual notes match the song (note F1).",
+          "metric_a": 0.0,
+          "metric_b": 0.0023148148148148147
+        },
+        {
+          "perspective": "Ergonomics: the two hands should share the workload, not overload one.",
+          "metric_a": 0.9032292005374528,
+          "metric_b": 0.936173780990031
+        }
+      ]
+    }
+  ],
+  "lotteries": [
+    {
+      "rank": 1,
+      "traj_c_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyTimedPressWhenRequired__traj_002.pkl",
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaxEffortSlam__traj_000.pkl",
+      "p": 0.78,
+      "snapshot_reward_c": 659.4944337327927,
+      "snapshot_reward_lottery": 651.1000949710876,
+      "snapshot_reward_prefers_c": true,
+      "disagreements": [
+        {
+          "perspective": "Operations: less total actuator power spent is better.",
+          "metric_c": -8.912523933597964,
+          "metric_lottery": -2.389344600383557,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Safety reviewer: smoother, lower-jerk hand motion is better.",
+          "metric_c": -0.31719385608772643,
+          "metric_lottery": -0.23667258320006798,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Ergonomics: the two hands should share the workload, not overload one.",
+          "metric_c": 0.8681713459736284,
+          "metric_lottery": 0.873149243605743,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Piano owner: play softly \u2014 avoid mashing keys far past the sounding point.",
+          "metric_c": -0.9881233051822074,
+          "metric_lottery": -0.21925984041051838,
+          "prefers": "L"
+        }
+      ],
+      "justification": "New shape (certain option is a low-energy timed key-engager, never used as C before). Reward returns: C=TimedPress +659.49, A=Neutral hover +752.07 (good branch), B=Slam +293.12 (bad branch). Indifference p* = (659.49-293.12)/(752.07-293.12) = 0.798. At p=0.78 the lottery EV = 0.78*752.07 + 0.22*293.12 = 651.1, so the reward prefers certain C by ~8. A person is offered: keep a trajectory that quietly plays the keys in rhythm, or gamble on 78% pure stillness vs 22% keyboard-mashing. The reward is nearly indifferent; a musician would likely keep the engager, a minimize-mistakes view might gamble on the stillness."
+    },
+    {
+      "rank": 2,
+      "traj_c_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRightHandTimedPress__traj_000.pkl",
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyTimedPressWhenRequired__traj_000.pkl",
+      "p": 0.18,
+      "snapshot_reward_c": 670.7905351017951,
+      "snapshot_reward_lottery": 669.5931365401991,
+      "snapshot_reward_prefers_c": true,
+      "disagreements": [
+        {
+          "perspective": "Audience: how accurately the actual notes match the song (note F1).",
+          "metric_c": 0.0,
+          "metric_lottery": 0.0018981481481481482,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Ergonomics: the two hands should share the workload, not overload one.",
+          "metric_c": 0.2949177342116671,
+          "metric_lottery": 0.9411224717582356,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Piano owner: play softly \u2014 avoid mashing keys far past the sounding point.",
+          "metric_c": -0.9903852302151313,
+          "metric_lottery": -0.813682970317669,
+          "prefers": "L"
+        }
+      ],
+      "justification": "New shape -- all three options are low-energy and the return range is tight, probing risk attitude at very low good-branch probability. Reward returns: C=RightHandTimedPress +670.79, A=Neutral hover +752.07 (good branch), B=TimedPress (two hands) +651.49 (bad branch). Indifference p* = (670.79-651.49)/(752.07-651.49) = 0.192. At p=0.18 the lottery EV = 0.18*752.07 + 0.82*651.49 = 669.6, so the reward prefers certain C by ~1.2 -- essentially a coin-toss-level preference. Certain single-hand engagement vs an 18%/82% gamble between doing nothing and two-hand engagement. The reward resolves a near-tie purely on expected return, where a person might have a firm preference about which style of (non-)playing they want."
+    }
+  ]
+}

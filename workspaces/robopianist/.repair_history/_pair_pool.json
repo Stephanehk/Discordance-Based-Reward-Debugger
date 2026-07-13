@@ -1,0 +1,150 @@
+{
+  "ids": [
+    "T001",
+    "T002",
+    "T003",
+    "T004",
+    "T005",
+    "T006",
+    "T007",
+    "T008",
+    "T009",
+    "T010",
+    "T011",
+    "T012",
+    "T013",
+    "T014",
+    "T015",
+    "T016",
+    "T017",
+    "T018",
+    "T019",
+    "T020",
+    "T021",
+    "T022",
+    "T023",
+    "T024",
+    "T025",
+    "T026",
+    "T027",
+    "T028",
+    "T029",
+    "T030",
+    "T031",
+    "T032",
+    "T033",
+    "T034",
+    "T035",
+    "T036"
+  ],
+  "pool": {
+    "T001": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyExtremeOscillator__traj_000.pkl"
+    },
+    "T002": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyExtremeOscillator__traj_001.pkl"
+    },
+    "T003": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyExtremeOscillator__traj_002.pkl"
+    },
+    "T004": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyExtremeOscillator__traj_003.pkl"
+    },
+    "T005": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaxEffortSlam__traj_000.pkl"
+    },
+    "T006": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaxEffortSlam__traj_001.pkl"
+    },
+    "T007": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaxEffortSlam__traj_002.pkl"
+    },
+    "T008": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaxEffortSlam__traj_003.pkl"
+    },
+    "T009": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRandomExploration__traj_000.pkl"
+    },
+    "T010": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRandomExploration__traj_001.pkl"
+    },
+    "T011": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRandomExploration__traj_002.pkl"
+    },
+    "T012": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRandomExploration__traj_003.pkl"
+    },
+    "T013": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_000.pkl"
+    },
+    "T014": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_001.pkl"
+    },
+    "T015": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_002.pkl"
+    },
+    "T016": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_003.pkl"
+    },
+    "T017": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySustainAlwaysOn__traj_000.pkl"
+    },
+    "T018": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySustainAlwaysOn__traj_001.pkl"
+    },
+    "T019": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySustainAlwaysOn__traj_002.pkl"
+    },
+    "T020": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySustainAlwaysOn__traj_003.pkl"
+    },
+    "T021": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHoverJustAboveKeys__traj_000.pkl"
+    },
+    "T022": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHoverJustAboveKeys__traj_001.pkl"
+    },
+    "T023": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHoverJustAboveKeys__traj_002.pkl"
+    },
+    "T024": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHoverJustAboveKeys__traj_003.pkl"
+    },
+    "T025": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_000.pkl"
+    },
+    "T026": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_001.pkl"
+    },
+    "T027": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_002.pkl"
+    },
+    "T028": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_003.pkl"
+    },
+    "T029": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRightHandTimedPress__traj_000.pkl"
+    },
+    "T030": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRightHandTimedPress__traj_001.pkl"
+    },
+    "T031": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRightHandTimedPress__traj_002.pkl"
+    },
+    "T032": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRightHandTimedPress__traj_003.pkl"
+    },
+    "T033": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyTimedPressWhenRequired__traj_000.pkl"
+    },
+    "T034": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyTimedPressWhenRequired__traj_001.pkl"
+    },
+    "T035": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyTimedPressWhenRequired__traj_002.pkl"
+    },
+    "T036": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyTimedPressWhenRequired__traj_003.pkl"
+    }
+  }
+}

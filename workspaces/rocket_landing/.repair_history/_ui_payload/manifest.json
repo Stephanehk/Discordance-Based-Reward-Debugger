@@ -1,0 +1,67 @@
+{
+  "workspace": "rocket_landing",
+  "snapshot_id": 4,
+  "feature_key_file": "/next/u/stephhk/automated_reward_repairer/workspaces/rocket_landing/.repair_history/_ui_payload/feature_key.json",
+  "cards": [
+    {
+      "kind": "pair",
+      "label": "PAIR 1/2",
+      "layout": null,
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/rocket_landing/.repair_history/_ui_payload/pair1.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/rocket_landing/viz/round4/pair1/A.mp4",
+          "caption": "Designed reward function's preferred trajectory"
+        },
+        {
+          "src": "/workspace/rocket_landing/viz/round4/pair1/B.mp4",
+          "caption": "The alternative trajectory"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/rocket_landing/.repair_history/_ui_payload/pair1.viz.json"
+    },
+    {
+      "kind": "pair",
+      "label": "PAIR 2/2",
+      "layout": null,
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/rocket_landing/.repair_history/_ui_payload/pair2.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/rocket_landing/viz/round4/pair2/A.mp4",
+          "caption": "Designed reward function's preferred trajectory"
+        },
+        {
+          "src": "/workspace/rocket_landing/viz/round4/pair2/B.mp4",
+          "caption": "The alternative trajectory"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/rocket_landing/.repair_history/_ui_payload/pair2.viz.json"
+    },
+    {
+      "kind": "lottery",
+      "label": "LOTTERY 1/1",
+      "layout": "lottery",
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/rocket_landing/.repair_history/_ui_payload/lottery1.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/rocket_landing/viz/round4/lottery1/A.mp4",
+          "caption": "Trajectory A",
+          "role": "A",
+          "probability": 0.42
+        },
+        {
+          "src": "/workspace/rocket_landing/viz/round4/lottery1/B.mp4",
+          "caption": "Trajectory B",
+          "role": "B",
+          "probability": 0.58
+        },
+        {
+          "src": "/workspace/rocket_landing/viz/round4/lottery1/C.mp4",
+          "caption": "Certain (C)",
+          "role": "C"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/rocket_landing/.repair_history/_ui_payload/lottery1.viz.json"
+    }
+  ]
+}

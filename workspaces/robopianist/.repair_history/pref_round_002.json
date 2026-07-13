@@ -1,0 +1,79 @@
+{
+  "snapshot_id": 2,
+  "timestamp": "2026-07-10T18:11:00",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRandomExploration__traj_003.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyExtremeOscillator__traj_002.pkl",
+      "snapshot_reward_a": 47.83495735750811,
+      "snapshot_reward_b": -992.8738644480575,
+      "disagreements": [
+        {
+          "perspective": "Audience: how accurately the actual notes match the song (note F1).",
+          "metric_a": 0.020028612303290415,
+          "metric_b": 0.028955532574974147
+        },
+        {
+          "perspective": "Piano owner: play softly \u2014 avoid mashing keys far past the sounding point.",
+          "metric_a": -0.9857625670861005,
+          "metric_b": -0.977778229128901
+        }
+      ]
+    }
+  ],
+  "lotteries": [
+    {
+      "rank": 1,
+      "traj_c_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyMaxEffortSlam__traj_003.pkl",
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_003.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRandomExploration__traj_002.pkl",
+      "p": 0.32,
+      "snapshot_reward_c": 275.73304955964574,
+      "snapshot_reward_lottery": 261.4068168407544,
+      "snapshot_reward_prefers_c": true,
+      "disagreements": [
+        {
+          "perspective": "Audience: how accurately the actual notes match the song (note F1).",
+          "metric_c": 0.0,
+          "metric_lottery": 0.011444600280504907,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Ergonomics: the two hands should share the workload, not overload one.",
+          "metric_c": 0.6100837094784647,
+          "metric_lottery": 0.9796563305254913,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Piano owner: play softly \u2014 avoid mashing keys far past the sounding point.",
+          "metric_c": -0.9985551425307626,
+          "metric_lottery": -0.6715816521578349,
+          "prefers": "L"
+        }
+      ],
+      "justification": "New shape (certain option is a key-mash, never used as C before; low good-branch probability). Reward returns: C=Slam +275.73, A=Neutral +752.28 (good branch), B=Random +30.41 (bad branch). Indifference p* = (275.73-30.41)/(752.28-30.41) = 0.340. At p=0.32 the lottery EV = 0.32*752.28 + 0.68*30.41 = 261.4, so the reward prefers certain C by ~14. This probes a different point on the curve than the earlier lotteries (good-branch prob 0.32 vs 0.70/0.85): a certain low-effort key-mash vs a gamble that is mostly (68%) an energetic, note-touching random policy. A person who wants the piano actually engaged might take the 68% chance of activity over certain mashing. p chosen just below p* on the C-preferring side."
+    },
+    {
+      "rank": 2,
+      "traj_c_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRandomExploration__traj_003.pkl",
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizerNeutralHover__traj_003.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyExtremeOscillator__traj_002.pkl",
+      "p": 0.57,
+      "snapshot_reward_c": 47.83495735750811,
+      "snapshot_reward_lottery": 1.8664315098114344,
+      "snapshot_reward_prefers_c": true,
+      "disagreements": [
+        {
+          "perspective": "Piano owner: play softly \u2014 avoid mashing keys far past the sounding point.",
+          "metric_c": -0.9857625670861005,
+          "metric_lottery": -0.42044463852542746,
+          "prefers": "L"
+        }
+      ],
+      "justification": "New shape (certain option consistently touches a few correct keys; good branch is stillness, not mashing; mid-curve probability). Reward returns: C=Random +47.83, A=Neutral +752.28 (good branch), B=Oscillator -992.87 (bad branch). Indifference p* = (47.83-(-992.87))/(752.28-(-992.87)) = 1040.7/1745.15 = 0.596. At p=0.57 the lottery EV = 0.57*752.28 + 0.43*(-992.87) = 1.9, so the reward prefers certain C by ~46. Differs from the prior Random-as-C lottery by making the good branch pure stillness (not a mash) and sitting at a mid-curve probability (0.57 vs 0.85): a certain trajectory that reliably plays a couple of notes vs a near-coin-flip between doing nothing and violent thrashing. The reward resolves this on expected return alone; a listener valuing consistent output would keep C."
+    }
+  ]
+}

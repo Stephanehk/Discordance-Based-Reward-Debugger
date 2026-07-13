@@ -1,6 +1,6 @@
 ---
 name: repair-preferences
-description: Show up to 5 trajectory pairs plus up to 2 lottery comparisons (certain trajectory C vs a p-probability lottery over A and B) as preference labels on the web UI. For each comparison: features, scores from the designed reward and the alternative-perspective metrics, the preference label each induces, a short explanation of why another perspective disagrees, and per-trajectory visualization paths. Ends with an overall interpretation of likely reward flaws.
+description: Show up to 5 trajectory pairs plus up to 2 lottery comparisons (certain trajectory C vs a p-probability lottery over A and B) on the web UI. For each: the trajectory videos, a short "why they disagree" line, and one sentence per characteristic contrasting the two trajectories.
 ---
 
 # /repair-preferences — show preference-label disagreements on the web UI
@@ -14,21 +14,9 @@ line.** The chat / terminal output the agent emits is **not** the
 deliverable; the website is. The render script's stdout is consumed by
 the agent, parsed, and forwarded to the UI — not pasted into the chat.
 
-Before any comparison is posted, the response on the web UI must
-include — in this order:
-
-1. **Overall-pattern paragraph + 1–2 possible reward tweaks**, posted
-   via `post --type markdown`. Framed as "the reward *appears* to
-   prioritize X over Y" — never as "the reward is wrong".
-2. **Orientation line**, posted via `post --type status`, telling the
-   user the comparisons below show where the designed reward may be
-   misaligned (and that they'll be asked what to do next). Keep
-   *may be misaligned* — not "wrong".
-3. **Feature key**, posted via `post --type feature_key`. Renders in
-   the right-hand sidebar.
-
-Then the comparisons (pairs first, then lotteries), each with its
-`--why` line.
+Post **only** the comparisons (pairs first, then lotteries), each with
+its `--why` line. Do **not** post a feature key, overall summary,
+pattern paragraph, or misalignment orientation.
 
 Finally, **always** close with the four-option `ask` (edit / add a
 feature / view more / finish and submit). The skill has not delivered
@@ -38,20 +26,15 @@ its core output until that question is on the website.
 
 The user will never read the codebase. Don't include file names,
 internal scripts, or boilerplate paths in anything posted to the
-website. **Never name a metric by its internal identifier**
-(e.g. `performance_metric_<short_name>`). Refer to "the candidate
-performance metric" or describe the perspective from the docstring
-(e.g. "the safety reviewer's view", "the operations perspective").
-Do not use the word "stakeholder" in anything posted to the user — say
-"other perspectives" or describe the specific perspective.
+website. The alternative-perspective metrics are **under-the-hood
+selection signals only** — never mention a perspective, metric, or
+"stakeholder" in anything posted to the user.
 
 **Never call any behavior, reward, or trajectory "correct" or
-"incorrect."** At most, frame things as *possibly* correct/incorrect or
-"appears aligned/misaligned with this perspective's view." Whether
-something is actually right is the user's call — the system surfaces
-evidence, not verdicts. The same applies to the overall interpretation:
-say "the reward *appears* to prioritize X over Y," not "the reward is
-wrong about Y." (See `CLAUDE.md` for the full tone rules.)
+"incorrect."** At most, frame things as *possibly* correct/incorrect.
+Whether something is actually right is the user's call — the system
+surfaces evidence, not verdicts. (See `CLAUDE.md` for the full tone
+rules.)
 
 ### Short status updates
 
@@ -102,6 +85,18 @@ metric, and pick the comparisons most useful for the user to see. The
 legacy algorithmic selector lives in `find_informative_pairs.py` and is
 no longer used for this step.
 
+**Informativeness is judged against the input reward function and its
+suspected flaws.** Read `<WORKSPACE_DIR>/designed_reward_fn.py` (the
+reward whose flaws this whole process exists to surface) and the reward
+decomposition `<WORKSPACE_DIR>/.repair_history/_reward_analysis.md` (its
+per-term breakdown and the exploit hypotheses `H1, H2, …`). A comparison
+is informative to the extent that it exposes one of those suspected
+flaws — a case where a specific reward term or exploit hypothesis drives
+the designed reward to prefer a trajectory the user would plausibly
+reject. Comparisons you can tie to a term or hypothesis in
+`designed_reward_fn.py` outrank generic disagreements that don't point at
+any suspected flaw.
+
 Two kinds of comparisons are available:
 
 - **Pairs** (`{a, b}`): a head-to-head A-vs-B comparison.
@@ -114,10 +109,19 @@ informative lotteries**. Favor diversity — don't repeat the same
 trade-off twice; each comparison should illuminate a distinct way the
 reward might be misaligned.
 
+**1a-pre. Refresh the reward decomposition.** Before selecting, ensure
+`<WORKSPACE_DIR>/.repair_history/_reward_analysis.md` matches the current
+reward hash; if the user edited the reward since it was written,
+regenerate it following `prompts/reward_decomposition_prompt.md` (see
+`CLAUDE.md` → "Reward introspection" for the reuse rule), so selection
+reasons about the *current* reward. All of this reward-flaw reasoning
+stays **internal** — the user-facing `--why` and `--content` still follow
+the tone rules below (no term names, perspectives, or "exploit").
+
 **1a. Dump the trajectory table.**
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
 python select_pairs.py --workspace workspaces/<WORKSPACE> --mode dump
 ```
 
@@ -132,8 +136,16 @@ the user reads — which is what lets you reason about what happened.
 
 For **pairs**, identify head-to-head comparisons where the designed
 reward ranks the two trajectories oppositely to another perspective the
-user plausibly cares about, or that otherwise best expose how the
-reward trades off the outcomes that matter.
+user plausibly cares about, or that otherwise best expose where the reward function is flawed and how the
+reward trades off the outcomes that matter. **Prioritize pairs you can
+tie to a specific reward term or exploit hypothesis `H#`** from the
+decomposition: the strongest comparison is one where the reward prefers A
+because a particular term fired (a proxy term, a farmable dense term, a
+skipped sparse term) while B is the trajectory that actually achieves the
+underlying outcome — read the proxy and true-outcome feature columns to
+confirm the decoupling is real in the two trajectories you pick. A pair
+that shows the reward preferring a proxy-gaming trajectory over a
+genuine-success trajectory should outrank a generic metric disagreement.
 
 For **lotteries**, identify triples (C, A, B) where: A is a clearly
 good outcome under some perspective's lens, B is a clearly bad outcome
@@ -174,10 +186,6 @@ If you want to surface two lotteries, prefer two *different shapes*
 over two values of `p` on the same shape — sweeping `p` on one shape
 is a single question rendered twice.
 
-You **must justify** your choice of `p` in the selection file —
-explain in one sentence why this specific `p` makes the disagreement
-legible.
-
 For both kinds, favor diversity across perspectives, behaviors, and
 reward terms. Use the internal `src` column only to judge diversity;
 never reveal round, policy, or step counts to the user. Aim for up to
@@ -190,8 +198,11 @@ can't find that many genuinely informative ones.
 ```json
 {
   "pairs": [
-    {"a": "T012", "b": "T034"},
-    {"a": "T100", "b": "T077"}
+    {"a": "T012", "b": "T034",
+     "reward_basis": "H[n] [proxy term]: reward prefers A because the proxy term fired; B achieves the true outcome the proxy stands in for",
+     "characteristics": ["<short_name_1>", "<short_name_2>", "<short_name_3>"]},
+    {"a": "T100", "b": "T077",
+     "characteristics": ["<short_name_1>", "<short_name_2>"]}
   ],
   "lotteries": [
     {"c": "T020", "a": "T005", "b": "T088", "p": 0.5,
@@ -200,38 +211,50 @@ can't find that many genuinely informative ones.
 }
 ```
 
+`"reward_basis"` is an **optional internal** field (the renderer ignores
+it; it is never shown to the user): one phrase naming the reward term or
+exploit hypothesis `H#` that drives this pair's questionable preference.
+Add it to every pair you can tie to the decomposition, and let it guide
+the `characteristics` ordering — put the proxy and true-outcome features
+that explain the preference first.
+
+For each pair, **rank the characteristics** via the optional
+`"characteristics"` list — the characteristic `short_name`s (the table's
+feature columns), ordered most→least informative about *why the designed
+reward's preference may be wrong for this pair*. The display lists them
+in that order (any you omit follow in their default order). Put the
+characteristics that best explain the questionable preference first.
+
 Then render:
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm && \
+source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
 python select_pairs.py --workspace workspaces/<WORKSPACE> --mode render \
        --selection workspaces/<WORKSPACE>/.repair_history/_selection.json
 ```
 
-The render step orients A = the reward-preferred side for pairs, lists
-the other perspectives that prefer B, prints each pair in the
-preference-label format, and for each comparison the workspace's
-`viz.py` saves per-trajectory visualizations to
+The render step orients A = the reward-preferred side for pairs (so A is
+"Designed reward function's preferred trajectory", B "the alternative trajectory"), prints one
+sentence per characteristic contrasting the two, and for each comparison
+the workspace's `viz.py` saves per-trajectory visualizations to
 `workspaces/<WORKSPACE>/viz/round{snap_id}/{pair,lottery}{rank}/…` and
 prints those paths.
 
-For lotteries it also computes `return(C)` and `p·return(A) +
-(1−p)·return(B)` under the designed reward, prints the lottery as a
-question (certain trajectory C vs the lottery), and lists the other
-perspectives whose preference disagrees with the reward's.
+For lotteries the render emits **no** user-facing content — you author a
+short plain-English summary of how A, B, and C differ (see Step 2).
+Perspective metrics drive selection under the hood but are never printed.
 
 The render also writes a **ready-to-post UI payload** to
 `workspaces/<WORKSPACE>/.repair_history/_ui_payload/` (printed at the end
 of its stdout as `[ui_payload] …`): a `manifest.json` listing every card
-in render order, one `*.content.txt` per card (the exact block to post,
-already stripped of the trailing visualizations list), one `*.viz.json`
-per card (the `--viz` argument, with this round's visuals — `src` URLs,
-`preferred`, and lottery `role`/`probability` — already filled in), and a
-`feature_key.json`. The bundle is regenerated on every render, so its
-visuals always belong to the round just rendered. You supply only the
-per-round judgment text (the overall-pattern paragraph and each card's
-`--why`); you do **not** hand-build viz JSON, content files, or the
-feature key any more. Use it in Step 2.
+in render order, one `*.content.txt` per card (for pairs, the exact
+sentences to post; empty for lotteries), and one `*.viz.json` per card
+(the `--viz` argument, with this round's visuals — `src` URLs,
+`preferred`, and lottery `role`/`probability` — already filled in). The
+bundle is regenerated on every render, so its visuals always belong to
+the round just rendered. You supply each pair's `--why` line, and for
+each lottery both its `--content` summary and its `--why` line; you do
+**not** hand-build viz JSON. Use it in Step 2.
 
 The render's stdout (and these payload files) are the source the agent
 forwards to the web UI in Step 2; nothing is copy-pasted into the chat.
@@ -242,66 +265,45 @@ there's not yet enough evidence to surface diverse disagreements.)
 
 ### 2. Forward the deliverable to the web UI
 
-This is the load-bearing step. Carry out all of the following before
-moving on.
+This is the load-bearing step. Post **only** the comparisons — no
+feature key, overall summary, pattern paragraph, or misalignment
+orientation.
 
-**2a. Overall pattern paragraph** (post first, before any comparison):
-
-```bash
-python -m web_ui.cli post --type markdown --content "<your overall pattern + 1–2 possible reward tweaks, ≤ 6 lines, framed as 'the reward *appears* to prioritize X over Y — if that wasn't intended, one option is …'. Never 'the reward is wrong about X.'>"
-```
-
-**2b. Orientation status:**
-
-```bash
-python -m web_ui.cli post --type status --content "View the trajectory comparisons below to note where the designed reward function may be misaligned. You'll be asked what to do next."
-```
-
-**2c. Feature key in the right sidebar.** Post the feature key the render
-already emitted — don't reconstruct it:
-
-```bash
-python -m web_ui.cli post --type feature_key \
-    --features-file workspaces/<WORKSPACE>/.repair_history/_ui_payload/feature_key.json
-```
-
-**2d. Each comparison** (pairs first, in render order; then lotteries).
+**Each comparison** (pairs first, in render order; then lotteries).
 Read
 `workspaces/<WORKSPACE>/.repair_history/_ui_payload/manifest.json` and
 post one comparison per entry in its `cards` list, **in order**. Every
 card already carries this round's `content_file`, `viz_file` (the exact
 `--viz` argument, with the round-specific `src` URLs, `preferred` badge,
 and lottery `role`/`probability` already filled in), `label`, and
-`layout`. You add **only** the `--why` judgment line:
+`layout`:
 
 ```bash
-# pair card (layout is null):
+# pair card (layout is null): post the render's sentences verbatim.
 python -m web_ui.cli post --type comparison \
     --label "<card.label>" \
     --content-file "<card.content_file>" \
     --viz "$(cat <card.viz_file>)" \
-    --why "<1–2 sentences naming the trade-off the reward made. For pairs: look at the largest entries in the Δ (B−A) column — those features drive the disagreement. Phrase as: 'the reward *appears* to prioritize <reward-term> over <other-perspective-priority>, scoring A higher because <feature shift>; this perspective would have chosen the opposite trade-off because <their priority>.'>"
+    --why "<1 sentence naming the trade-off between the two trajectories — what the designed reward function's preferred trajectory gains and what it gives up. Don't mention perspectives or metrics.>"
 
-# lottery card (layout is "lottery"): add --layout lottery
+# lottery card (layout is "lottery"): you author --content (the content_file is empty).
 python -m web_ui.cli post --type comparison \
     --label "<card.label>" --layout lottery \
-    --content-file "<card.content_file>" \
+    --content "<2–3 sentences on how Trajectory A (good branch), Trajectory B (bad branch), and the certain Trajectory C differ. Be QUANTITATIVE: state the actual characteristic values (with units) from the table; do NOT use qualitative interpretations like 'safe', 'smooth', or 'aggressive'. Don't mention perspectives or metrics.>" \
     --viz "$(cat <card.viz_file>)" \
-    --why "<1–2 sentences naming the risk-attitude or curvature trade-off between C and the lottery. Phrase as: 'the reward *appears* to treat the lottery as worth more than C (i.e. it is risk-seeking between A's upside and B's downside relative to this perspective's view); this perspective prefers C because <their priority — usually downside aversion or upside skepticism>.'>"
+    --why "<1 sentence naming the risk-attitude trade-off between the certain trajectory C and the lottery. Don't mention perspectives or metrics.>"
 ```
 
-Pass `--layout <card.layout>` only when the card's `layout` is non-null
-(lotteries). Omit `--viz` only when a card's `viz_file` is null (the
-workspace has no `viz.py`, so no visuals were produced). The `--why`
-line is the one piece you author per card; it differs each round, just
-as the visuals do.
+For pairs, post `--content-file` exactly as the render produced it. For
+lotteries, supply your own `--content` summary (the render leaves the
+lottery content empty). Pass `--layout lottery` only for lottery cards.
+Omit `--viz` only when a card's `viz_file` is null (the workspace has no
+`viz.py`, so no visuals were produced).
 
-Don't name a metric by its internal id; either say "the candidate
-performance metric" or refer to the perspective ("the safety
-reviewer's view", etc.). Do not use the word "stakeholder". Do not
-re-introduce policy class names or round numbers — the payload
-intentionally hides them. Do not edit the `content_file` — post it
-exactly as the render produced it.
+Never mention a perspective, metric, or "stakeholder" — they are
+under-the-hood signals only. Do not re-introduce policy class names or
+round numbers — the payload intentionally hides them. Do not edit a
+pair's `content_file` — post it exactly as the render produced it.
 
 ### 3. Always close by asking the user what to do next
 
@@ -312,7 +314,7 @@ wording very close to them):
 python -m web_ui.cli ask --prompt "What would you like to do next?" \
     --options '[
       {"label":"Edit the reward function","description":"Modify the reward to reflect what you actually want, based on the disagreements above."},
-      {"label":"Add another trajectory feature","description":"Add a new feature to the trajectory summary so the comparisons show more detail."},
+      {"label":"Add another characteristic","description":"Add a new characteristic to the trajectory summary so the comparisons show more detail."},
       {"label":"View more comparisons","description":"Surface additional pairs or lotteries from the evidence already collected."},
       {"label":"Finish and submit (not reversible)","description":"Lock in the current reward function as the final answer. This ends the session."}
     ]'
@@ -342,7 +344,7 @@ Read `value` from the returned JSON.
     to re-check the previously-surfaced pairs, **or** `/repair-round`
     to gather fresh evidence under the new reward.
 
-- **Add another trajectory feature** → ask the user, via a long-text
+- **Add another characteristic** → ask the user, via a long-text
   question, what feature they want. Edit
   `gather_evidence/trajectory_features.py`, re-run
   `runtime.compute_features` over every existing round so all
@@ -406,7 +408,7 @@ Read `value` from the returned JSON.
 
 ```bash
 python -m web_ui.cli post --type markdown --content "💡 **Tips for guiding a reward edit**
-- Be concrete: name the term to change, and — if you can — the preference label you want for each shown pair (e.g. \"for pair 2, A ≻ B should become B ≻ A\").
+- Be concrete: name the term to change, and — if you can — which trajectory should come out ahead for each shown pair (e.g. \"for pair 2, the alternative trajectory should become the preferred one\").
 - You can pin an edit to an outcome: e.g. \"increase this penalty until the preference for pair 2 flips,\" and Claude will solve for the smallest change that produces it."
 ```
 

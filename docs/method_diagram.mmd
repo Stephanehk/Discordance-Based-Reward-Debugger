@@ -1,0 +1,112 @@
+%% Automated Reward Repairer — method for surfacing trajectory pairs / lotteries
+%% Each lane is a /repair-* stage. Cylinders are persisted artifacts on disk.
+flowchart TB
+
+  %% ============ STAGE 0/1: SETUP ============
+  subgraph SETUP["/repair-setup — define env &amp; reward"]
+    direction TB
+    S1["Elicit reward-design template<br/>(outcomes to achieve / avoid)"]
+    S2[/"env_config.py<br/>make_env(), OBS/ACTION_DESCRIPTION,<br/>MAX_EPISODE_STEPS"/]
+    S3[/"designed_reward_fn.py<br/>r(obs, act, next_obs) -&gt; float<br/>(template kept as header)"/]
+    S1 --> S3
+    S1 --> S2
+  end
+
+  %% ============ STAGE 2: INIT ============
+  subgraph INIT["/repair-init — instrument the reward (one-time)"]
+    direction TB
+    I1[/"Trajectory2Features<br/>6-12 features the HUMAN reads.<br/>Cover every reward term; expose<br/>proxy vs. true-outcome separately"/]
+    I2[/"performance_metrics.py<br/>3-6 performance_metric_*(traj)-&gt;float.<br/>ALTERNATIVE perspectives; under-the-hood<br/>selection signals, never shown to user"/]
+  end
+
+  %% ============ REWARD DECOMPOSITION (internal) ============
+  subgraph DECOMP["Reward decomposition — internal, regenerated when reward hash changes"]
+    direction TB
+    D1[("_reward_analysis.md<br/>&lt;!-- reward-hash: sha1:... --&gt;<br/>term-by-term breakdown +<br/>exploit hypotheses H1, H2, … Hn")]
+  end
+
+  %% ============ STAGE 3-5: ROUND (autonomous loop) ============
+  subgraph ROUND["/repair-round — collect evidence (loop, up to 3 rounds/call)"]
+    direction TB
+    R1["Author data_collection_policy_round_k.py<br/>REQUIRED: (a) reward-MAXIMIZER policy<br/>(b) ≥1 exploit probe per untested H#<br/>(decouple rewarded proxy from true outcome)"]
+    R2["Roll out + featurize<br/>runtime.run_round / run_round_parallel (SLURM)<br/>≤ 100 trajectories per round"]
+    R3[("round_k_trajectories/*.pkl<br/>round_k_trajectory_features/*.json<br/>{(obs,act,next_obs)…} + features")]
+    R4{"Sufficiency rubric<br/>1) every term + every H# exercised<br/>2) features meaningfully diverse<br/>3) ≥5 disagreeing pairs in table<br/>4) no untried flaw-revealing behavior"}
+    R1 --> R2 --> R3 --> R4
+    R4 -->|"gap remains &amp; &lt;3 rounds"| R1
+  end
+
+  %% ============ STAGE: SELECTION (the core) ============
+  subgraph SELECT["/repair-preferences — select &amp; render comparisons"]
+    direction TB
+    P1["select_pairs.py --mode dump<br/>load ALL trajectories, assign ids T001…<br/>each row = features + designed-reward total<br/>+ every alternative-metric total"]
+    P2[("_trajectory_table.txt<br/>id | reward | metric cols | feature cols | src")]
+    P3["CLAUDE reads table &amp; selects<br/>(not an algorithm):<br/>≤ 5 pairs  +  ≤ 2 lotteries<br/>favoring diversity of trade-offs"]
+    P4[/"_selection.json<br/>pairs:[{a,b,characteristics[]}]<br/>lotteries:[{c,a,b,p,justification}]"/]
+    P5["select_pairs.py --mode render"]
+    P1 --> P2 --> P3 --> P4 --> P5
+
+    subgraph PAIRLOGIC["per PAIR"]
+      direction TB
+      PA["Orient A = higher designed-reward side<br/>(reward-preferred). Δφ = φ(B) − φ(A)"]
+      PB["Disagreeing perspectives =<br/>metrics where total(B) &gt; total(A)"]
+      PC["Rank characteristics most→least<br/>informative; emit 'higher/lower/same<br/>{feature} (a vs. b, unit)' lines"]
+      PA --> PB --> PC
+    end
+
+    subgraph LOTLOGIC["per LOTTERY (C vs p·A + (1−p)·B)"]
+      direction TB
+      LA["return(C) vs p·return(A)+(1−p)·return(B)<br/>p = prob of GOOD branch A"]
+      LB["Indifference p* = (R_C − R_B)/(R_A − R_B);<br/>pick p just off p* → small reward<br/>preference a human might reverse"]
+      LC["Disagreement = any metric whose<br/>C-vs-lottery preference flips vs reward's"]
+      LA --> LB --> LC
+    end
+
+    P5 --> PAIRLOGIC
+    P5 --> LOTLOGIC
+    PC --> P6
+    LC --> P6
+    P6[("pref_round_NNN.json snapshot<br/>(A/B/C paths, p, reward totals,<br/>disagreements) + _ui_payload/")]
+  end
+
+  %% ============ WEB UI ============
+  subgraph UI["Web UI (127.0.0.1:8000) — the only user-facing channel"]
+    direction TB
+    U1["PAIR card: A &amp; B videos on top<br/>(A='your preferred'), 'why they<br/>disagree' line, ranked characteristic<br/>bullets. 1st expanded, rest collapsed"]
+    U2["LOTTERY card: A &amp; B side-by-side<br/>w/ probabilities, certain C below,<br/>quantitative plain-English summary"]
+    U3{"Next step?<br/>edit reward · add characteristic ·<br/>view more · finish &amp; submit"}
+  end
+
+  %% ============ VERIFY ============
+  subgraph VERIFY["/repair-verify — recheck after a reward edit"]
+    direction TB
+    V1["find_informative_pairs.py --check-snapshots<br/>recompute every snapshotted A/B/C under<br/>the CURRENT reward; report which<br/>disagreements are now resolved"]
+  end
+
+  %% ---- cross-stage edges ----
+  S2 --> I1
+  S3 --> I1
+  S3 --> I2
+  S3 -->|"hash"| D1
+  I1 --> R1
+  I2 --> R1
+  D1 --> R1
+  R4 -->|"sufficient OR 3-round cap"| P1
+  D1 -.->|"targets H# coverage"| P3
+  I1 -.->|"feature encoding"| P1
+  I2 -.->|"metric totals (hidden)"| P1
+  P6 --> U1
+  P6 --> U2
+  U1 --> U3
+  U2 --> U3
+  U3 -->|"edit reward"| S3
+  U3 -->|"add characteristic"| I1
+  U3 -->|"view more / collect more"| R1
+  U3 -->|"verify edit"| V1
+  V1 -.->|"still disagreeing → iterate"| S3
+
+  classDef artifact fill:#1f2937,stroke:#60a5fa,stroke-width:1px,color:#e5e7eb;
+  classDef decision fill:#3b0764,stroke:#a855f7,stroke-width:1.5px,color:#f3e8ff;
+  classDef stage fill:#0f172a,stroke:#334155,color:#e2e8f0;
+  class S2,S3,I1,I2,P4,R3,P2,P6,D1 artifact;
+  class R4,U3 decision;

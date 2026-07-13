@@ -46,3 +46,115 @@ Traceback (most recent call last):
 ModuleNotFoundError: No module named 'fastapi'
 
 === launch 2026-06-01T16:02:50 ===
+
+=== launch 2026-06-02T10:51:34 ===
+
+=== launch 2026-06-03T17:38:24 ===
+
+=== launch 2026-06-04T10:17:29 ===
+
+=== launch 2026-06-05T12:22:36 ===
+
+=== launch 2026-06-08T11:10:03 ===
+
+=== launch 2026-06-12T11:41:49 ===
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/next/u/stephhk/automated_reward_repairer/web_ui/server.py", line 47, in <module>
+    from fastapi import FastAPI, HTTPException, Request
+ModuleNotFoundError: No module named 'fastapi'
+
+=== launch 2026-06-12T11:42:15 ===
+
+=== launch 2026-06-15T15:04:19 ===
+
+=== launch 2026-06-15T20:53:08 ===
+
+=== launch 2026-06-16T11:02:50 ===
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/next/u/stephhk/automated_reward_repairer/web_ui/server.py", line 47, in <module>
+    from fastapi import FastAPI, HTTPException, Request
+ModuleNotFoundError: No module named 'fastapi'
+
+=== launch 2026-06-16T11:03:20 ===
+
+=== launch 2026-06-17T13:15:27 ===
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/next/u/stephhk/automated_reward_repairer/web_ui/server.py", line 47, in <module>
+    from fastapi import FastAPI, HTTPException, Request
+ModuleNotFoundError: No module named 'fastapi'
+
+=== launch 2026-06-17T13:15:50 ===
+
+=== launch 2026-06-19T17:30:14 ===
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/next/u/stephhk/automated_reward_repairer/web_ui/server.py", line 47, in <module>
+    from fastapi import FastAPI, HTTPException, Request
+ModuleNotFoundError: No module named 'fastapi'
+
+=== launch 2026-06-19T17:30:38 ===
+
+=== launch 2026-06-22T18:07:20 ===
+
+=== launch 2026-06-26T11:40:33 ===
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/next/u/stephhk/automated_reward_repairer/web_ui/server.py", line 47, in <module>
+    from fastapi import FastAPI, HTTPException, Request
+ModuleNotFoundError: No module named 'fastapi'
+
+=== launch 2026-06-26T11:40:57 ===
+
+=== launch 2026-06-26T11:41:26 ===
+
+=== launch 2026-06-26T11:59:29 ===
+
+=== launch 2026-06-26T11:59:50 ===
+
+=== launch 2026-06-26T13:00:59 ===
+
+=== launch 2026-06-26T13:01:08 ===
+
+=== launch 2026-06-26T13:01:19 ===
+
+=== launch 2026-06-29T10:45:22 ===
+
+=== launch 2026-06-30T09:50:38 ===
+
+=== launch 2026-06-30T20:37:11 ===
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/next/u/stephhk/automated_reward_repairer/web_ui/server.py", line 47, in <module>
+    from fastapi import FastAPI, HTTPException, Request
+ModuleNotFoundError: No module named 'fastapi'
+
+=== launch 2026-06-30T20:37:33 ===
+
+=== launch 2026-07-10T15:14:19 ===
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/next/u/stephhk/automated_reward_repairer/web_ui/server.py", line 47, in <module>
+    from fastapi import FastAPI, HTTPException, Request
+ModuleNotFoundError: No module named 'fastapi'
+
+=== launch 2026-07-10T15:14:42 ===
+
+=== launch 2026-07-13T11:01:25 ===
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/next/u/stephhk/automated_reward_repairer/web_ui/server.py", line 47, in <module>
+    from fastapi import FastAPI, HTTPException, Request
+ModuleNotFoundError: No module named 'fastapi'
+
+=== launch 2026-07-13T11:01:54 ===

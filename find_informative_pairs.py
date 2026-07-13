@@ -352,48 +352,73 @@ def _strip_policy_prefix(name: str) -> str:
     return name.removeprefix("DataCollectionPolicy") if name else name
 
 
+def _fmt_value(v) -> str:
+    """Compact display of a feature value: integers plain, others 2 decimals."""
+    v = float(v)
+    return str(int(round(v))) if abs(v - round(v)) < 1e-9 else f"{v:.2f}"
+
+
+_FEATURE_UNITS_CACHE = None
+
+
+def _feature_units_map() -> dict:
+    """Map short_name -> unit string, read from the workspace's optional
+    `Trajectory2Features.feature_units`. Returns {} if none is declared."""
+    global _FEATURE_UNITS_CACHE
+    if _FEATURE_UNITS_CACHE is not None:
+        return _FEATURE_UNITS_CACHE
+    units: dict = {}
+    try:
+        from gather_evidence.trajectory_features import Trajectory2Features
+        names = getattr(Trajectory2Features, "feature_names", [])
+        unit_list = getattr(Trajectory2Features, "feature_units", None)
+        if unit_list:
+            for (short, _desc), u in zip(names, unit_list):
+                units[short] = u
+    except Exception:
+        pass
+    _FEATURE_UNITS_CACHE = units
+    return units
+
+
 def _print_pair_preference_labels(rank: int, total: int,
                                   rec_a: TrajRecord, rec_b: TrajRecord,
                                   disagreements: list[dict],
-                                  score: float | None = None) -> None:
-    """Compact preference-label view; A is reward-preferred.
+                                  score: float | None = None,
+                                  order: list | None = None) -> None:
+    """One sentence per characteristic contrasting the reward-preferred
+    trajectory A ("Designed reward function's preferred trajectory") with B
+    ("the alternative trajectory"). Perspective metrics are used only for
+    under-the-hood selection and are never shown to the user.
 
-    Other perspectives are printed by their docstring (e.g. "the safety
-    reviewer's view") rather than internal metric ids.
+    `order` is an optional list of characteristic short_names, ranked
+    most→least informative about why the reward's preference may be wrong;
+    listed characteristics are shown first in that order, the rest after.
     """
-    a_r = rec_a.designed_reward
-    b_r = rec_b.designed_reward
-    a_meta = rec_a.metadata
-    b_meta = rec_b.metadata
-
-    print()
-    print("═" * 78)
-    print(f"PAIR {rank}/{total}")
-    print("─" * 78)
-    print(f"  Trajectory A")
-    print(f"  Trajectory B")
-    print()
-    print(f"                                  {'Trajectory A':>14s}   {'Trajectory B':>14s}")
-    print(f"  designed reward                 {a_r:>+14.3f}   {b_r:>+14.3f}")
-    print()
-    print(f"  preference by designed reward         →   A ≻ B")
-    print()
-    print(f"  Other perspectives that disagree (prefer B ≻ A):")
-    for d in disagreements:
-        print(f"    • {d['perspective']}")
-        print(f"        A={d['metric_a']:+10.3f}   B={d['metric_b']:+10.3f}")
-    print()
-    if rec_a.features and rec_b.features:
-        print(f"  Trajectory features:")
-        print(f"    {'feature':24s}   {'A':>10s}   {'B':>10s}   {'Δ (B−A)':>10s}")
-        print(f"    {'─' * 60}")
-        for (short, _desc), va, vb in zip(rec_a.feature_names,
-                                          rec_a.features,
-                                          rec_b.features):
-            d_v = vb - va
-            print(f"    {short:24s}   {va:>+10.2f}   {vb:>+10.2f}   {d_v:>+10.2f}")
-    else:
-        print("  (no features on disk for these trajectories)")
+    if not (rec_a.features and rec_b.features):
+        print("(no characteristics recorded for these trajectories)")
+        return
+    units = _feature_units_map()
+    rows = list(zip(rec_a.feature_names, rec_a.features, rec_b.features))
+    if order:
+        rank_of = {short: i for i, short in enumerate(order)}
+        # Stable sort: listed characteristics by their rank, the rest keep
+        # their original order after them.
+        rows.sort(key=lambda t: rank_of.get(t[0][0], len(order)))
+    # First line is the lead-in header; each following line is a bulleted item
+    # (the web UI renders line 1 as a heading and the rest as the purple boxes).
+    print("Designed reward function's preferred trajectory has a")
+    for (short, desc), va, vb in rows:
+        label = desc.rstrip(". ")
+        # Lowercase the leading capital so it reads naturally, but leave
+        # acronyms (e.g. "CO2") alone.
+        if label[:2] != label[:2].upper():
+            label = label[0].lower() + label[1:]
+        unit = units.get(short, "")
+        suffix = f", {unit}" if unit else ""
+        vals = f"({_fmt_value(va)} vs. {_fmt_value(vb)}{suffix})"
+        word = "higher" if va > vb else "lower" if va < vb else "same"
+        print(f"**{word}** {label} {vals}")
 
 
 def _print_trajectory_features_block(rec: TrajRecord, indent: str = "    ") -> None:
@@ -419,56 +444,12 @@ def _print_lottery_preference_labels(rank: int, total: int,
                                      justification: str | None = None) -> None:
     """Lottery comparison: certain trajectory C vs (p·A, (1-p)·B).
 
-    Rendered as a question to the user. Other perspectives that disagree
-    with the designed reward are listed (a perspective "disagrees" when
-    its preference between C and the lottery differs from the reward's).
+    The user-facing description (a plain-English summary of how the certain
+    trajectory C and the lottery's branches A and B differ) is authored by
+    the skill and posted via `--content`, so nothing is printed here.
+    Perspective metrics are used only for under-the-hood selection.
     """
-    pct_a = 100.0 * p
-    pct_b = 100.0 * (1.0 - p)
-
-    print()
-    print("═" * 78)
-    print(f"LOTTERY {rank}/{total}")
-    print("─" * 78)
-    print()
-    print(f"Do you prefer the following trajectory:")
-    print()
-    _print_trajectory_features_block(rec_c)
-    print()
-    print(f"or a {pct_a:g}% chance of this trajectory:")
-    print()
-    _print_trajectory_features_block(rec_a)
-    print()
-    print(f"and a {pct_b:g}% chance of this trajectory:")
-    print()
-    _print_trajectory_features_block(rec_b)
-    print(f"?")
-    print()
-    print(f"  Designed reward")
-    print(f"    return(C)                              =  {r_c:>+10.3f}")
-    print(f"    {p:.2f}·return(A) + {1.0-p:.2f}·return(B)  "
-          f"           =  {r_lottery:>+10.3f}")
-    if reward_prefers_c:
-        print(f"    → preference by designed reward            →   C ≻ lottery")
-    else:
-        print(f"    → preference by designed reward            →   lottery ≻ C")
-    print()
-    pref_side = "lottery ≻ C" if reward_prefers_c else "C ≻ lottery"
-    print(f"  Other perspectives that disagree (prefer {pref_side}):")
-    if not disagreements:
-        print(f"    (none — no other perspective disagrees with the reward "
-              f"on this lottery)")
-    else:
-        for d in disagreements:
-            print(f"    • {d['perspective']}")
-            m_c = d.get("metric_c", 0.0)
-            m_lot = d.get("metric_lottery", 0.0)
-            print(f"        metric(C)={m_c:+10.3f}   "
-                  f"{p:.2f}·m(A)+{1.0-p:.2f}·m(B)={m_lot:+10.3f}")
-    if justification:
-        print()
-        print(f"  Why this p={p:g}:")
-        print(f"    {justification}")
+    return
 
 
 HISTORY_DIR = ".repair_history"

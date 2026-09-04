@@ -1,12 +1,38 @@
 """Designed reward for the Meta-World `drawer-open-v3` task.
 
-This is the environment's own dense reward (`SawyerDrawerOpenEnvV3.compute_reward`
-with the default `reward_function_version="v2"`), reproduced here so it can be
-evaluated from a `(obs, act, next_obs)` transition alone. It is the sum of a
-*caging* term (bring the gripper to the handle) and an *opening* term (bring the
-handle to the fully-open target), each shaped with dm_control's `tolerance`,
-scaled by 5. It is computed on `next_obs`, matching the env, which evaluates the
-post-step observation. The action is unused.
+What this reward pays for
+-------------------------
+Over an episode, the rewards below sum to
+
+    return(tau)  ~=  OPEN_WEIGHT * (how far open the drawer is at the END)
+                     + a small, bounded guidance term for reaching the handle
+
+so a trajectory is worth exactly the state it leaves the drawer in. Opening the
+drawer and letting it slide back gives that credit up; opening it and shoving it
+shut again is worth nothing at all. Nothing is paid for *dwelling* near the goal,
+so the reward cannot be collected by parking the arm half-way and idling.
+
+How it gets there
+-----------------
+Both terms are written as **differences** between the step's two observations
+rather than as levels. A per-step level is integrated over the episode, which is
+what makes an idle-in-a-good-pose trajectory score like a finished one. A per-step
+difference telescopes: summed over the episode it collapses to (final - initial),
+i.e. a property of the endpoints alone.
+
+  * Opening: `OPEN_WEIGHT * (openness(next_obs) - openness(obs))`, where openness
+    runs 0 (shut, as the episode starts) to 1 (fully open). It sums to
+    `OPEN_WEIGHT * openness(final)`. Progress pays, backsliding costs the same,
+    and standing still pays zero.
+
+  * Caging: the same hand-to-handle term the task has always used, but entered as
+    a *potential* — only its change is paid. It sums to
+    `CAGE_WEIGHT * (cage(final) - cage(initial))`, which is bounded by
+    +/- CAGE_WEIGHT and cannot outweigh the opening term. It keeps a dense
+    "get to the handle" gradient for learning without letting a trajectory earn
+    anything by hovering there.
+
+The action is unused: how hard or how jerkily the arm moves is not scored.
 
 Observation — Box(shape=(45,), float64):
   [0:3]   hand (end-effector) position (x, y, z), meters
@@ -32,7 +58,9 @@ import numpy as np
 MAX_DIST = 0.2  # meters the handle travels from closed to fully open
 VALUE_AT_MARGIN = 0.1  # tolerance() output once the error reaches `margin`
 XY_SCALE = np.array([3.0, 3.0, 1.0])  # emphasize XY hand-to-handle error over Z
-REWARD_SCALE = 5.0  # env multiplies the summed terms by this
+
+OPEN_WEIGHT = 10.0  # a full open, held to the end, is worth this much
+CAGE_WEIGHT = 0.5  # guidance only; bounded by +/- this over a whole episode
 
 
 def _long_tail(x: float) -> float:
@@ -48,25 +76,36 @@ def _tolerance(x: float, upper_bound: float, margin: float) -> float:
     return _long_tail((x - upper_bound) / margin)
 
 
-def designed_reward_fn(obs, act, next_obs) -> float:
-    next_obs = np.asarray(next_obs, dtype=np.float64)
+def _openness(o) -> float:
+    """How far open the drawer is: 0.0 = shut (as it starts), 1.0 = fully open."""
+    handle = o[4:7]
+    target_pos = o[39:42]  # handle position when fully open
+    remaining = float(np.linalg.norm(handle - target_pos))
+    return float(np.clip(1.0 - remaining / MAX_DIST, 0.0, 1.0))
 
-    gripper = next_obs[0:3]  # hand position, meters
-    handle = next_obs[4:7]  # drawer-handle position, meters
-    target_pos = next_obs[39:42]  # handle position when fully open, meters
-    init_tcp = next_obs[42:45]  # hand position at episode start, meters
 
-    # Opening: how far the handle still is from the fully-open pose, meters.
-    handle_error = float(np.linalg.norm(handle - target_pos))
-    reward_for_opening = _tolerance(handle_error, upper_bound=0.02, margin=MAX_DIST)
+def _caging_potential(o) -> float:
+    """Hand-to-handle proximity, 0 (far) to 1 (at the handle). Guidance only."""
+    gripper = o[0:3]  # hand position
+    handle = o[4:7]  # drawer-handle position
+    target_pos = o[39:42]
+    init_tcp = o[42:45]  # hand position at episode start
 
-    # Caging: XY-emphasized hand-to-handle error, normalized by the same error at
-    # episode start (hand at its initial pose, drawer closed).
+    # Normalize by the same error at episode start: hand at its initial pose,
+    # drawer shut (so the handle sits MAX_DIST from its fully-open target).
     handle_pos_init = target_pos + np.array([0.0, MAX_DIST, 0.0])
     gripper_error = float(np.linalg.norm((handle - gripper) * XY_SCALE))
     gripper_error_init = float(np.linalg.norm((handle_pos_init - init_tcp) * XY_SCALE))
-    reward_for_caging = _tolerance(
-        gripper_error, upper_bound=0.01, margin=gripper_error_init
-    )
+    return _tolerance(gripper_error, upper_bound=0.01, margin=gripper_error_init)
 
-    return REWARD_SCALE * (reward_for_caging + reward_for_opening)
+
+def designed_reward_fn(obs, act, next_obs) -> float:
+    obs = np.asarray(obs, dtype=np.float64)
+    next_obs = np.asarray(next_obs, dtype=np.float64)
+
+    # Both terms are paid on their *change* over the step, so that summing them
+    # over an episode leaves only the endpoints (see the module docstring).
+    opening = _openness(next_obs) - _openness(obs)
+    caging = _caging_potential(next_obs) - _caging_potential(obs)
+
+    return OPEN_WEIGHT * opening + CAGE_WEIGHT * caging

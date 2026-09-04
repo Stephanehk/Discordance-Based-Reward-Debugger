@@ -1,0 +1,58 @@
+[
+  {
+    "name": "final_open_frac",
+    "description": "how far open the drawer is at the end (0 = shut, 1 = fully open)"
+  },
+  {
+    "name": "max_open_frac",
+    "description": "the furthest the drawer was opened at any point in the attempt"
+  },
+  {
+    "name": "ends_open",
+    "description": "1 if the drawer is open to within the task's tolerance at the end, else 0"
+  },
+  {
+    "name": "steps_to_open",
+    "description": "steps taken to first reach the fully-open position (episode length if never)"
+  },
+  {
+    "name": "drawer_slipped_back",
+    "description": "how much of the opening was given back after the furthest point (fraction)"
+  },
+  {
+    "name": "frac_steps_drawer_open",
+    "description": "fraction of steps with the drawer at the fully-open position"
+  },
+  {
+    "name": "mean_handle_to_target",
+    "description": "average distance from the handle to its fully-open position (m)"
+  },
+  {
+    "name": "mean_hand_to_handle",
+    "description": "average distance from the hand to the drawer handle (m)"
+  },
+  {
+    "name": "frac_steps_hand_at_handle",
+    "description": "fraction of steps with the hand touching-distance from the handle"
+  },
+  {
+    "name": "frac_steps_fingers_closed",
+    "description": "fraction of steps with the fingers closed rather than splayed open"
+  },
+  {
+    "name": "frac_steps_pulling_handle",
+    "description": "fraction of steps where the hand is on the handle and the handle is actually moving"
+  },
+  {
+    "name": "mean_action_magnitude",
+    "description": "average size of the commanded movement each step (0-1)"
+  },
+  {
+    "name": "mean_action_change",
+    "description": "average step-to-step change in the command \u2014 how jerky the motion is"
+  },
+  {
+    "name": "hand_path_length",
+    "description": "total distance the hand travelled over the attempt (m)"
+  }
+]

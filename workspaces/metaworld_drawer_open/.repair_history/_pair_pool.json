@@ -97,7 +97,207 @@
     "T095",
     "T096",
     "T097",
-    "T098"
+    "T098",
+    "T099",
+    "T100",
+    "T101",
+    "T102",
+    "T103",
+    "T104",
+    "T105",
+    "T106",
+    "T107",
+    "T108",
+    "T109",
+    "T110",
+    "T111",
+    "T112",
+    "T113",
+    "T114",
+    "T115",
+    "T116",
+    "T117",
+    "T118",
+    "T119",
+    "T120",
+    "T121",
+    "T122",
+    "T123",
+    "T124",
+    "T125",
+    "T126",
+    "T127",
+    "T128",
+    "T129",
+    "T130",
+    "T131",
+    "T132",
+    "T133",
+    "T134",
+    "T135",
+    "T136",
+    "T137",
+    "T138",
+    "T139",
+    "T140",
+    "T141",
+    "T142",
+    "T143",
+    "T144",
+    "T145",
+    "T146",
+    "T147",
+    "T148",
+    "T149",
+    "T150",
+    "T151",
+    "T152",
+    "T153",
+    "T154",
+    "T155",
+    "T156",
+    "T157",
+    "T158",
+    "T159",
+    "T160",
+    "T161",
+    "T162",
+    "T163",
+    "T164",
+    "T165",
+    "T166",
+    "T167",
+    "T168",
+    "T169",
+    "T170",
+    "T171",
+    "T172",
+    "T173",
+    "T174",
+    "T175",
+    "T176",
+    "T177",
+    "T178",
+    "T179",
+    "T180",
+    "T181",
+    "T182",
+    "T183",
+    "T184",
+    "T185",
+    "T186",
+    "T187",
+    "T188",
+    "T189",
+    "T190",
+    "T191",
+    "T192",
+    "T193",
+    "T194",
+    "T195",
+    "T196",
+    "T197",
+    "T198",
+    "T199",
+    "T200",
+    "T201",
+    "T202",
+    "T203",
+    "T204",
+    "T205",
+    "T206",
+    "T207",
+    "T208",
+    "T209",
+    "T210",
+    "T211",
+    "T212",
+    "T213",
+    "T214",
+    "T215",
+    "T216",
+    "T217",
+    "T218",
+    "T219",
+    "T220",
+    "T221",
+    "T222",
+    "T223",
+    "T224",
+    "T225",
+    "T226",
+    "T227",
+    "T228",
+    "T229",
+    "T230",
+    "T231",
+    "T232",
+    "T233",
+    "T234",
+    "T235",
+    "T236",
+    "T237",
+    "T238",
+    "T239",
+    "T240",
+    "T241",
+    "T242",
+    "T243",
+    "T244",
+    "T245",
+    "T246",
+    "T247",
+    "T248",
+    "T249",
+    "T250",
+    "T251",
+    "T252",
+    "T253",
+    "T254",
+    "T255",
+    "T256",
+    "T257",
+    "T258",
+    "T259",
+    "T260",
+    "T261",
+    "T262",
+    "T263",
+    "T264",
+    "T265",
+    "T266",
+    "T267",
+    "T268",
+    "T269",
+    "T270",
+    "T271",
+    "T272",
+    "T273",
+    "T274",
+    "T275",
+    "T276",
+    "T277",
+    "T278",
+    "T279",
+    "T280",
+    "T281",
+    "T282",
+    "T283",
+    "T284",
+    "T285",
+    "T286",
+    "T287",
+    "T288",
+    "T289",
+    "T290",
+    "T291",
+    "T292",
+    "T293",
+    "T294",
+    "T295",
+    "T296",
+    "T297",
+    "T298"
   ],
   "pool": {
     "T001": {
@@ -393,6 +593,606 @@
     },
     "T098": {
       "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySlamOpen__traj_013.pkl"
+    },
+    "T099": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_000.pkl"
+    },
+    "T100": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_001.pkl"
+    },
+    "T101": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_002.pkl"
+    },
+    "T102": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_003.pkl"
+    },
+    "T103": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_004.pkl"
+    },
+    "T104": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_005.pkl"
+    },
+    "T105": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_006.pkl"
+    },
+    "T106": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_007.pkl"
+    },
+    "T107": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_008.pkl"
+    },
+    "T108": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_009.pkl"
+    },
+    "T109": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_010.pkl"
+    },
+    "T110": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_011.pkl"
+    },
+    "T111": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_012.pkl"
+    },
+    "T112": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_013.pkl"
+    },
+    "T113": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_014.pkl"
+    },
+    "T114": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_015.pkl"
+    },
+    "T115": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_016.pkl"
+    },
+    "T116": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_017.pkl"
+    },
+    "T117": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_018.pkl"
+    },
+    "T118": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_019.pkl"
+    },
+    "T119": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_020.pkl"
+    },
+    "T120": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_021.pkl"
+    },
+    "T121": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_022.pkl"
+    },
+    "T122": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_023.pkl"
+    },
+    "T123": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_024.pkl"
+    },
+    "T124": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_000.pkl"
+    },
+    "T125": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_001.pkl"
+    },
+    "T126": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_002.pkl"
+    },
+    "T127": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_003.pkl"
+    },
+    "T128": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_004.pkl"
+    },
+    "T129": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_005.pkl"
+    },
+    "T130": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_006.pkl"
+    },
+    "T131": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_007.pkl"
+    },
+    "T132": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_008.pkl"
+    },
+    "T133": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_009.pkl"
+    },
+    "T134": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_010.pkl"
+    },
+    "T135": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_011.pkl"
+    },
+    "T136": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_012.pkl"
+    },
+    "T137": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_013.pkl"
+    },
+    "T138": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_014.pkl"
+    },
+    "T139": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_015.pkl"
+    },
+    "T140": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_016.pkl"
+    },
+    "T141": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_017.pkl"
+    },
+    "T142": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_018.pkl"
+    },
+    "T143": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_019.pkl"
+    },
+    "T144": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_020.pkl"
+    },
+    "T145": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_021.pkl"
+    },
+    "T146": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_022.pkl"
+    },
+    "T147": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_023.pkl"
+    },
+    "T148": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_024.pkl"
+    },
+    "T149": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_000.pkl"
+    },
+    "T150": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_001.pkl"
+    },
+    "T151": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_002.pkl"
+    },
+    "T152": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_003.pkl"
+    },
+    "T153": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_004.pkl"
+    },
+    "T154": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_005.pkl"
+    },
+    "T155": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_006.pkl"
+    },
+    "T156": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_007.pkl"
+    },
+    "T157": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_008.pkl"
+    },
+    "T158": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_009.pkl"
+    },
+    "T159": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_010.pkl"
+    },
+    "T160": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_011.pkl"
+    },
+    "T161": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_012.pkl"
+    },
+    "T162": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_013.pkl"
+    },
+    "T163": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_014.pkl"
+    },
+    "T164": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_015.pkl"
+    },
+    "T165": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_016.pkl"
+    },
+    "T166": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_017.pkl"
+    },
+    "T167": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_018.pkl"
+    },
+    "T168": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_019.pkl"
+    },
+    "T169": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_020.pkl"
+    },
+    "T170": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_021.pkl"
+    },
+    "T171": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_022.pkl"
+    },
+    "T172": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_023.pkl"
+    },
+    "T173": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_024.pkl"
+    },
+    "T174": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_000.pkl"
+    },
+    "T175": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_001.pkl"
+    },
+    "T176": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_002.pkl"
+    },
+    "T177": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_003.pkl"
+    },
+    "T178": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_004.pkl"
+    },
+    "T179": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_005.pkl"
+    },
+    "T180": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_006.pkl"
+    },
+    "T181": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_007.pkl"
+    },
+    "T182": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_008.pkl"
+    },
+    "T183": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_009.pkl"
+    },
+    "T184": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_010.pkl"
+    },
+    "T185": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_011.pkl"
+    },
+    "T186": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_012.pkl"
+    },
+    "T187": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_013.pkl"
+    },
+    "T188": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_014.pkl"
+    },
+    "T189": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_015.pkl"
+    },
+    "T190": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_016.pkl"
+    },
+    "T191": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_017.pkl"
+    },
+    "T192": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_018.pkl"
+    },
+    "T193": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_019.pkl"
+    },
+    "T194": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_020.pkl"
+    },
+    "T195": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_021.pkl"
+    },
+    "T196": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_022.pkl"
+    },
+    "T197": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_023.pkl"
+    },
+    "T198": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_024.pkl"
+    },
+    "T199": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_000.pkl"
+    },
+    "T200": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_001.pkl"
+    },
+    "T201": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_002.pkl"
+    },
+    "T202": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_003.pkl"
+    },
+    "T203": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_004.pkl"
+    },
+    "T204": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_005.pkl"
+    },
+    "T205": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_006.pkl"
+    },
+    "T206": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_007.pkl"
+    },
+    "T207": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_008.pkl"
+    },
+    "T208": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_009.pkl"
+    },
+    "T209": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_010.pkl"
+    },
+    "T210": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_011.pkl"
+    },
+    "T211": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_012.pkl"
+    },
+    "T212": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_013.pkl"
+    },
+    "T213": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_014.pkl"
+    },
+    "T214": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_015.pkl"
+    },
+    "T215": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_016.pkl"
+    },
+    "T216": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_017.pkl"
+    },
+    "T217": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_018.pkl"
+    },
+    "T218": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_019.pkl"
+    },
+    "T219": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_020.pkl"
+    },
+    "T220": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_021.pkl"
+    },
+    "T221": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_022.pkl"
+    },
+    "T222": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_023.pkl"
+    },
+    "T223": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyHalfOpenThenCamp__traj_024.pkl"
+    },
+    "T224": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_000.pkl"
+    },
+    "T225": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_001.pkl"
+    },
+    "T226": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_002.pkl"
+    },
+    "T227": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_003.pkl"
+    },
+    "T228": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_004.pkl"
+    },
+    "T229": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_005.pkl"
+    },
+    "T230": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_006.pkl"
+    },
+    "T231": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_007.pkl"
+    },
+    "T232": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_008.pkl"
+    },
+    "T233": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_009.pkl"
+    },
+    "T234": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_010.pkl"
+    },
+    "T235": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_011.pkl"
+    },
+    "T236": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_012.pkl"
+    },
+    "T237": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_013.pkl"
+    },
+    "T238": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_014.pkl"
+    },
+    "T239": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_015.pkl"
+    },
+    "T240": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_016.pkl"
+    },
+    "T241": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_017.pkl"
+    },
+    "T242": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_018.pkl"
+    },
+    "T243": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_019.pkl"
+    },
+    "T244": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_020.pkl"
+    },
+    "T245": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_021.pkl"
+    },
+    "T246": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_022.pkl"
+    },
+    "T247": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_023.pkl"
+    },
+    "T248": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRandomWalk__traj_024.pkl"
+    },
+    "T249": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_000.pkl"
+    },
+    "T250": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_001.pkl"
+    },
+    "T251": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_002.pkl"
+    },
+    "T252": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_003.pkl"
+    },
+    "T253": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_004.pkl"
+    },
+    "T254": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_005.pkl"
+    },
+    "T255": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_006.pkl"
+    },
+    "T256": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_007.pkl"
+    },
+    "T257": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_008.pkl"
+    },
+    "T258": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_009.pkl"
+    },
+    "T259": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_010.pkl"
+    },
+    "T260": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_011.pkl"
+    },
+    "T261": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_012.pkl"
+    },
+    "T262": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_013.pkl"
+    },
+    "T263": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_014.pkl"
+    },
+    "T264": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_015.pkl"
+    },
+    "T265": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_016.pkl"
+    },
+    "T266": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_017.pkl"
+    },
+    "T267": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_018.pkl"
+    },
+    "T268": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_019.pkl"
+    },
+    "T269": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_020.pkl"
+    },
+    "T270": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_021.pkl"
+    },
+    "T271": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_022.pkl"
+    },
+    "T272": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_023.pkl"
+    },
+    "T273": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyRewardMaximizer__traj_024.pkl"
+    },
+    "T274": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_000.pkl"
+    },
+    "T275": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_001.pkl"
+    },
+    "T276": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_002.pkl"
+    },
+    "T277": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_003.pkl"
+    },
+    "T278": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_004.pkl"
+    },
+    "T279": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_005.pkl"
+    },
+    "T280": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_006.pkl"
+    },
+    "T281": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_007.pkl"
+    },
+    "T282": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_008.pkl"
+    },
+    "T283": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_009.pkl"
+    },
+    "T284": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_010.pkl"
+    },
+    "T285": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_011.pkl"
+    },
+    "T286": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_012.pkl"
+    },
+    "T287": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_013.pkl"
+    },
+    "T288": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_014.pkl"
+    },
+    "T289": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_015.pkl"
+    },
+    "T290": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_016.pkl"
+    },
+    "T291": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_017.pkl"
+    },
+    "T292": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_018.pkl"
+    },
+    "T293": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_019.pkl"
+    },
+    "T294": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_020.pkl"
+    },
+    "T295": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_021.pkl"
+    },
+    "T296": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_022.pkl"
+    },
+    "T297": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_023.pkl"
+    },
+    "T298": {
+      "path": "gather_evidence/round_3_trajectories/DataCollectionPolicyWrenchPastOpen__traj_024.pkl"
     }
   }
 }

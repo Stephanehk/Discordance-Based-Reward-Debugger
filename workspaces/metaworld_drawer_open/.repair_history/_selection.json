@@ -1,0 +1,88 @@
+{
+  "pairs": [
+    {
+      "a": "T200",
+      "b": "T001",
+      "reward_basis": "H1/H2 — the reward's own maximum is reachable without finishing. T200 pulls the drawer 81% open by step 73, then parks on the handle and never completes: it ties the global reward maximum (1064.3) and beats a genuine full open (T001, 832.9, ends 96% open and within tolerance) by 231. Both terms are per-step integrals, so being mostly-open early and holding still pays more than being fully open at the end.",
+      "characteristics": [
+        "ends_open",
+        "final_open_frac",
+        "steps_to_open",
+        "mean_handle_to_target",
+        "frac_steps_hand_at_handle",
+        "max_open_frac",
+        "frac_steps_pulling_handle"
+      ]
+    },
+    {
+      "a": "T281",
+      "b": "T003",
+      "reward_basis": "H5/H8 — nothing in the reward reads the action or the handle speed. Both trajectories end with the drawer open to the same extent (0.96 vs 0.97) and both succeed, but T281 hauls on the handle at 1.6x the command magnitude and 6x the jerk and keeps dragging it off-axis after it is already open. Roughness is free and earliness is paid, so T281 wins by 140.",
+      "characteristics": [
+        "mean_action_magnitude",
+        "mean_action_change",
+        "hand_path_length",
+        "steps_to_open",
+        "frac_steps_drawer_open",
+        "final_open_frac",
+        "ends_open"
+      ]
+    },
+    {
+      "a": "T253",
+      "b": "T007",
+      "reward_basis": "H6 — the caging term only measures hand-to-handle distance, so no grasp is ever required. T253 never closes its fingers (frac_steps_fingers_closed 0.00), hooks the drawer, and leaves it 85% open; T007 grips the handle properly (0.45) and pulls it to 96%. The reward prefers the non-grasping, less-open trajectory by 224 because it got there in half the steps.",
+      "characteristics": [
+        "frac_steps_fingers_closed",
+        "frac_steps_pulling_handle",
+        "final_open_frac",
+        "steps_to_open",
+        "frac_steps_drawer_open",
+        "frac_steps_hand_at_handle"
+      ]
+    },
+    {
+      "a": "T280",
+      "b": "T163",
+      "reward_basis": "H8 + no final-state check. T280 yanks the drawer 100% open, then keeps hauling and drags it back to 72% — outside tolerance, task not done. T163 opens it to 85% and leaves it there, within tolerance. The reward prefers the run that wrecked its own result by 195, because it banked the credit earlier.",
+      "characteristics": [
+        "ends_open",
+        "drawer_slipped_back",
+        "final_open_frac",
+        "max_open_frac",
+        "mean_action_magnitude",
+        "frac_steps_drawer_open",
+        "mean_handle_to_target"
+      ]
+    },
+    {
+      "a": "T228",
+      "b": "T130",
+      "reward_basis": "The reward's floor is not zero. Neither trajectory ever touches the drawer. T228 thrashes at random (jerk 0.68, hand travels 0.53 m) and collects 346; T130 stands still and collects 184. The caging term pays 162 points for aimless motion that happens to drift the hand nearer the handle, with nothing achieved.",
+      "characteristics": [
+        "mean_action_change",
+        "mean_action_magnitude",
+        "hand_path_length",
+        "mean_hand_to_handle",
+        "final_open_frac",
+        "ends_open"
+      ]
+    }
+  ],
+  "lotteries": [
+    {
+      "c": "T002",
+      "a": "T253",
+      "b": "T239",
+      "p": 0.69,
+      "justification": "Shape: is the reward willing to gamble a certain success away for speed? C = T002 (824.32), a certain gently-gripped success ending 94% open. Good branch A = T253 (1064.32), a fast hook-and-hold success. Bad branch B = T239 (329.63), random flailing that never touches the drawer. p* = (824.32 - 329.63)/(1064.32 - 329.63) = 0.6733. I set p = 0.69, just onto the lottery-preferring side: the gamble is worth 0.69*1064.32 + 0.31*329.63 = 836.6 against C's 824.3 — a definite but small margin of 12 points (1.5%). That is exactly the hard p: the designed reward accepts a 31% chance the drawer is never touched at all, rather than take a certain successful open, in exchange for a chance at a faster one. A person who cares whether the drawer ends up open would take C without hesitating."
+    },
+    {
+      "c": "T004",
+      "a": "T256",
+      "b": "T045",
+      "p": 0.05,
+      "justification": "Different shape: the bad branch is not failure-to-act but the agent undoing its own work, and here NO p can make the reward prefer the certain trajectory. C = T004 (810.81), a certain gently-gripped success ending 88% open. Good branch A = T256 (1064.31), a fast success. Bad branch B = T045 (936.20), a run that opens the drawer to 88% and then shoves it fully shut, ending 0% open. Because even the bad branch out-scores the certain success, p* = (810.81 - 936.20)/(1064.31 - 936.20) = -0.98 lies outside [0,1] — the reward prefers the lottery at every p. I chose p = 0.05 to make that maximally legible: even when the gamble ends with the drawer shoved shut 95% of the time, the reward still prefers it (942.6 vs 810.8) over a certain successful open. The question for the human is how low a success probability they would tolerate; the reward's answer is zero."
+    }
+  ]
+}

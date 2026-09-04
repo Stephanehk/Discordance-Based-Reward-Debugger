@@ -1,0 +1,193 @@
+{
+  "snapshot_id": 1,
+  "timestamp": "2026-07-13T11:44:01",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoverOnHandle__traj_011.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDawdleThenOpen__traj_021.pkl",
+      "snapshot_reward_a": 745.1724579351574,
+      "snapshot_reward_b": 398.0563145414958,
+      "disagreements": [
+        {
+          "perspective": "Task success: the drawer is open at the end of the attempt.",
+          "metric_a": 0.0,
+          "metric_b": 1.0
+        },
+        {
+          "perspective": "Impatient user: the drawer should be open as early in the attempt as possible.",
+          "metric_a": 0.0,
+          "metric_b": 0.020000000000000018
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyOpenThenClose__traj_005.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyGripAndOpenGently__traj_010.pkl",
+      "snapshot_reward_a": 949.3191422216198,
+      "snapshot_reward_b": 796.7600615881846,
+      "disagreements": [
+        {
+          "perspective": "Task success: the drawer is open at the end of the attempt.",
+          "metric_a": 0.0,
+          "metric_b": 1.0
+        },
+        {
+          "perspective": "Operations: achieve the task with as little commanded motion as possible.",
+          "metric_a": -0.4497904502612073,
+          "metric_b": -0.3430179438020421
+        },
+        {
+          "perspective": "Safety reviewer: the arm should move smoothly, without jerky command reversals.",
+          "metric_a": -0.025523618504330017,
+          "metric_b": -0.00774054045142055
+        },
+        {
+          "perspective": "Demonstration quality: the drawer should be opened by gripping the handle, not hooking or shoving it.",
+          "metric_a": 0.0,
+          "metric_b": 0.6960663438608263
+        },
+        {
+          "perspective": "Hardware maintenance: the drawer should never be yanked or slammed at high speed.",
+          "metric_a": -0.0025994861894932473,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySlamOpen__traj_003.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyGripAndOpenGently__traj_005.pkl",
+      "snapshot_reward_a": 1033.2776751194078,
+      "snapshot_reward_b": 857.7363636825771,
+      "disagreements": [
+        {
+          "perspective": "Operations: achieve the task with as little commanded motion as possible.",
+          "metric_a": -0.5759475306717408,
+          "metric_b": -0.35573435203963055
+        },
+        {
+          "perspective": "Safety reviewer: the arm should move smoothly, without jerky command reversals.",
+          "metric_a": -0.3565903585886617,
+          "metric_b": -0.007887804614274622
+        },
+        {
+          "perspective": "Demonstration quality: the drawer should be opened by gripping the handle, not hooking or shoving it.",
+          "metric_a": 0.0,
+          "metric_b": 0.6957357914128769
+        },
+        {
+          "perspective": "Hardware maintenance: the drawer should never be yanked or slammed at high speed.",
+          "metric_a": -0.0005268782621243948,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyGentleOpenThenRetreat__traj_004.pkl",
+      "snapshot_reward_a": 1064.3162976703948,
+      "snapshot_reward_b": 785.065539059963,
+      "disagreements": [
+        {
+          "perspective": "Operations: achieve the task with as little commanded motion as possible.",
+          "metric_a": -0.4213319208517472,
+          "metric_b": -0.3676911145424947
+        },
+        {
+          "perspective": "Safety reviewer: the arm should move smoothly, without jerky command reversals.",
+          "metric_a": -0.03217999186388673,
+          "metric_b": -0.007444243867578447
+        },
+        {
+          "perspective": "Hardware maintenance: the drawer should never be yanked or slammed at high speed.",
+          "metric_a": -0.0014187822458606811,
+          "metric_b": -0.0
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyGripAndOpenGently__traj_005.pkl",
+      "snapshot_reward_a": 1064.3162976703948,
+      "snapshot_reward_b": 857.7363636825771,
+      "disagreements": [
+        {
+          "perspective": "Operations: achieve the task with as little commanded motion as possible.",
+          "metric_a": -0.4213319208517472,
+          "metric_b": -0.35573435203963055
+        },
+        {
+          "perspective": "Safety reviewer: the arm should move smoothly, without jerky command reversals.",
+          "metric_a": -0.03217999186388673,
+          "metric_b": -0.007887804614274622
+        },
+        {
+          "perspective": "Demonstration quality: the drawer should be opened by gripping the handle, not hooking or shoving it.",
+          "metric_a": 0.0,
+          "metric_b": 0.6957357914128769
+        },
+        {
+          "perspective": "Hardware maintenance: the drawer should never be yanked or slammed at high speed.",
+          "metric_a": -0.0014187822458606811,
+          "metric_b": -0.0
+        }
+      ]
+    }
+  ],
+  "lotteries": [
+    {
+      "rank": 1,
+      "traj_c_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoverOnHandle__traj_011.pkl",
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer__traj_004.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyDoNothing__traj_000.pkl",
+      "p": 0.61,
+      "snapshot_reward_c": 745.1724579351574,
+      "snapshot_reward_lottery": 721.0777421224648,
+      "snapshot_reward_prefers_c": true,
+      "disagreements": [
+        {
+          "perspective": "Task success: the drawer is open at the end of the attempt.",
+          "metric_c": 0.0,
+          "metric_lottery": 0.61,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Impatient user: the drawer should be open as early in the attempt as possible.",
+          "metric_c": 0.0,
+          "metric_lottery": 0.3619333333333333,
+          "prefers": "L"
+        }
+      ],
+      "justification": "C = T040 (745.2): parks on the handle, never opens the drawer. Good branch A = T178 (1064.3): opens it and ends open. Bad branch B = T124 (184.2): does nothing at all. Designed-reward indifference point p* = (745.2 - 184.2) / (1064.3 - 184.2) = 0.637. Setting p = 0.61 puts us just onto the C-preferring side: the lottery is worth 0.61*1064.3 + 0.39*184.2 = 721.0 against C's 745.2, so the reward gives a small but real preference for the certain hover. The human intuition runs the other way: the lottery is a 61% chance the drawer actually gets opened, versus a certainty that it never does. A reward whose flaw is that it pays for hovering should show up exactly here."
+    },
+    {
+      "rank": 2,
+      "traj_c_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyGripAndOpenGently__traj_005.pkl",
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySlamOpen__traj_003.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyOpenThenRetreat__traj_001.pkl",
+      "p": 0.13,
+      "snapshot_reward_c": 857.7363636825771,
+      "snapshot_reward_lottery": 852.1317743751915,
+      "snapshot_reward_prefers_c": true,
+      "disagreements": [
+        {
+          "perspective": "Impatient user: the drawer should be open as early in the attempt as possible.",
+          "metric_c": 0.17333333333333334,
+          "metric_lottery": 0.5344666666666666,
+          "prefers": "L"
+        }
+      ],
+      "justification": "C = T006 (857.7): a careful, gripped open that ends 99% open. Good branch A = T088 (1033.3): a violent slam that ends 94% open. Bad branch B = T058 (825.1): opens the drawer but lets it creep back to 75% (not open by the task's tolerance). Indifference point p* = (857.7 - 825.1) / (1033.3 - 825.1) = 0.157. Setting p = 0.13 sits just below it: the lottery is worth 0.13*1033.3 + 0.87*825.1 = 852.1 against C's 857.7 \u2014 the reward prefers C by only 5.6 points out of ~850. That near-indifference is the point: the reward considers a certain clean success roughly equivalent to an 87% chance of leaving the drawer short plus a 13% chance of a slam, where a person would take the certain success without hesitating. Different shape from lottery 1 (there the reward is too risk-averse; here its exchange rate between outcome quality and risk is simply flat)."
+    }
+  ]
+}

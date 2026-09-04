@@ -1,0 +1,144 @@
+{
+  "workspace": "metaworld_drawer_open",
+  "snapshot_id": 3,
+  "feature_key_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/feature_key.json",
+  "cards": [
+    {
+      "kind": "pair",
+      "label": "PAIR 1/5",
+      "layout": null,
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair1.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair1/A.mp4",
+          "caption": "Designed reward function's preferred trajectory"
+        },
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair1/B.mp4",
+          "caption": "The alternative trajectory"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair1.viz.json"
+    },
+    {
+      "kind": "pair",
+      "label": "PAIR 2/5",
+      "layout": null,
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair2.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair2/A.mp4",
+          "caption": "Designed reward function's preferred trajectory"
+        },
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair2/B.mp4",
+          "caption": "The alternative trajectory"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair2.viz.json"
+    },
+    {
+      "kind": "pair",
+      "label": "PAIR 3/5",
+      "layout": null,
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair3.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair3/A.mp4",
+          "caption": "Designed reward function's preferred trajectory"
+        },
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair3/B.mp4",
+          "caption": "The alternative trajectory"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair3.viz.json"
+    },
+    {
+      "kind": "pair",
+      "label": "PAIR 4/5",
+      "layout": null,
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair4.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair4/A.mp4",
+          "caption": "Designed reward function's preferred trajectory"
+        },
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair4/B.mp4",
+          "caption": "The alternative trajectory"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair4.viz.json"
+    },
+    {
+      "kind": "pair",
+      "label": "PAIR 5/5",
+      "layout": null,
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair5.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair5/A.mp4",
+          "caption": "Designed reward function's preferred trajectory"
+        },
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/pair5/B.mp4",
+          "caption": "The alternative trajectory"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/pair5.viz.json"
+    },
+    {
+      "kind": "lottery",
+      "label": "LOTTERY 1/2",
+      "layout": "lottery",
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/lottery1.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/lottery1/A.mp4",
+          "caption": "Trajectory A",
+          "role": "A",
+          "probability": 0.69
+        },
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/lottery1/B.mp4",
+          "caption": "Trajectory B",
+          "role": "B",
+          "probability": 0.31
+        },
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/lottery1/C.mp4",
+          "caption": "Certain (C)",
+          "role": "C"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/lottery1.viz.json"
+    },
+    {
+      "kind": "lottery",
+      "label": "LOTTERY 2/2",
+      "layout": "lottery",
+      "content_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/lottery2.content.txt",
+      "viz": [
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/lottery2/A.mp4",
+          "caption": "Trajectory A",
+          "role": "A",
+          "probability": 0.05
+        },
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/lottery2/B.mp4",
+          "caption": "Trajectory B",
+          "role": "B",
+          "probability": 0.95
+        },
+        {
+          "src": "/workspace/metaworld_drawer_open/viz/round3/lottery2/C.mp4",
+          "caption": "Certain (C)",
+          "role": "C"
+        }
+      ],
+      "viz_file": "/next/u/stephhk/automated_reward_repairer/workspaces/metaworld_drawer_open/.repair_history/_ui_payload/lottery2.viz.json"
+    }
+  ]
+}

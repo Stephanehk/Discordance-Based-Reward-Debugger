@@ -78,9 +78,13 @@ class _WipeRewardEnv(gym.Env):
 
     metadata = {"render_modes": ["rgb_array"]}
 
-    def __init__(self, render_mode: str | None = None):
+    def __init__(self, render_mode: str | None = None, seed: int | None = None):
         self.render_mode = render_mode
+        self.rd_seed = seed
         use_camera_obs = render_mode == "rgb_array"
+
+        if seed is not None:
+            np.random.seed(seed)
 
         self._env = suite.make(
             env_name="Wipe",
@@ -96,6 +100,7 @@ class _WipeRewardEnv(gym.Env):
             reward_shaping=True,
             camera_names="frontview",
             hard_reset=False,
+            seed=seed,
         )
 
         # Decide which observation keys to flatten — same default as
@@ -235,15 +240,22 @@ class _WipeRewardEnv(gym.Env):
             pass
 
 
-def make_env(render_mode: str | None = None):
+def make_env(render_mode: str | None = None, seed: int | None = None):
     """Build a fresh Wipe env wrapped for the repair pipeline.
 
     ``render_mode="rgb_array"`` enables offscreen camera rendering so
     rollouts can capture per-step frames (consumed by viz.py through the
     ``CAPTURE_FRAMES`` sidecar pipeline).
+
+    ``seed`` controls the dirt layout, which robosuite re-samples on every
+    reset — the rollout runners pass a distinct seed per episode so the
+    episodes of one policy differ. Policies can read it back off the env as
+    ``env.rd_seed``.
     """
-    env = _WipeRewardEnv(render_mode=render_mode)
-    return TimeLimit(env, max_episode_steps=HORIZON)
+    env = _WipeRewardEnv(render_mode=render_mode, seed=seed)
+    wrapped = TimeLimit(env, max_episode_steps=HORIZON)
+    wrapped.rd_seed = seed
+    return wrapped
 
 
 OBS_DESCRIPTION = """\

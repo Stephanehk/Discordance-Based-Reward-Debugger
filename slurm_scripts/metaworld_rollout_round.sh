@@ -1,11 +1,10 @@
 #!/bin/bash
 #SBATCH --partition=next
 #SBATCH --account=next
-#SBATCH --nodelist=next1,next2
 #SBATCH --time=2:00:00
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=16G
 #SBATCH --job-name=mw_rollout
 #SBATCH --output=/next/u/stephhk/automated_reward_repairer/run_logs/slurmjob_%j.out
 #SBATCH --error=/next/u/stephhk/automated_reward_repairer/run_logs/slurmjob_%j.err

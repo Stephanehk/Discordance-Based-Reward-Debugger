@@ -1,0 +1,166 @@
+{
+  "snapshot_id": 3,
+  "timestamp": "2026-07-13T15:07:15",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_000.pkl",
+      "snapshot_reward_a": 663.2161454868894,
+      "snapshot_reward_b": 601.3862122087323,
+      "disagreements": [
+        {
+          "perspective": "Task success: the nail ends up fully driven into the wall.",
+          "metric_a": 0.0,
+          "metric_b": 1.0
+        },
+        {
+          "perspective": "Impatient user: the nail should be driven in as early in the attempt as possible.",
+          "metric_a": 0.0,
+          "metric_b": 0.5866666666666667
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_000.pkl",
+      "snapshot_reward_a": 552.7319059466893,
+      "snapshot_reward_b": 414.7397733867082,
+      "disagreements": [
+        {
+          "perspective": "Impatient user: the nail should be driven in as early in the attempt as possible.",
+          "metric_a": 0.5466666666666666,
+          "metric_b": 0.5666666666666667
+        },
+        {
+          "perspective": "Operations: finish with as little commanded arm motion as possible.",
+          "metric_a": 0.5252570127237892,
+          "metric_b": 0.6414762638359334
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_000.pkl",
+      "snapshot_reward_a": 663.2161454868894,
+      "snapshot_reward_b": 139.51217693571627,
+      "disagreements": [
+        {
+          "perspective": "Task success: the nail ends up fully driven into the wall.",
+          "metric_a": 0.0,
+          "metric_b": 1.0
+        },
+        {
+          "perspective": "Impatient user: the nail should be driven in as early in the attempt as possible.",
+          "metric_a": 0.0,
+          "metric_b": 0.7266666666666667
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_000.pkl",
+      "snapshot_reward_a": 601.3862122087323,
+      "snapshot_reward_b": 365.6997245159677,
+      "disagreements": [
+        {
+          "perspective": "Impatient user: the nail should be driven in as early in the attempt as possible.",
+          "metric_a": 0.5866666666666667,
+          "metric_b": 0.7333333333333334
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_000.pkl",
+      "snapshot_reward_a": 663.2161454868894,
+      "snapshot_reward_b": 528.56312733042,
+      "disagreements": [
+        {
+          "perspective": "Operations: finish with as little commanded arm motion as possible.",
+          "metric_a": 0.7450186975788958,
+          "metric_b": 0.762110862387934
+        },
+        {
+          "perspective": "Hardware maintenance: the nail should be tapped in progressively, never sunk in one violent blow.",
+          "metric_a": 0.5569177809472643,
+          "metric_b": 0.5912804954105528
+        }
+      ]
+    }
+  ],
+  "lotteries": [
+    {
+      "rank": 1,
+      "traj_c_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_000.pkl",
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_000.pkl",
+      "p": 0.9,
+      "snapshot_reward_c": 601.3862122087323,
+      "snapshot_reward_lottery": 610.8457486317722,
+      "snapshot_reward_prefers_c": false,
+      "disagreements": [
+        {
+          "perspective": "Task success: the nail ends up fully driven into the wall.",
+          "metric_c": 1.0,
+          "metric_lottery": 0.09999999999999998,
+          "prefers": "C"
+        },
+        {
+          "perspective": "Impatient user: the nail should be driven in as early in the attempt as possible.",
+          "metric_c": 0.5866666666666667,
+          "metric_lottery": 0.07266666666666666,
+          "prefers": "C"
+        },
+        {
+          "perspective": "Craft quality: the nail should be sunk by striking it with the hammer, not shoved by the arm.",
+          "metric_c": 1.0,
+          "metric_lottery": 0.9,
+          "prefers": "C"
+        },
+        {
+          "perspective": "Reliability: the arm should keep hold of the hammer rather than dropping or losing it.",
+          "metric_c": 1.0,
+          "metric_lottery": 0.9,
+          "prefers": "C"
+        }
+      ],
+      "justification": "C = a certain, clean full success driven home with the hammer (T147, 601.4). The lottery's 'good' branch under the designed reward is A = the run that parks the nail 1mm short and never finishes (T122, 663.2); the other branch B = a full success pushed in by the gripper (T025, 139.5). Indifference is p* = (601.4 - 139.5) / (663.2 - 139.5) = 0.882. I chose p = 0.90, just ABOVE p*, so the reward now prefers the LOTTERY (EV 610.9 vs 601.4) \u2014 it gives up a guaranteed driven nail for a 90% chance of a run in which the nail is never driven at all. A user is choosing between a sure thing and a gamble that is 90% likely to leave the job unfinished; they would keep the sure thing. The reward says otherwise, and only barely \u2014 which shows how little the act of finishing is actually worth to it."
+    },
+    {
+      "rank": 2,
+      "traj_c_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_000.pkl",
+      "traj_a_path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_000.pkl",
+      "p": 0.5,
+      "snapshot_reward_c": 663.2161454868894,
+      "snapshot_reward_lottery": 577.0590590777108,
+      "snapshot_reward_prefers_c": true,
+      "disagreements": [
+        {
+          "perspective": "Task success: the nail ends up fully driven into the wall.",
+          "metric_c": 0.0,
+          "metric_lottery": 1.0,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Impatient user: the nail should be driven in as early in the attempt as possible.",
+          "metric_c": 0.0,
+          "metric_lottery": 0.5666666666666667,
+          "prefers": "L"
+        }
+      ],
+      "justification": "A different shape: BOTH lottery branches fully drive the nail into the wall, differing only in what the arm does afterwards (A finishes cleanly, 601.4; B thrashes at full magnitude while jammed against the nail, 552.7). So the lottery guarantees the task is completed whichever way the coin falls. C is the reward's favourite trajectory overall \u2014 the one that stops 1mm short and never finishes (T122, 663.2). Because C outscores BOTH branches, no indifference point exists in [0,1]: the designed reward prefers the certain non-completion for EVERY value of p. I set p = 0.50 so the two branches are symmetric and the only thing the coin decides is HOW the nail gets driven, never WHETHER \u2014 making it as plain as possible that the reward is rejecting a guaranteed success in favour of a guaranteed failure."
+    }
+  ]
+}

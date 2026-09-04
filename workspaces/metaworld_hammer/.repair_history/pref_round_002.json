@@ -1,0 +1,181 @@
+{
+  "snapshot_id": 2,
+  "timestamp": "2026-07-13T14:40:34",
+  "selection_method": "claude_selected",
+  "pairs": [
+    {
+      "rank": 1,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_000.pkl",
+      "snapshot_reward_a": 567.6697789774377,
+      "snapshot_reward_b": 528.56312733042,
+      "disagreements": [
+        {
+          "perspective": "Operations: finish with as little commanded arm motion as possible.",
+          "metric_a": 0.6980837251035142,
+          "metric_b": 0.762110862387934
+        },
+        {
+          "perspective": "Hardware maintenance: the nail should be tapped in progressively, never sunk in one violent blow.",
+          "metric_a": 0.48607198708825033,
+          "metric_b": 0.5912804954105528
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_000.pkl",
+      "snapshot_reward_a": 414.7397733867082,
+      "snapshot_reward_b": 399.638661229062,
+      "disagreements": [
+        {
+          "perspective": "Operations: finish with as little commanded arm motion as possible.",
+          "metric_a": 0.6414762638359334,
+          "metric_b": 0.7670102244576776
+        },
+        {
+          "perspective": "Hardware maintenance: the nail should be tapped in progressively, never sunk in one violent blow.",
+          "metric_a": 0.48773002761621814,
+          "metric_b": 0.604960332649613
+        },
+        {
+          "perspective": "Reliability: the arm should keep hold of the hammer rather than dropping or losing it.",
+          "metric_a": 0.4748201438848921,
+          "metric_b": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_000.pkl",
+      "snapshot_reward_a": 220.3604343936579,
+      "snapshot_reward_b": 206.9518723266356,
+      "disagreements": [
+        {
+          "perspective": "Operations: finish with as little commanded arm motion as possible.",
+          "metric_a": 0.6114173875708063,
+          "metric_b": 0.6708845921229891
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_000.pkl",
+      "snapshot_reward_a": 255.86166175092245,
+      "snapshot_reward_b": 139.51217693571627,
+      "disagreements": [
+        {
+          "perspective": "Task success: the nail ends up fully driven into the wall.",
+          "metric_a": 0.0,
+          "metric_b": 1.0
+        },
+        {
+          "perspective": "Impatient user: the nail should be driven in as early in the attempt as possible.",
+          "metric_a": 0.0,
+          "metric_b": 0.7266666666666667
+        },
+        {
+          "perspective": "Operations: finish with as little commanded arm motion as possible.",
+          "metric_a": 0.4814242269614493,
+          "metric_b": 0.5344240294282037
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "score": 0.0,
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_000.pkl",
+      "snapshot_reward_a": 255.86166175092245,
+      "snapshot_reward_b": 206.9518723266356,
+      "disagreements": [
+        {
+          "perspective": "Operations: finish with as little commanded arm motion as possible.",
+          "metric_a": 0.4814242269614493,
+          "metric_b": 0.6708845921229891
+        },
+        {
+          "perspective": "Hardware maintenance: the nail should be tapped in progressively, never sunk in one violent blow.",
+          "metric_a": 0.5218450970820435,
+          "metric_b": 1.0
+        },
+        {
+          "perspective": "Reliability: the arm should keep hold of the hammer rather than dropping or losing it.",
+          "metric_a": 0.2949640287769784,
+          "metric_b": 0.45588235294117646
+        }
+      ]
+    }
+  ],
+  "lotteries": [
+    {
+      "rank": 1,
+      "traj_c_path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_000.pkl",
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_000.pkl",
+      "p": 0.1,
+      "snapshot_reward_c": 414.7397733867082,
+      "snapshot_reward_lottery": 412.5311078391978,
+      "snapshot_reward_prefers_c": true,
+      "disagreements": [
+        {
+          "perspective": "Operations: finish with as little commanded arm motion as possible.",
+          "metric_c": 0.6414762638359334,
+          "metric_lottery": 0.7665202882507034,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Hardware maintenance: the nail should be tapped in progressively, never sunk in one violent blow.",
+          "metric_c": 0.48773002761621814,
+          "metric_lottery": 0.603592348925707,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Reliability: the arm should keep hold of the hammer rather than dropping or losing it.",
+          "metric_c": 0.4748201438848921,
+          "metric_lottery": 1.0,
+          "prefers": "L"
+        }
+      ],
+      "justification": "C = a full success that also tidily sets the hammer down (T049, 414.7, nail fully driven). NEITHER lottery branch ever drives the nail: A stops it halfway and holds (T073, 528.6), B holds the hammer against a nail that barely moves (T013, 399.6). Designed-reward indifference is p* = (414.7 - 399.6) / (528.6 - 399.6) = 0.117. I chose p = 0.10, just below p*, so the reward prefers the certain success by a razor-thin margin (EV 412.5 vs 414.7). That thinness IS the finding: a guaranteed, cleanly-finished job is worth barely more to this reward than a 90%-likely outcome in which the nail is never driven in at all. A user would take C overwhelmingly, not by a hair."
+    },
+    {
+      "rank": 2,
+      "traj_c_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_000.pkl",
+      "traj_a_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_000.pkl",
+      "traj_b_path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_000.pkl",
+      "p": 0.15,
+      "snapshot_reward_c": 220.3604343936579,
+      "snapshot_reward_lottery": 203.73581724197447,
+      "snapshot_reward_prefers_c": true,
+      "disagreements": [
+        {
+          "perspective": "Task success: the nail ends up fully driven into the wall.",
+          "metric_c": 0.0,
+          "metric_lottery": 1.0,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Impatient user: the nail should be driven in as early in the attempt as possible.",
+          "metric_c": 0.0,
+          "metric_lottery": 0.7046666666666667,
+          "prefers": "L"
+        },
+        {
+          "perspective": "Craft quality: the nail should be sunk by striking it with the hammer, not shoved by the arm.",
+          "metric_c": 0.0,
+          "metric_lottery": 0.15,
+          "prefers": "L"
+        }
+      ],
+      "justification": "A different shape: BOTH lottery branches fully drive the nail into the wall \u2014 they differ only in method (A strikes it with the hammer, 567.7; B pushes it in with the gripper, 139.5). So the lottery guarantees the task is completed, whatever the coin does. C is an arm that clamps the handle and does nothing whatsoever (T001, 220.4). Indifference is p* = (220.4 - 139.5) / (567.7 - 139.5) = 0.189; I chose p = 0.15, just below it, so the designed reward prefers the certain do-nothing (EV 203.8 vs 220.4). The reward turns down a guaranteed driven nail in order to lock in an episode where nothing happens \u2014 the choice a user would find easiest is the one the reward gets backwards."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+Designed reward function's preferred trajectory has a
+**lower** nail travel that happened without the hammer head on the nail (m) (0 vs. 0.10)
+**higher** fraction of steps the hammer is actually lifted and in the hand (0.93 vs. 0.51)
+**higher** fraction of steps the hammer head hovers at that pose (0.59 vs. 0.13)
+**lower** mean size of the arm's per-step movement command (0.42 vs. 0.96)
+**higher** fraction of the episode taken to drive the nail in (1.0 = never) (0.42 vs. 0.27)
+**same** 1 if the nail was driven all the way in, else 0 (1 vs. 1)
+**lower** how far the nail ends up driven into the wall (m) (0.10 vs. 0.10)
+**lower** mean distance from the hammer head to the nail's driven-in pose (m) (0.10 vs. 0.21)
+**higher** fraction of steps the fingers bracket the hammer handle (0.37 vs. 0)
+**higher** fraction of steps the gripper is commanded to squeeze shut (0.91 vs. 0.73)
+**lower** highest the hammer is raised above where it started (m) (0.12 vs. 0.13)
+**lower** how flat the hammer is held, 1 = perfectly level, 0 = fully tipped (0.76 vs. 0.91)

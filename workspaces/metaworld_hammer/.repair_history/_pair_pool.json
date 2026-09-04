@@ -1,0 +1,790 @@
+{
+  "ids": [
+    "T001",
+    "T002",
+    "T003",
+    "T004",
+    "T005",
+    "T006",
+    "T007",
+    "T008",
+    "T009",
+    "T010",
+    "T011",
+    "T012",
+    "T013",
+    "T014",
+    "T015",
+    "T016",
+    "T017",
+    "T018",
+    "T019",
+    "T020",
+    "T021",
+    "T022",
+    "T023",
+    "T024",
+    "T025",
+    "T026",
+    "T027",
+    "T028",
+    "T029",
+    "T030",
+    "T031",
+    "T032",
+    "T033",
+    "T034",
+    "T035",
+    "T036",
+    "T037",
+    "T038",
+    "T039",
+    "T040",
+    "T041",
+    "T042",
+    "T043",
+    "T044",
+    "T045",
+    "T046",
+    "T047",
+    "T048",
+    "T049",
+    "T050",
+    "T051",
+    "T052",
+    "T053",
+    "T054",
+    "T055",
+    "T056",
+    "T057",
+    "T058",
+    "T059",
+    "T060",
+    "T061",
+    "T062",
+    "T063",
+    "T064",
+    "T065",
+    "T066",
+    "T067",
+    "T068",
+    "T069",
+    "T070",
+    "T071",
+    "T072",
+    "T073",
+    "T074",
+    "T075",
+    "T076",
+    "T077",
+    "T078",
+    "T079",
+    "T080",
+    "T081",
+    "T082",
+    "T083",
+    "T084",
+    "T085",
+    "T086",
+    "T087",
+    "T088",
+    "T089",
+    "T090",
+    "T091",
+    "T092",
+    "T093",
+    "T094",
+    "T095",
+    "T096",
+    "T097",
+    "T098",
+    "T099",
+    "T100",
+    "T101",
+    "T102",
+    "T103",
+    "T104",
+    "T105",
+    "T106",
+    "T107",
+    "T108",
+    "T109",
+    "T110",
+    "T111",
+    "T112",
+    "T113",
+    "T114",
+    "T115",
+    "T116",
+    "T117",
+    "T118",
+    "T119",
+    "T120",
+    "T121",
+    "T122",
+    "T123",
+    "T124",
+    "T125",
+    "T126",
+    "T127",
+    "T128",
+    "T129",
+    "T130",
+    "T131",
+    "T132",
+    "T133",
+    "T134",
+    "T135",
+    "T136",
+    "T137",
+    "T138",
+    "T139",
+    "T140",
+    "T141",
+    "T142",
+    "T143",
+    "T144",
+    "T145",
+    "T146",
+    "T147",
+    "T148",
+    "T149",
+    "T150",
+    "T151",
+    "T152",
+    "T153",
+    "T154",
+    "T155",
+    "T156",
+    "T157",
+    "T158",
+    "T159",
+    "T160",
+    "T161",
+    "T162",
+    "T163",
+    "T164",
+    "T165",
+    "T166",
+    "T167",
+    "T168",
+    "T169",
+    "T170",
+    "T171",
+    "T172",
+    "T173",
+    "T174",
+    "T175",
+    "T176",
+    "T177",
+    "T178",
+    "T179",
+    "T180",
+    "T181",
+    "T182",
+    "T183",
+    "T184",
+    "T185",
+    "T186",
+    "T187",
+    "T188",
+    "T189",
+    "T190",
+    "T191",
+    "T192",
+    "T193",
+    "T194",
+    "T195",
+    "T196"
+  ],
+  "pool": {
+    "T001": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_000.pkl"
+    },
+    "T002": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_001.pkl"
+    },
+    "T003": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_002.pkl"
+    },
+    "T004": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_003.pkl"
+    },
+    "T005": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_004.pkl"
+    },
+    "T006": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_005.pkl"
+    },
+    "T007": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_006.pkl"
+    },
+    "T008": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_007.pkl"
+    },
+    "T009": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_008.pkl"
+    },
+    "T010": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_009.pkl"
+    },
+    "T011": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_010.pkl"
+    },
+    "T012": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyCageWithoutLifting__traj_011.pkl"
+    },
+    "T013": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_000.pkl"
+    },
+    "T014": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_001.pkl"
+    },
+    "T015": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_002.pkl"
+    },
+    "T016": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_003.pkl"
+    },
+    "T017": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_004.pkl"
+    },
+    "T018": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_005.pkl"
+    },
+    "T019": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_006.pkl"
+    },
+    "T020": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_007.pkl"
+    },
+    "T021": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_008.pkl"
+    },
+    "T022": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_009.pkl"
+    },
+    "T023": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_010.pkl"
+    },
+    "T024": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyHoldAgainstUndrivenNail__traj_011.pkl"
+    },
+    "T025": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_000.pkl"
+    },
+    "T026": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_001.pkl"
+    },
+    "T027": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_002.pkl"
+    },
+    "T028": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_003.pkl"
+    },
+    "T029": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_004.pkl"
+    },
+    "T030": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_005.pkl"
+    },
+    "T031": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_006.pkl"
+    },
+    "T032": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_007.pkl"
+    },
+    "T033": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_008.pkl"
+    },
+    "T034": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_009.pkl"
+    },
+    "T035": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_010.pkl"
+    },
+    "T036": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyNailByHandNoHammer__traj_011.pkl"
+    },
+    "T037": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_000.pkl"
+    },
+    "T038": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_001.pkl"
+    },
+    "T039": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_002.pkl"
+    },
+    "T040": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_003.pkl"
+    },
+    "T041": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_004.pkl"
+    },
+    "T042": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_005.pkl"
+    },
+    "T043": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_006.pkl"
+    },
+    "T044": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_007.pkl"
+    },
+    "T045": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_008.pkl"
+    },
+    "T046": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_009.pkl"
+    },
+    "T047": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_010.pkl"
+    },
+    "T048": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyRewardMaximizer__traj_011.pkl"
+    },
+    "T049": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_000.pkl"
+    },
+    "T050": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_001.pkl"
+    },
+    "T051": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_002.pkl"
+    },
+    "T052": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_003.pkl"
+    },
+    "T053": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_004.pkl"
+    },
+    "T054": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_005.pkl"
+    },
+    "T055": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_006.pkl"
+    },
+    "T056": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_007.pkl"
+    },
+    "T057": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_008.pkl"
+    },
+    "T058": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_009.pkl"
+    },
+    "T059": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_010.pkl"
+    },
+    "T060": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicySucceedThenDisengage__traj_011.pkl"
+    },
+    "T061": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_000.pkl"
+    },
+    "T062": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_001.pkl"
+    },
+    "T063": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_002.pkl"
+    },
+    "T064": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_003.pkl"
+    },
+    "T065": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_004.pkl"
+    },
+    "T066": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_005.pkl"
+    },
+    "T067": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_006.pkl"
+    },
+    "T068": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_007.pkl"
+    },
+    "T069": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_008.pkl"
+    },
+    "T070": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_009.pkl"
+    },
+    "T071": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_010.pkl"
+    },
+    "T072": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyTiltedCarry__traj_011.pkl"
+    },
+    "T073": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_000.pkl"
+    },
+    "T074": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_001.pkl"
+    },
+    "T075": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_002.pkl"
+    },
+    "T076": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_003.pkl"
+    },
+    "T077": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_004.pkl"
+    },
+    "T078": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_005.pkl"
+    },
+    "T079": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_006.pkl"
+    },
+    "T080": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_007.pkl"
+    },
+    "T081": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_008.pkl"
+    },
+    "T082": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_009.pkl"
+    },
+    "T083": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_010.pkl"
+    },
+    "T084": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyUnderDriveAndHold__traj_011.pkl"
+    },
+    "T085": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_000.pkl"
+    },
+    "T086": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_001.pkl"
+    },
+    "T087": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_002.pkl"
+    },
+    "T088": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_003.pkl"
+    },
+    "T089": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_004.pkl"
+    },
+    "T090": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_005.pkl"
+    },
+    "T091": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_006.pkl"
+    },
+    "T092": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_007.pkl"
+    },
+    "T093": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_008.pkl"
+    },
+    "T094": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_009.pkl"
+    },
+    "T095": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_010.pkl"
+    },
+    "T096": {
+      "path": "gather_evidence/round_1_trajectories/DataCollectionPolicyViolentLooseSlam__traj_011.pkl"
+    },
+    "T097": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_000.pkl"
+    },
+    "T098": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_001.pkl"
+    },
+    "T099": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_002.pkl"
+    },
+    "T100": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_003.pkl"
+    },
+    "T101": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_004.pkl"
+    },
+    "T102": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_005.pkl"
+    },
+    "T103": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_006.pkl"
+    },
+    "T104": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_007.pkl"
+    },
+    "T105": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_008.pkl"
+    },
+    "T106": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_009.pkl"
+    },
+    "T107": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_010.pkl"
+    },
+    "T108": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_011.pkl"
+    },
+    "T109": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_012.pkl"
+    },
+    "T110": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_013.pkl"
+    },
+    "T111": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_014.pkl"
+    },
+    "T112": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_015.pkl"
+    },
+    "T113": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_016.pkl"
+    },
+    "T114": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_017.pkl"
+    },
+    "T115": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_018.pkl"
+    },
+    "T116": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_019.pkl"
+    },
+    "T117": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_020.pkl"
+    },
+    "T118": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_021.pkl"
+    },
+    "T119": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_022.pkl"
+    },
+    "T120": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_023.pkl"
+    },
+    "T121": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyHandDriveThenPose__traj_024.pkl"
+    },
+    "T122": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_000.pkl"
+    },
+    "T123": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_001.pkl"
+    },
+    "T124": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_002.pkl"
+    },
+    "T125": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_003.pkl"
+    },
+    "T126": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_004.pkl"
+    },
+    "T127": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_005.pkl"
+    },
+    "T128": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_006.pkl"
+    },
+    "T129": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_007.pkl"
+    },
+    "T130": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_008.pkl"
+    },
+    "T131": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_009.pkl"
+    },
+    "T132": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_010.pkl"
+    },
+    "T133": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_011.pkl"
+    },
+    "T134": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_012.pkl"
+    },
+    "T135": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_013.pkl"
+    },
+    "T136": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_014.pkl"
+    },
+    "T137": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_015.pkl"
+    },
+    "T138": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_016.pkl"
+    },
+    "T139": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_017.pkl"
+    },
+    "T140": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_018.pkl"
+    },
+    "T141": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_019.pkl"
+    },
+    "T142": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_020.pkl"
+    },
+    "T143": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_021.pkl"
+    },
+    "T144": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_022.pkl"
+    },
+    "T145": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_023.pkl"
+    },
+    "T146": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyPoisedAtSuccessLine__traj_024.pkl"
+    },
+    "T147": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_000.pkl"
+    },
+    "T148": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_001.pkl"
+    },
+    "T149": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_002.pkl"
+    },
+    "T150": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_003.pkl"
+    },
+    "T151": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_004.pkl"
+    },
+    "T152": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_005.pkl"
+    },
+    "T153": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_006.pkl"
+    },
+    "T154": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_007.pkl"
+    },
+    "T155": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_008.pkl"
+    },
+    "T156": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_009.pkl"
+    },
+    "T157": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_010.pkl"
+    },
+    "T158": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_011.pkl"
+    },
+    "T159": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_012.pkl"
+    },
+    "T160": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_013.pkl"
+    },
+    "T161": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_014.pkl"
+    },
+    "T162": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_015.pkl"
+    },
+    "T163": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_016.pkl"
+    },
+    "T164": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_017.pkl"
+    },
+    "T165": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_018.pkl"
+    },
+    "T166": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_019.pkl"
+    },
+    "T167": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_020.pkl"
+    },
+    "T168": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_021.pkl"
+    },
+    "T169": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_022.pkl"
+    },
+    "T170": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_023.pkl"
+    },
+    "T171": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicyRewardMaximizer2__traj_024.pkl"
+    },
+    "T172": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_000.pkl"
+    },
+    "T173": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_001.pkl"
+    },
+    "T174": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_002.pkl"
+    },
+    "T175": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_003.pkl"
+    },
+    "T176": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_004.pkl"
+    },
+    "T177": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_005.pkl"
+    },
+    "T178": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_006.pkl"
+    },
+    "T179": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_007.pkl"
+    },
+    "T180": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_008.pkl"
+    },
+    "T181": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_009.pkl"
+    },
+    "T182": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_010.pkl"
+    },
+    "T183": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_011.pkl"
+    },
+    "T184": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_012.pkl"
+    },
+    "T185": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_013.pkl"
+    },
+    "T186": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_014.pkl"
+    },
+    "T187": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_015.pkl"
+    },
+    "T188": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_016.pkl"
+    },
+    "T189": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_017.pkl"
+    },
+    "T190": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_018.pkl"
+    },
+    "T191": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_019.pkl"
+    },
+    "T192": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_020.pkl"
+    },
+    "T193": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_021.pkl"
+    },
+    "T194": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_022.pkl"
+    },
+    "T195": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_023.pkl"
+    },
+    "T196": {
+      "path": "gather_evidence/round_2_trajectories/DataCollectionPolicySucceedThenThrash__traj_024.pkl"
+    }
+  }
+}

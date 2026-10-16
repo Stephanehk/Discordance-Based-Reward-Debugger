@@ -1,7 +1,11 @@
-# Automated Reward Repairer
+# Discordant-Based Reward Debugger
 
 A tool for checking whether the reward function you wrote actually says
 what you meant.
+
+The name says how it works: it hunts for **discordant** runs — pairs
+where your reward function disagrees with how you'd rank them — and puts
+them in front of you to debug.
 
 If you train an agent in a simulated environment, you have to write down
 a **reward function**: a piece of code that scores how good each moment
@@ -21,50 +25,158 @@ under the new version.
 The comparisons are the product. Nothing here trains a policy or learns
 a reward for you — think of it as a debugger for reward functions.
 
+> **This tool is built on [Claude Code](https://claude.com/claude-code).**
+> The whole workflow is a set of slash commands you run inside Claude
+> Code; Claude is what reads your reward, writes the probe policies, and
+> picks the comparisons. We developed and tested it with a **Claude Max
+> subscription** running **Claude Opus 4.8**, and that is the setup we
+> recommend — the quality of the comparisons depends on the model doing
+> the reasoning. In Claude Code, select Opus with `/model`.
+
 ---
 
 ## What you need
 
-- **Claude Code.** The whole workflow runs as slash commands inside
-  Claude Code, from this repo's root directory.
-- **Python 3.10+** with `numpy` and `gymnasium` (`pip install -r
-  requirements.txt`). On this machine those live in the `llm` conda
-  environment:
-  ```bash
-  source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm
-  ```
-  Some environments need heavier dependencies (MuJoCo, Meta-World, …)
-  and so have their own conda environment. An environment folder can
-  carry a one-line `.conda_env` file naming the one it needs; when that
-  file is absent, `llm` is assumed. The slash commands read it and
-  activate the right environment for you.
-- **A Gym/Gymnasium environment** to inspect — either something
-  installable (`gym.make("Hopper-v4")`) or your own Python class.
-- **A reward function, or just an idea of one.** You don't have to write
-  the code: the first step can interview you and write it for you.
-- **A browser.** All the reading and deciding happens on a local web
-  page, not in the terminal.
+1. **Claude Code**, with a **Max subscription** and **Opus 4.8** selected
+   (`/model` → Opus). Every command below is run from this repo's root
+   directory.
+2. **Python 3.10+** with `numpy` and `gymnasium`. A fresh virtual
+   environment is the simplest:
+   ```bash
+   python -m venv .venv && source .venv/bin/activate
+   pip install -r requirements.txt
+   ```
+   (A conda environment works equally well.) Some RL environments need
+   heavier dependencies — MuJoCo, Meta-World, highway-env, … — which you
+   install into the same environment, or into a dedicated one. If a
+   workspace needs a *different* interpreter than your default, drop a
+   one-line `.conda_env` file naming the conda env it needs into the
+   workspace folder; the slash commands read it and activate that env for
+   you (absent → your current environment is used).
+3. **A Gym/Gymnasium environment** to inspect — either something
+   installable (`gym.make("Hopper-v4")`) or your own Python class. This
+   is the one thing you must supply; see
+   [Getting started](#getting-started-describe-your-environment) below.
+4. **A reward function, or just an idea of one.** You don't have to write
+   the code — setup can interview you and write it for you.
+5. **A browser.** All the reading and deciding happens on a local web
+   page, not in the terminal.
+
+---
+
+## Getting started: describe your environment
+
+The only thing the tool needs from you to begin is a description of your
+environment, written as a single file: **`workspaces/<name>/env_config.py`**.
+Everything else (the reward, what to measure, the probe policies, the
+comparisons) is derived from it. This file must expose four things:
+
+| Name | What it is |
+|---|---|
+| `make_env()` | returns a Gym/Gymnasium-compatible env (`reset`/`step`); wraps `gym.make(...)` or your own class |
+| `OBS_DESCRIPTION: str` | plain-English description of **what every observation dimension means** |
+| `ACTION_DESCRIPTION: str` | plain-English description of the action space |
+| `MAX_EPISODE_STEPS: int` | the episode horizon (use `1000` if you can't infer one) |
+
+The observation/action descriptions matter as much as the code: they are
+how Claude understands your environment well enough to write sensible
+probe policies and characteristics. Write them for a reader who has never
+seen your env.
+
+### You can ask Claude to generate it
+
+You don't have to write `env_config.py` by hand. Point Claude Code at
+your environment's source and ask it to generate the file. A prompt that
+works well:
+
+> I'm setting up the Discordant-Based Reward Debugger on a new environment. Read
+> my environment's source code (below / at `<path>`) and write
+> `workspaces/<name>/env_config.py` conforming to the tool's contract:
+>
+> - `make_env()` returning a Gym/Gymnasium-compatible env. If the env can
+>   render RGB frames, make `make_env` accept a `render_mode` kwarg and
+>   set `CAPTURE_FRAMES = True` at module level so rollouts record a video
+>   per episode.
+> - `OBS_DESCRIPTION: str` describing what **each** observation dimension
+>   means, in plain English.
+> - `ACTION_DESCRIPTION: str` describing the action space.
+> - `MAX_EPISODE_STEPS: int` (the horizon; use 1000 if unsure).
+>
+> Also write the companion `workspaces/<name>/viz.py` (see below for how I
+> want trajectories visualized). Follow the contracts in `CLAUDE.md`
+> exactly, and model both files on the committed examples in
+> `workspaces/merge/` (video) and `workspaces/pandemic/` (plots).
+>
+> My environment: `<paste the source, or give the import path / gym id>`
+
+Several worked examples are committed in this repo — read them before you
+start, and use them as templates:
+
+- `workspaces/pandemic/env_config.py` — a custom simulator class with a
+  rich, per-field `OBS_DESCRIPTION`.
+- `workspaces/merge/env_config.py`, `workspaces/highway_two_way/env_config.py`
+  — `highway-env` tasks.
+- `workspaces/metaworld_drawer_open/`, `workspaces/metaworld_hammer/`,
+  `workspaces/wipe/`, `workspaces/pointmaze_umaze/`,
+  `workspaces/rocket_landing/`, `workspaces/robopianist/` — MuJoCo /
+  Meta-World / robosuite tasks, several with `CAPTURE_FRAMES = True`.
+
+### Decide how your trajectories should be shown to you
+
+Part of describing your environment is saying **how you want a single run
+rendered** on the review page — this is what you actually look at when you
+decide whether the reward got a comparison right. You have three choices,
+and they are set up alongside `env_config.py`:
+
+1. **A video of the real environment** — best when your env has a
+   renderer. Set `CAPTURE_FRAMES = True` in `env_config.py` and make
+   `make_env` accept `render_mode="rgb_array"`; rollouts then record one
+   frame per step into an mp4, and a tiny `viz.py` just surfaces it.
+   Examples: `workspaces/merge/viz.py`, `workspaces/metaworld_drawer_open/viz.py`.
+2. **Rendered plots or images** — best for observation-rich envs with no
+   natural picture. `viz.py` draws the trajectory itself (e.g. per-feature
+   time series). Example: `workspaces/pandemic/viz.py` produces a stacked
+   PNG of population curves and the regulation stage over time.
+3. **Text / feature descriptions only** — if you omit `viz.py` entirely,
+   each comparison still shows the plain-English list of how the two runs
+   differ (higher/lower characteristic values). No picture, just the
+   numbers.
+
+The visualization lives in `workspaces/<name>/viz.py`, which exposes
+`VIZ_EXT` (e.g. `".mp4"` or `".png"`) and
+`visualize_trajectory(trajectory, metadata, out_path, source_path=None, **_)`.
+The exact contract is in `CLAUDE.md`; the generation prompt above asks
+Claude to write it for you.
+
+> **Prefer to be interviewed?** You don't need to pre-write any of this.
+> Running `/repair-setup <name>` (next section) walks you through creating
+> `env_config.py` (and the reward) interactively and launches the review
+> page for you. Pre-writing `env_config.py` is simply the fast path if you
+> already know your environment inside out.
 
 ---
 
 ## Usage
 
-Open Claude Code in this repo and run:
+**Start here:**
 
-```
-/repair-setup <env_name>
-```
-
-`<env_name>` is any short name you pick for this piece of work — e.g.
-`hopper`, `pandemic`, `merge`. It becomes a folder under `workspaces/`
-holding everything about this environment and this reward. You can have
-as many as you like side by side; they share nothing.
-
-That command prints one thing to your terminal: a link to
-**http://127.0.0.1:8000**. Open it. **From then on, everything happens
-on that page** — Claude posts its explanations, code, videos, and
-questions there, and you answer there. The terminal only shows status
-lines like "collecting trajectories…".
+1. Make sure Opus 4.8 is selected in Claude Code (`/model` → Opus).
+2. Open Claude Code in this repo's root directory.
+3. Run:
+   ```
+   /repair-setup <env_name>
+   ```
+   `<env_name>` is any short name you pick for this piece of work — e.g.
+   `hopper`, `pandemic`, `merge`. It becomes a folder under `workspaces/`
+   holding everything about this environment and this reward. You can have
+   as many as you like side by side; they share nothing. (If you already
+   pre-wrote `workspaces/<env_name>/env_config.py`, setup picks it up.)
+4. That command prints **one** thing to your terminal: a link to
+   **http://127.0.0.1:8000**.
+5. **Open that link.** From then on, *everything* happens on that page —
+   Claude posts its explanations, code, videos, and questions there, and
+   you answer there. The terminal only shows status lines like
+   "collecting trajectories…".
 
 ### What the page asks you
 
@@ -355,4 +467,17 @@ hand-write them, the exact contracts each file must satisfy (`make_env`,
 methods, the `performance_metric_*` signature, the on-disk formats for
 runs and characteristics) are spelled out in **`CLAUDE.md`** under
 *Invariants*. Anything obeying those contracts works with the rest of
-the system unchanged.
+the system unchanged. See
+[Getting started](#getting-started-describe-your-environment) for the
+`env_config.py` contract and a prompt that generates it for you.
+
+---
+
+## Paper
+
+This tool accompanies our paper on manual reward specification for RL.
+
+<!-- TODO: add citation, BibTeX, and arXiv/project link on release. -->
+
+If you use it in your research, please cite the paper (citation and link
+to be added on release).

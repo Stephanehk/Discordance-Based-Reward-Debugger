@@ -8,7 +8,7 @@
 <style>
   :root{
     --bg:#fbfaf7; --fg:#1c1b19; --muted:#66625b; --rule:#e4e0d8;
-    --accent:#1f6f5f; --accent-bg:#eef5f2;
+    --accent:#1f6f5f; --accent-bg:#eef5f2; --accent-fg:#ffffff;
     --code-bg:#f1efe9; --code-fg:#1c1b19;
     --serif:"Iowan Old Style","Palatino Linotype",Palatino,Charter,Georgia,"Times New Roman",serif;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -17,14 +17,14 @@
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
-      --accent:#7fc7b3; --accent-bg:#1d2b27;
+      --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
       --code-bg:#1f2023; --code-fg:#ebe8e1;
       color-scheme:dark;
     }
   }
   :root[data-theme="dark"]{
     --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
-    --accent:#7fc7b3; --accent-bg:#1d2b27;
+    --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
     --code-bg:#1f2023; --code-fg:#ebe8e1;
     color-scheme:dark;
   }
@@ -97,8 +97,12 @@
   .callout{margin-top:16px;padding:14px 16px;border:1px solid var(--rule);border-radius:8px;font-size:15.5px}
   .callout b{font-weight:600}
 
-  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-  @media (max-width:720px){.two{grid-template-columns:1fr}}
+  .cta{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:14px 24px;border-radius:10px;
+       background:var(--accent);color:var(--accent-fg);font-weight:600;font-size:17px;border-bottom:0;
+       box-shadow:0 6px 18px rgba(31,111,95,.22);transition:transform .12s ease,box-shadow .12s ease}
+  .cta:hover{border-bottom:0;transform:translateY(-1px);box-shadow:0 10px 24px rgba(31,111,95,.3)}
+  .cta-wrap{margin-top:28px;padding-top:28px;border-top:1px solid var(--rule)}
+  .cta-wrap p{margin-bottom:0}
 
   dl{margin:0}
   dl dt{font-weight:600;margin-top:14px}
@@ -119,8 +123,8 @@
     <p class="muted">In popular RL environments such as Meta-World, our discordant-based reward debugger uncovers previously documented and novel reward misspecifications. In ExploitGym, it uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.</p>
     <nav>
       <a href="#setup">Set up &darr;</a>
+      <a href="walkthrough.html">See walkthrough</a>
       <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger">GitHub</a>
-      <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger#readme">Full README</a>
     </nav>
     <div class="aside">
       <b>Built on <a href="https://claude.com/claude-code">Claude Code</a>.</b> The whole workflow is a set of slash commands you run inside Claude Code. We developed and tested it with a Claude Max subscription running Claude Opus 4.8, and that is the setup we recommend.
@@ -205,12 +209,15 @@ My environment: &lt;paste the source, or give the import path / gym id&gt;</pre>
     </div></li>
 
   </ol>
+  <div class="cta-wrap text">
+    <p>Curious what happens on that page? Take a short, screenshot-by-screenshot tour.</p>
+    <a class="cta" href="walkthrough.html">See walkthrough &rarr;</a>
+  </div>
 </section>
 
 <section>
   <h2>What you get back</h2>
-  <div class="two">
-    <div>
+  <div class="text">
       <p>Once enough behavior has been collected, the page fills with comparisons.</p>
       <dl>
         <dt>Pairs</dt>
@@ -218,29 +225,15 @@ My environment: &lt;paste the source, or give the import path / gym id&gt;</pre>
         <dt>Lotteries</dt>
         <dd>A gamble: would you rather have this certain trajectory C, or a probability distribution between trajectory A and trajectory B?</dd>
       </dl>
-    </div>
-    <div>
-      <p>Below the comparisons, the page asks you to pick one:</p>
-      <dl>
-        <dt>Edit the reward function</dt>
-        <dd>Change the code yourself, or tell Claude in plain language what to change.</dd>
-        <dt>Add another characteristic</dt>
-        <dd>Name something you need in order to judge the comparisons; it gets measured and folded in.</dd>
-        <dt>View more comparisons</dt>
-        <dd>Surface more pairs and lotteries from the behavior already collected.</dd>
-        <dt>Finish and submit</dt>
-        <dd>Locks the current reward in as your final answer. Not reversible.</dd>
-      </dl>
-    </div>
+      <p style="margin-top:16px">The <a href="walkthrough.html">walkthrough</a> shows each of these on screen, and what you can do once you have seen them.</p>
   </div>
 </section>
 
 <footer>
   <div class="links">
+    <a href="walkthrough.html">Walkthrough</a>
     <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger">GitHub</a>
-    <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger#readme">Full README</a>
   </div>
-  <p>For more details and results, check out our paper. Citation and link to be added on release.</p>
 </footer>
 
 </div>

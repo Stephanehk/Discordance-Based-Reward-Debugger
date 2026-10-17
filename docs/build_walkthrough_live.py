@@ -1,0 +1,485 @@
+import json, html, re, pathlib
+ROOT = pathlib.Path('/next/u/stephhk/automated_reward_repairer')
+PAY = ROOT/'workspaces/metaworld_drawer_open/.repair_history/_ui_payload'
+OUT = ROOT/'docs/walkthrough-live.html'
+
+def esc(s): return html.escape(s, quote=False)
+def inline(s):
+    s = esc(s)
+    return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', s)
+
+def pair_card(n, open_):
+    lines = [l.strip() for l in (PAY/f'pair{n}.content.txt').read_text().splitlines() if l.strip()]
+    head, bullets = lines[0], lines[1:]
+    vids = ''.join(f'''
+          <figure>
+            <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair{n}-{r}.mp4"></video>
+            <figcaption>{cap}</figcaption>
+          </figure>''' for r, cap in (('A',"Designed reward function's preferred trajectory"),('B','The alternative trajectory')))
+    lis = ''.join(f'\n          <li>{inline(b)}</li>' for b in bullets)
+    return f'''
+      <article class="msg msg-cmp">
+        <details class="cmp-details"{" open" if open_ else ""}>
+          <summary class="msg-head"><span class="label">PAIR {n}/3</span></summary>
+          <div class="cmp-viz">{vids}
+          </div>
+          <div class="cmp-chars-head">{inline(head)}</div>
+          <ul class="cmp-chars">{lis}
+          </ul>
+        </details>
+      </article>'''
+
+def lottery_card(n, open_):
+    viz = json.loads((PAY/f'lottery{n}.viz.json').read_text())
+    a = next(v for v in viz if v['role']=='A'); b = next(v for v in viz if v['role']=='B'); c = next(v for v in viz if v['role']=='C')
+    pa = round(a['probability']*100); pb = 100-pa
+    def fig(role, cap, prob=None):
+        p = f'\n            <div class="viz-prob">{prob}% chance</div>' if prob is not None else ''
+        return f'''
+          <figure>
+            <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery{n}-{role}.mp4"></video>
+            <figcaption>{cap}</figcaption>{p}
+          </figure>'''
+    prefC = bool(c.get('reward_preferred'))
+    badge = '<div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this certain trajectory</div>' if prefC else '<div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this lottery</div>'
+    ab_row = f'<div class="lot-row lot-ab">{fig("A","Trajectory A",pa)}{fig("B","Trajectory B",pb)}\n          </div>'
+    c_row = f'<div class="lot-row lot-c">{fig("C","Certain (C)")}\n          </div>'
+    body = (ab_row + '\n          ' + badge + '\n          ' + c_row) if prefC else (badge + '\n          ' + ab_row + '\n          ' + c_row)
+    return f'''
+      <article class="msg msg-cmp msg-lottery">
+        <details class="cmp-details"{" open" if open_ else ""}>
+          <summary class="msg-head"><span class="label">LOTTERY {n}/2</span></summary>
+          <div class="lot-viz">
+          {body}
+          </div>
+        </details>
+      </article>'''
+
+code = (ROOT/'workspaces/metaworld_drawer_open/designed_reward_fn.py').read_text()
+
+SETUP_FEED = '''
+      <article class="msg msg-status"><div class="msg-body">The environment is set up.</div></article>
+      <article class="msg msg-md"><div class="msg-body md">
+        <p><strong>What the agent perceives.</strong> The agent controls a Sawyer robot arm. It senses where its own hand is in space, how far the gripper is open or closed, and where the drawer handle is (both its position and the way it is oriented). It also knows where the handle needs to end up for the drawer to count as fully open, where its hand started at the beginning of the attempt, and the overall goal location. All positions are measured in meters.</p>
+        <p><strong>What the agent can do.</strong> On each step the agent nudges its hand a small amount along three directions — left/right, forward/back, and up/down — and sends a command to open or close the gripper. Repeating these small moves is how it reaches the handle and pulls the drawer open.</p>
+      </div></article>
+      <article class="msg msg-status"><div class="msg-body">A stub reward function is in place. Implement its body, then continue.</div></article>
+      <article class="msg msg-cta" data-cta>
+        <div class="cta-prompt muted">The environment and reward function are set up.</div>
+        <button type="button" class="btn btn-cta">Identify possible flaws</button>
+      </article>
+      <div class="thinking" hidden><span class="spinner"></span><span>Claude is thinking…</span></div>
+      <div class="msg msg-status after-cta" hidden><div class="msg-body">Asking a few quick questions, then spawning subagents to look for flaws. This can take up to an hour.</div></div>'''
+
+def frame(inner, status='awaiting', url='127.0.0.1:8000'):
+    return f'''
+    <div class="frame">
+      <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">{url}</span></div>
+      <div class="app">
+        <header class="topbar">
+          <div class="topbar-left"><div class="dot"></div><span class="brand">Automated Reward Repairer</span></div>
+          <div class="topbar-right"><span class="muted">workspace</span><span class="chip">metaworld_drawer_open</span><span class="muted">·</span><span class="chip status" data-status="{status}">{status}</span></div>
+        </header>
+        <div class="feed">{inner}
+        </div>
+      </div>
+    </div>'''
+
+QUESTION1 = '''
+      <article class="msg msg-q" data-q="specify">
+        <header class="msg-head"><span class="label">Question</span><span class="qstatus muted">awaiting your answer</span></header>
+        <div class="q-prompt">How would you like to specify the reward function?</div>
+        <div class="q-body">
+          <div class="q-options">
+            <button type="button" class="q-option" data-value="describe"><span class="opt-label">Describe it — I will implement</span><span class="opt-desc">Fill in a short template; I translate it into Python and show it back for review.</span></button>
+            <button type="button" class="q-option" data-value="myself"><span class="opt-label">I will write it myself</span><span class="opt-desc">I leave a stub file with the observation/action summary as a docstring; you fill in the body.</span></button>
+          </div>
+          <div class="q-actions"><button type="button" class="btn">Submit</button></div>
+        </div>
+        <div class="q-note" hidden></div>
+      </article>'''
+
+QUESTION7 = '''
+      <article class="msg msg-q" data-q="next">
+        <header class="msg-head"><span class="label">Question</span><span class="qstatus muted">awaiting your answer</span></header>
+        <div class="q-prompt">What would you like to do next?</div>
+        <div class="q-body">
+          <div class="q-options">
+            <button type="button" class="q-option" data-value="edit"><span class="opt-label">Edit the reward function</span><span class="opt-desc">Modify the reward to reflect what you actually want, based on the disagreements above.</span></button>
+            <button type="button" class="q-option" data-value="char"><span class="opt-label">Add another characteristic</span><span class="opt-desc">Add a new characteristic to the trajectory summary so the comparisons show more detail.</span></button>
+            <button type="button" class="q-option" data-value="more"><span class="opt-label">View more comparisons</span><span class="opt-desc">Surface additional pairs or lotteries from the evidence already collected.</span></button>
+            <button type="button" class="q-option" data-value="finish"><span class="opt-label">Finish and submit (not reversible)</span><span class="opt-desc">Lock in the current reward function as the final answer. This ends the session.</span></button>
+          </div>
+          <div class="q-actions"><button type="button" class="btn">Submit</button></div>
+        </div>
+        <div class="q-note" hidden></div>
+      </article>'''
+
+EDITOR = f'''
+    <div class="frame ide">
+      <div class="frame-bar dark"><span class="fdots"><i></i><i></i><i></i></span><span class="ftab">designed_reward_fn.py</span><span class="fpath">workspaces / metaworld_drawer_open</span></div>
+      <div class="editor"><pre><code class="py">{esc(code)}</code></pre></div>
+    </div>'''
+
+JS = r"""<script>
+(function(){
+  // ---- Python highlighter (same token classes as the app's) + line numbers
+  var KW=new Set("False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case".split(" "));
+  var BI=new Set("abs all any bool bytes callable chr complex dict dir divmod enumerate eval exec filter float format frozenset getattr globals hasattr hash help hex id input int isinstance issubclass iter len list locals map max min next object oct open ord pow print property range repr reversed round set setattr slice sorted staticmethod str sum super tuple type vars zip".split(" "));
+  function esc(s){return s.replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function hl(src){
+    var out=[],i=0,n=src.length,m;
+    function emit(t,c){out.push(c?'<span class="tok-'+c+'">'+esc(t)+'</span>':esc(t))}
+    while(i<n){
+      var rest=src.slice(i);
+      if((m=rest.match(/^[rbuRBUfF]{0,2}("{3}|'{3})/))){var q=m[1],e=src.indexOf(q,i+m[0].length),stop=e<0?n:e+3;emit(src.slice(i,stop),"string");i=stop;continue}
+      if((m=rest.match(/^[rbuRBUfF]{0,2}(["'])/))){var q2=m[1],j=i+m[0].length;while(j<n){if(src[j]==="\\"){j+=2;continue}if(src[j]===q2||src[j]==="\n")break;j++}if(j<n&&src[j]===q2)j++;emit(src.slice(i,j),"string");i=j;continue}
+      if(src[i]==="#"){var eol=src.indexOf("\n",i),s2=eol<0?n:eol;emit(src.slice(i,s2),"comment");i=s2;continue}
+      if((m=rest.match(/^(?:0[xX][0-9a-fA-F_]+|\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][-+]?\d+)?)/))){emit(m[0],"number");i+=m[0].length;continue}
+      if((m=rest.match(/^@[A-Za-z_][\w.]*/))){emit(m[0],"decorator");i+=m[0].length;continue}
+      if((m=rest.match(/^[A-Za-z_]\w*/))){var w=m[0],after=src.slice(i+w.length).match(/^\s*\(/);var prev=src.slice(0,i).match(/(def|class)\s+$/);
+        emit(w,KW.has(w)?"keyword":BI.has(w)?"builtin":(prev||after)?"function":null);i+=w.length;continue}
+      emit(src[i],null);i++;
+    }
+    return out.join("");
+  }
+  document.querySelectorAll(".editor code.py").forEach(function(c){
+    var lines=hl(c.textContent).split("\n");
+    c.innerHTML=lines.map(function(l,k){return '<span class="ln">'+(k+1)+'</span>'+l}).join("\n");
+  });
+
+  // ---- Question cards: select an option, submit, show what happens next
+  var NOTES={
+    describe:'With this choice you fill in three short boxes (what to achieve, what to avoid, trade-offs) and Claude writes the Python for you. This tour follows the other path. <a href="#s2">Continue to step 2 &darr;</a>',
+    myself:'Claude leaves a stub <code>designed_reward_fn.py</code> for you to fill in. <a href="#s2">Continue to step 2 &darr;</a>',
+    edit:'Claude asks whether you want to edit the file yourself or describe the change in plain language. Either way, the comparisons are re-scored against the new reward.',
+    char:'You name the characteristic; Claude writes a small measurement for it, and every comparison gains a new “higher / lower / same” line.',
+    more:'More pairs and lotteries appear from the evidence already collected. No new rollouts are needed.',
+    finish:'The current reward function is locked in as your final answer and the session ends.'
+  };
+  document.querySelectorAll(".app .msg-q").forEach(function(card){
+    var sel=null,opts=card.querySelectorAll(".q-option"),submit=card.querySelector(".q-actions .btn"),note=card.querySelector(".q-note"),st=card.querySelector(".qstatus");
+    opts.forEach(function(o){o.addEventListener("click",function(){if(o.disabled)return;if(sel)sel.classList.remove("selected");o.classList.add("selected");sel=o})});
+    submit.addEventListener("click",function(){
+      if(!sel)return;
+      opts.forEach(function(o){o.disabled=true});submit.disabled=true;
+      st.textContent="answered";st.classList.add("answered");
+      note.innerHTML=NOTES[sel.dataset.value]||"";note.hidden=false;
+      var chip=card.closest(".app").querySelector(".chip.status");if(chip){chip.textContent="running";chip.dataset.status="running"}
+    });
+  });
+
+  // ---- CTA: pressing "Identify possible flaws" starts the pipeline
+  document.querySelectorAll(".app [data-cta] .btn-cta").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      btn.disabled=true;
+      var app=btn.closest(".app"),th=app.querySelector(".thinking"),after=app.querySelector(".after-cta"),chip=app.querySelector(".chip.status");
+      if(chip){chip.textContent="running";chip.dataset.status="running"}
+      th.hidden=false;
+      setTimeout(function(){after.hidden=false},900);
+    });
+  });
+
+  // ---- Videos: play while visible, pause when not
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting){v.play().catch(function(){})}else{v.pause()}})},{threshold:.35});
+    document.querySelectorAll(".app video").forEach(function(v){io.observe(v)});
+    document.querySelectorAll(".app details").forEach(function(d){d.addEventListener("toggle",function(){d.querySelectorAll("video").forEach(function(v){d.open?v.play().catch(function(){}):v.pause()})})});
+  }
+})();
+</script>"""
+
+page = f'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Walkthrough (live draft) — Discordant-Based Reward Debugger</title>
+<meta name="description" content="A short tour of what you will see when you run the Discordant-Based Reward Debugger, with the real interface components embedded.">
+<style>
+  :root{{
+    --bg:#fbfaf7; --fg:#1c1b19; --muted:#66625b; --rule:#e4e0d8;
+    --accent:#1f6f5f; --accent-bg:#eef5f2; --accent-fg:#ffffff;
+    --code-bg:#f1efe9; --code-fg:#1c1b19;
+    --shot-shadow:0 12px 32px rgba(28,27,25,.12), 0 1px 2px rgba(28,27,25,.08);
+    --frame-chrome:#ecebe6; --frame-chrome-fg:#6b675f;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Charter,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }}
+  @media (prefers-color-scheme: dark){{
+    :root:not([data-theme="light"]){{
+      --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
+      --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
+      --code-bg:#1f2023; --code-fg:#ebe8e1;
+      --shot-shadow:0 12px 32px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.4);
+      --frame-chrome:#26272b; --frame-chrome-fg:#a39e94;
+      color-scheme:dark;
+    }}
+  }}
+  :root[data-theme="dark"]{{
+    --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
+    --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
+    --code-bg:#1f2023; --code-fg:#ebe8e1;
+    --shot-shadow:0 12px 32px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.4);
+    --frame-chrome:#26272b; --frame-chrome-fg:#a39e94;
+    color-scheme:dark;
+  }}
+
+  *{{box-sizing:border-box}}
+  html{{scroll-behavior:smooth}}
+  body{{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 var(--sans);-webkit-font-smoothing:antialiased}}
+  a{{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}}
+  a:hover{{border-bottom-color:currentColor}}
+  code{{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:.1em .35em;border-radius:4px}}
+  h1,h2,h3{{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;margin:0}}
+  h1{{font-size:clamp(34px,5.4vw,46px);line-height:1.12}}
+  h2{{font-size:28px;line-height:1.2;margin-bottom:22px}}
+  h3{{font-size:21px;line-height:1.3;margin-bottom:8px}}
+  p{{margin:0 0 14px}}
+  p:last-child{{margin-bottom:0}}
+  .muted{{color:var(--muted)}}
+  b{{font-weight:600}}
+
+  .page{{max-width:1040px;margin:0 auto;padding:0 20px}}
+  .text{{max-width:660px}}
+
+  header.site{{padding:calc(56px + env(safe-area-inset-top,0px)) 0 44px;border-bottom:1px solid var(--rule)}}
+  header.site nav{{display:flex;gap:22px;flex-wrap:wrap;margin-top:24px;font-size:15.5px}}
+  header.site nav a{{font-weight:600}}
+  .crumb{{font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}}
+  .crumb a{{color:var(--muted)}}
+  .draft{{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--accent-bg);color:var(--accent);font-size:11px;letter-spacing:.06em;font-weight:700;vertical-align:middle}}
+
+  section{{padding:48px 0;border-bottom:1px solid var(--rule)}}
+  section:last-of-type{{border-bottom:0}}
+
+  ol.tour{{list-style:none;margin:0;padding:0;counter-reset:step}}
+  ol.tour>li{{counter-increment:step;display:grid;grid-template-columns:72px 1fr;gap:0 18px;padding:36px 0;border-top:1px solid var(--rule)}}
+  ol.tour>li:first-child{{border-top:0;padding-top:0}}
+  ol.tour>li::before{{content:counter(step);font-family:var(--serif);font-size:40px;line-height:1;color:var(--accent);padding-top:2px}}
+  ol.tour>li>div{{min-width:0}}
+  ol.tour .note{{max-width:660px}}
+  @media (max-width:640px){{
+    ol.tour>li{{grid-template-columns:1fr;gap:6px}}
+    ol.tour>li::before{{font-size:26px}}
+  }}
+  .try{{display:inline-block;margin-top:6px;font-size:13.5px;color:var(--muted)}}
+  .try::before{{content:"✦ ";color:var(--accent)}}
+
+  dl{{margin:0}} dl dt{{font-weight:600;margin-top:14px}} dl dd{{margin:2px 0 0;color:var(--muted)}}
+  .aside{{margin-top:20px;padding:16px 18px;border-left:3px solid var(--accent);background:var(--accent-bg);border-radius:0 8px 8px 0;font-size:16px}}
+  .callout{{margin-top:16px;padding:14px 16px;border:1px solid var(--rule);border-radius:8px;font-size:15.5px}}
+
+  .cta{{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:14px 24px;border-radius:10px;
+       background:var(--accent);color:var(--accent-fg);font-weight:600;font-size:17px;border-bottom:0;
+       box-shadow:0 6px 18px rgba(31,111,95,.22);transition:transform .12s ease,box-shadow .12s ease}}
+  .cta:hover{{border-bottom:0;transform:translateY(-1px);box-shadow:0 10px 24px rgba(31,111,95,.3)}}
+
+  footer{{padding:36px 0 calc(48px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:15px;border-top:1px solid var(--rule)}}
+  footer .links{{display:flex;gap:22px;flex-wrap:wrap}}
+
+  /* ===== Browser-like frame around each embedded component ===== */
+  .frame{{margin-top:20px;border:1px solid var(--rule);border-radius:12px;overflow:hidden;box-shadow:var(--shot-shadow);background:#f6f7fb}}
+  .frame-bar{{display:flex;align-items:center;gap:12px;padding:9px 14px;background:var(--frame-chrome);color:var(--frame-chrome-fg);font:12.5px var(--sans)}}
+  .fdots{{display:inline-flex;gap:6px}}
+  .fdots i{{width:10px;height:10px;border-radius:50%;background:#d6d3cb;display:inline-block}}
+  .fdots i:nth-child(1){{background:#f1655a}} .fdots i:nth-child(2){{background:#f4bf4f}} .fdots i:nth-child(3){{background:#61c554}}
+  .furl{{flex:1;text-align:center;font-family:var(--mono);font-size:12px;opacity:.85}}
+  .frame-bar.dark{{background:#0b0f1c;color:#9aa0b5}}
+  .ftab{{padding:3px 10px;border-radius:6px;background:#161c30;color:#e4e8f5;font-family:var(--mono);font-size:12px}}
+  .fpath{{margin-left:auto;font-family:var(--mono);font-size:11.5px;opacity:.7}}
+
+  /* ===== Fake IDE ===== */
+  .editor{{background:#0f1424;max-height:520px;overflow:auto}}
+  .editor pre{{margin:0;padding:14px 18px 18px 0;font:13px/1.55 var(--mono);color:#d9def0;counter-reset:ln}}
+  .editor code{{display:block;background:none;padding:0;font-size:inherit;white-space:pre}}
+  .editor .ln{{display:inline-block;width:52px;padding-right:16px;text-align:right;color:#4a5170;user-select:none}}
+  .editor .tok-keyword{{color:#c678dd;font-weight:600}} .editor .tok-builtin{{color:#56b6c2}} .editor .tok-string{{color:#98c379}}
+  .editor .tok-comment{{color:#7c8095;font-style:italic}} .editor .tok-number{{color:#d19a66}} .editor .tok-function{{color:#61afef}} .editor .tok-decorator{{color:#d19a66}}
+
+  /* ===== Scoped copy of the real app stylesheet (web_ui/static/styles.css) ===== */
+  .app{{background:#f6f7fb;color:#1a1d29;font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color-scheme:light}}
+  .app .topbar{{display:flex;justify-content:space-between;align-items:center;padding:12px 22px;background:#fff;border-bottom:1px solid #e7e9f1;flex-wrap:wrap;gap:8px}}
+  .app .topbar-left{{display:flex;align-items:center;gap:10px}}
+  .app .brand{{font-weight:600;letter-spacing:-0.01em;font-size:15px}}
+  .app .dot{{width:10px;height:10px;background:linear-gradient(135deg,#6366f1,#06b6d4);border-radius:50%}}
+  .app .topbar-right{{display:flex;align-items:center;gap:10px;font-size:13px}}
+  .app .chip{{padding:3px 9px;background:#eef0f7;border-radius:999px;font-weight:500;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12px;color:#353846}}
+  .app .chip.status{{background:#e6f4ff;color:#1d6fc5}}
+  .app .chip.status[data-status="running"]{{background:#fff3d1;color:#8a6300}}
+  .app .chip.status[data-status="awaiting"]{{background:#fde8eb;color:#b3344b}}
+  .app .muted{{color:#6b7080}}
+  .app .feed{{max-width:880px;margin:0 auto;padding:20px 20px 24px;display:flex;flex-direction:column;gap:14px}}
+  .app .msg{{background:#fff;border:1px solid #e7e9f1;border-radius:12px;padding:16px 18px;animation:appear 220ms ease}}
+  @keyframes appear{{from{{opacity:0;transform:translateY(4px)}}to{{opacity:1;transform:translateY(0)}}}}
+  .app .msg-head{{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}}
+  .app .msg-head .label{{font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#4f5363}}
+  .app .msg-body{{white-space:pre-wrap}}
+  .app .md p{{margin:8px 0}} .app .md strong{{color:#1a1d29}}
+  .app .msg-status{{background:#f0f3fb;border:1px dashed #c8cdde;color:#4f5363;font-size:13.5px;padding:10px 14px;border-radius:10px}}
+  .app .msg-q{{border:1px solid #cdd1ff;background:#fafbff}}
+  .app .msg-q .label{{color:#4f46e5}}
+  .app .msg-q .qstatus{{font-size:12px}}
+  .app .msg-q .qstatus.answered{{color:#1a7f3c}}
+  .app .q-prompt{{font-size:15px;margin-bottom:14px;color:#1a1d29}}
+  .app .q-body{{display:flex;flex-direction:column;gap:10px}}
+  .app .q-options{{display:grid;gap:8px}}
+  .app .q-option{{display:flex;flex-direction:column;gap:4px;padding:12px 14px;background:#fff;border:1px solid #e7e9f1;border-radius:10px;cursor:pointer;transition:border-color 100ms ease,background 100ms ease;text-align:left;font:inherit;color:inherit}}
+  .app .q-option:hover:not(:disabled){{border-color:#aeb4ff;background:#f4f5ff}}
+  .app .q-option.selected{{border-color:#4f46e5;background:#eef0ff}}
+  .app .q-option .opt-label{{font-weight:600;font-size:14px}}
+  .app .q-option .opt-desc{{font-size:12.5px;color:#6b7080}}
+  .app .q-option:disabled{{cursor:default;opacity:.6}}
+  .app .q-actions{{display:flex;justify-content:flex-end;gap:8px}}
+  .app .btn{{border:0;background:#4f46e5;color:#fff;font:inherit;font-weight:600;font-size:14px;padding:9px 16px;border-radius:8px;cursor:pointer;transition:background 100ms ease}}
+  .app .btn:hover{{background:#4338ca}}
+  .app .btn:disabled{{background:#b6b9d1;cursor:not-allowed}}
+  .app .q-note{{margin-top:12px;padding:10px 14px;border-radius:10px;background:#eef0ff;border:1px solid #cdd1ff;font-size:13.5px;color:#2a2540}}
+  .app .q-note a{{color:#4f46e5;font-weight:600}}
+  .app code{{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:#eef0f7;color:#1a1d29;padding:1px 6px;border-radius:6px;font-size:13px}}
+  .app .msg-cta{{background:#f0f1ff;border:1px solid #cdd1ff;display:flex;flex-direction:column;align-items:flex-start;gap:12px}}
+  .app .msg-cta .cta-prompt{{font-size:14px}}
+  .app .btn-cta{{background:#4f46e5;color:#fff;border:0;font:inherit;font-weight:600;font-size:14.5px;padding:11px 22px;border-radius:10px;cursor:pointer;transition:background 100ms ease,transform 80ms ease}}
+  .app .btn-cta:hover:not(:disabled){{background:#4338ca;transform:translateY(-1px)}}
+  .app .btn-cta:disabled{{background:#b6b9d1;cursor:not-allowed;transform:none}}
+  .app .thinking{{display:flex;align-items:center;gap:10px;padding:8px 14px;color:#6b7080;font-size:13px;font-style:italic;align-self:flex-start}}
+  .app .thinking[hidden],.app [hidden]{{display:none}}
+  .app .spinner{{width:14px;height:14px;border-radius:50%;border:2px solid #d9dceb;border-top-color:#4f46e5;animation:spin .85s linear infinite;display:inline-block}}
+  @keyframes spin{{to{{transform:rotate(360deg)}}}}
+  .app .msg-cmp .label{{color:#4f46e5}}
+  .app .cmp-details>summary{{cursor:pointer;list-style:none;justify-content:flex-start;margin-bottom:0}}
+  .app .cmp-details[open]>summary{{margin-bottom:10px}}
+  .app .cmp-details>summary::-webkit-details-marker{{display:none}}
+  .app .cmp-details>summary::before{{content:"▸";color:#4f46e5;margin-right:8px;font-size:12px}}
+  .app .cmp-details[open]>summary::before{{content:"▾"}}
+  .app .cmp-chars-head{{margin:12px 0 10px;padding:10px 14px;background:#f5f3ff;border:1px solid #e9d5ff;border-left:3px solid #7c3aed;border-radius:9px;font-size:15.5px;font-weight:600;color:#2a2540}}
+  .app .cmp-chars{{list-style:disc;margin:0;padding-left:22px;color:#2a2540}}
+  .app .cmp-chars li{{margin:4px 0;font-size:13px;line-height:1.5}}
+  .app .cmp-chars li::marker{{color:#7c3aed}}
+  .app .cmp-chars strong{{color:#6d28d9}}
+  .app .cmp-viz{{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}}
+  .app .cmp-viz figure{{margin:0;flex:1 1 280px;min-width:240px}}
+  .app .cmp-viz video,.app .lot-row video{{width:100%;border-radius:8px;background:#000;display:block;aspect-ratio:1/1}}
+  .app .cmp-viz figcaption,.app .lot-row figcaption{{font-size:12.5px;color:#6b7080;margin-top:4px}}
+  .app .viz-preferred{{margin-top:4px;font-size:12px;font-weight:600;color:#1d6fc5;background:#e6f4ff;padding:4px 8px;border-radius:6px;display:inline-block}}
+  .app .viz-prob{{margin-top:4px;font-size:12.5px;font-weight:600;color:#4f46e5;background:#eef0ff;padding:3px 8px;border-radius:6px;display:inline-block}}
+  .app .lot-viz{{display:flex;flex-direction:column;gap:12px;margin-top:12px}}
+  .app .lot-row{{display:flex;flex-wrap:wrap;gap:12px}}
+  .app .lot-row figure{{margin:0;flex:1 1 280px;min-width:220px}}
+  .app .lot-c figure{{flex:0 1 360px}}
+  .app .lot-preferred{{margin-top:0;margin-bottom:-4px;align-self:flex-start}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site">
+  <div class="text">
+    <p class="crumb"><a href="./">Discordant-Based Reward Debugger</a> &nbsp;/&nbsp; Walkthrough <span class="draft">LIVE DRAFT</span></p>
+    <p>Once you have run <code>/repair-setup &lt;env_name&gt;</code> and opened <b>http://127.0.0.1:8000</b>, everything below happens on that page. The panels on this page are the real interface, so click around.</p>
+    <nav>
+      <a href="#tour">Start the tour &darr;</a>
+      <a href="./#setup">Set up</a>
+      <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section id="tour">
+  <ol class="tour">
+
+    <li id="s1"><div>
+      <div class="note">
+        <h3>Choose how to specify your reward function</h3>
+        <p>The first thing we will ask is how you want to specify a reward function. You can describe it in plain language and let Claude write the code, or you can write it yourself.</p>
+        <span class="try">Try it: pick an option and press Submit.</span>
+      </div>{frame(QUESTION1)}
+    </div></li>
+
+    <li id="s2"><div>
+      <div class="note">
+        <h3>If you choose “I will write it myself”</h3>
+        <p>You will see this page. <b>You will need to switch to your IDE and write the code for your reward function in <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code></b> inside the cloned repo.</p>
+      </div>{frame(SETUP_FEED)}
+    </div></li>
+
+    <li id="s3"><div>
+      <div class="note">
+        <h3>Write your reward function</h3>
+        <p>Open <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> in your IDE and fill in the body. <b>This is the only time you will need to write code.</b></p>
+        <span class="try">Below is the reward function we wrote for Meta-World's drawer-open task.</span>
+      </div>{EDITOR}
+    </div></li>
+
+    <li id="s4"><div>
+      <div class="note">
+        <h3>Press “Identify possible flaws”</h3>
+        <p>When you are done, return to your browser and press <b>Identify possible flaws</b>. You will be asked a few more quick questions, and then our system will spawn subagents to find flaws in your reward function.</p>
+        <div class="callout"><b>This step can take up to an hour,</b> depending on the speed of your simulator. Feel free to come back to the page later, but don't close it!</div>
+        <span class="try">Try it: press the button.</span>
+      </div>{frame(SETUP_FEED)}
+    </div></li>
+
+    <li id="s5"><div>
+      <div class="note">
+        <h3>Review the trajectory pairs</h3>
+        <p>We will show you hypothesized reward misspecifications in the form of trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Underneath each pair is a one-line “why they disagree”.</p>
+        <p>The hypotheses are not always right! Expand the other trajectory pairs the system identified to see more.</p>
+        <span class="try">Try it: the videos play when scrolled into view. Expand PAIR 2/3 and 3/3.</span>
+      </div>{frame(pair_card(1,True)+pair_card(2,False)+pair_card(3,False), status='awaiting')}
+    </div></li>
+
+    <li id="s6"><div>
+      <div class="note">
+        <h3>Review the lotteries</h3>
+        <p>Some hypotheses are shown as lotteries instead. A lottery asks: would you rather have the certain trajectory <b>C</b>, or a gamble that gives you trajectory <b>A</b> with one probability and trajectory <b>B</b> with the other? A badge marks which side your reward function assigns higher return to.</p>
+      </div>{frame(lottery_card(1,True)+lottery_card(2,False), status='awaiting')}
+    </div></li>
+
+    <li id="s7"><div>
+      <div class="note">
+        <h3>Decide what to do next</h3>
+        <p>Below the comparisons, the page asks you to pick one:</p>
+        <dl>
+          <dt>Edit the reward function</dt>
+          <dd>Change the code yourself, or tell Claude in plain language what to change.</dd>
+          <dt>Add another characteristic</dt>
+          <dd>Name something you need in order to judge the comparisons; it gets measured and folded in.</dd>
+          <dt>View more comparisons</dt>
+          <dd>Surface more pairs and lotteries from the behavior already collected.</dd>
+          <dt>Finish and submit</dt>
+          <dd>Locks the current reward in as your final answer. Not reversible.</dd>
+        </dl>
+        <div class="aside">
+          <b>Didn't find a flaw?</b> If none of the pairs identified a flaw in your reward function, you can run another round of this process. In our experience, after two more rounds (three rounds total) the system has covered many different hypothesized flaws.
+        </div>
+      </div>{frame(QUESTION7)}
+    </div></li>
+
+  </ol>
+</section>
+
+<section>
+  <div class="text">
+    <h2>Ready to try it?</h2>
+    <p>Head back to the setup guide to get the tool running on your own environment.</p>
+    <a class="cta" href="./#setup">Back to set up &rarr;</a>
+  </div>
+</section>
+
+<footer>
+  <div class="links">
+    <a href="./">Home</a>
+    <a href="walkthrough.html">Screenshot version</a>
+    <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger">GitHub</a>
+  </div>
+</footer>
+
+</div>
+{JS}
+</body>
+</html>
+'''
+OUT.write_text(page)
+print('wrote', OUT, len(page))

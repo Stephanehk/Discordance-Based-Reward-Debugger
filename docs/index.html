@@ -121,6 +121,7 @@
     <p class="lede">A tool for debugging reward functions.</p>
     <p>You give it a reward function implemented in Python and your environment's source code. It constructs comparisons where it hypothesizes your preferences will most likely differ from the ranking induced by the reward function. In light of those hypotheses, you update your reward function as you see fit.</p>
     <p class="muted">In popular RL environments such as Meta-World, our discordant-based reward debugger uncovers previously documented and novel reward misspecifications. In ExploitGym, it uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.</p>
+    <p>In this codebase, we provide our proposed Scaffolded Reward Debugger.</p>
     <nav>
       <a href="#setup">Set up &darr;</a>
       <a href="walkthrough.html">See walkthrough</a>
@@ -215,19 +216,6 @@ My environment: &lt;paste the source, or give the import path / gym id&gt;</pre>
   </div>
 </section>
 
-<section>
-  <h2>What you get back</h2>
-  <div class="text">
-      <p>Once enough behavior has been collected, the page fills with comparisons.</p>
-      <dl>
-        <dt>Pairs</dt>
-        <dd>Two videos: on the left, the trajectory your reward function preferred; on the right, the alternative. Underneath, a one-line "why they disagree" and how the preferred trajectory differed.</dd>
-        <dt>Lotteries</dt>
-        <dd>A gamble: would you rather have this certain trajectory C, or a probability distribution between trajectory A and trajectory B?</dd>
-      </dl>
-      <p style="margin-top:16px">The <a href="walkthrough.html">walkthrough</a> shows each of these on screen, and what you can do once you have seen them.</p>
-  </div>
-</section>
 
 <footer>
   <div class="links">

@@ -1,26 +1,46 @@
 import json, html, re, pathlib
 ROOT = pathlib.Path('/next/u/stephhk/automated_reward_repairer')
-PAY = ROOT/'workspaces/metaworld_drawer_open/.repair_history/_ui_payload'
+RUN = pathlib.Path('/next/u/stephhk/traj_pair_comparison_automated_reward_repairer/user_study_rfs/metaworld_drawer_open/our_system_collected_data/default_rf')
+SNAP = json.loads((RUN/'shown_to_user/pref_round_001.json').read_text())
+FEATURE_KEY = json.loads((RUN/'shown_to_user/_ui_payload/feature_key.json').read_text())
 OUT = ROOT/'docs/walkthrough-live.html'
+
+def feats(traj_path):
+    k = traj_path.split('/')[1].split('_')[1]
+    d = json.loads((RUN/f'rollouts/round_{k}_trajectory_features'/(pathlib.Path(traj_path).stem+'.json')).read_text())
+    return dict(zip([n[0] for n in d['names']], d['features']))
+
+def fmt(v):
+    return str(int(round(v))) if abs(v-round(v))<1e-9 else f'{v:.2f}'
+
+def bullets(fa, fb):
+    out=[]
+    for f in FEATURE_KEY:
+        a,b = fa[f['name']], fb[f['name']]
+        word = 'higher' if a>b+1e-9 else 'lower' if a<b-1e-9 else 'same'
+        out.append(f'**{word}** {f["description"]} ({fmt(a)} vs. {fmt(b)})')
+    return out
 
 def esc(s): return html.escape(s, quote=False)
 def inline(s):
     s = esc(s)
     return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', s)
 
+NPAIRS = len(SNAP['pairs']); NLOTS = len(SNAP['lotteries'])
 def pair_card(n, open_):
-    lines = [l.strip() for l in (PAY/f'pair{n}.content.txt').read_text().splitlines() if l.strip()]
-    head, bullets = lines[0], lines[1:]
+    p = SNAP['pairs'][n-1]
+    head = "Designed reward function's preferred trajectory has a"
+    bullets_ = bullets(feats(p['traj_a_path']), feats(p['traj_b_path']))
     vids = ''.join(f'''
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair{n}-{r}.mp4"></video>
             <figcaption>{cap}</figcaption>
           </figure>''' for r, cap in (('A',"Designed reward function's preferred trajectory"),('B','The alternative trajectory')))
-    lis = ''.join(f'\n          <li>{inline(b)}</li>' for b in bullets)
+    lis = ''.join(f'\n          <li>{inline(b)}</li>' for b in bullets_)
     return f'''
       <article class="msg msg-cmp">
         <details class="cmp-details"{" open" if open_ else ""}>
-          <summary class="msg-head"><span class="label">PAIR {n}/3</span></summary>
+          <summary class="msg-head"><span class="label">PAIR {n}/{NPAIRS}</span></summary>
           <div class="cmp-viz">{vids}
           </div>
           <div class="cmp-chars-head">{inline(head)}</div>
@@ -30,9 +50,9 @@ def pair_card(n, open_):
       </article>'''
 
 def lottery_card(n, open_):
-    viz = json.loads((PAY/f'lottery{n}.viz.json').read_text())
-    a = next(v for v in viz if v['role']=='A'); b = next(v for v in viz if v['role']=='B'); c = next(v for v in viz if v['role']=='C')
-    pa = round(a['probability']*100); pb = 100-pa
+    l = SNAP['lotteries'][n-1]
+    pa = round(l['p']*100); pb = 100-pa
+    prefC = bool(l['snapshot_reward_prefers_c'])
     def fig(role, cap, prob=None):
         p = f'\n            <div class="viz-prob">{prob}% chance</div>' if prob is not None else ''
         return f'''
@@ -40,7 +60,6 @@ def lottery_card(n, open_):
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery{n}-{role}.mp4"></video>
             <figcaption>{cap}</figcaption>{p}
           </figure>'''
-    prefC = bool(c.get('reward_preferred'))
     badge = '<div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this certain trajectory</div>' if prefC else '<div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this lottery</div>'
     ab_row = f'<div class="lot-row lot-ab">{fig("A","Trajectory A",pa)}{fig("B","Trajectory B",pb)}\n          </div>'
     c_row = f'<div class="lot-row lot-c">{fig("C","Certain (C)")}\n          </div>'
@@ -48,14 +67,14 @@ def lottery_card(n, open_):
     return f'''
       <article class="msg msg-cmp msg-lottery">
         <details class="cmp-details"{" open" if open_ else ""}>
-          <summary class="msg-head"><span class="label">LOTTERY {n}/2</span></summary>
+          <summary class="msg-head"><span class="label">LOTTERY {n}/{NLOTS}</span></summary>
           <div class="lot-viz">
           {body}
           </div>
         </details>
       </article>'''
 
-code = (ROOT/'workspaces/metaworld_drawer_open/designed_reward_fn.py').read_text()
+code = (RUN/'designed_reward_fn.py').read_text()
 
 SETUP_FEED = '''
       <article class="msg msg-status"><div class="msg-body">The environment is set up.</div></article>
@@ -64,12 +83,13 @@ SETUP_FEED = '''
         <p><strong>What the agent can do.</strong> On each step the agent nudges its hand a small amount along three directions — left/right, forward/back, and up/down — and sends a command to open or close the gripper. Repeating these small moves is how it reaches the handle and pulls the drawer open.</p>
       </div></article>
       <article class="msg msg-status"><div class="msg-body">A stub reward function is in place. Implement its body, then continue.</div></article>
-      <article class="msg msg-cta" data-cta>
+      <article class="msg msg-cta" data-cta="{mode}">
         <div class="cta-prompt muted">The environment and reward function are set up.</div>
         <button type="button" class="btn btn-cta">Identify possible flaws</button>
       </article>
       <div class="thinking" hidden><span class="spinner"></span><span>Claude is thinking…</span></div>
-      <div class="msg msg-status after-cta" hidden><div class="msg-body">Asking a few quick questions, then spawning subagents to look for flaws. This can take up to an hour.</div></div>'''
+      <div class="msg msg-status after-cta" hidden><div class="msg-body"></div></div>'''
+def setup_feed(mode): return SETUP_FEED.replace('{mode}', mode)
 
 def frame(inner, status='awaiting', url='127.0.0.1:8000'):
     return f'''
@@ -147,10 +167,12 @@ JS = r"""<script>
     var lines=hl(c.textContent).split("\n");
     c.innerHTML=lines.map(function(l,k){return '<span class="ln">'+(k+1)+'</span>'+l}).join("\n");
   });
+  // Start the editor scrolled to the bottom, where designed_reward_fn lives.
+  document.querySelectorAll(".editor").forEach(function(e){e.scrollTop=e.scrollHeight});
 
   // ---- Question cards: select an option, submit, show what happens next
   var NOTES={
-    describe:'With this choice you fill in three short boxes (what to achieve, what to avoid, trade-offs) and Claude writes the Python for you. This tour follows the other path. <a href="#s2">Continue to step 2 &darr;</a>',
+    describe:'With this choice you fill in three short text boxes, and Claude will implement a reward function in Python for you. This tour follows the other path. <a href="#s2">Continue to step 2 &darr;</a>',
     myself:'Claude leaves a stub <code>designed_reward_fn.py</code> for you to fill in. <a href="#s2">Continue to step 2 &darr;</a>',
     edit:'Claude asks whether you want to edit the file yourself or describe the change in plain language. Either way, the comparisons are re-scored against the new reward.',
     char:'You name the characteristic; Claude writes a small measurement for it, and every comparison gains a new “higher / lower / same” line.',
@@ -172,11 +194,16 @@ JS = r"""<script>
   // ---- CTA: pressing "Identify possible flaws" starts the pipeline
   document.querySelectorAll(".app [data-cta] .btn-cta").forEach(function(btn){
     btn.addEventListener("click",function(){
+      var card=btn.closest("[data-cta]"),app=btn.closest(".app"),th=app.querySelector(".thinking"),after=app.querySelector(".after-cta"),chip=app.querySelector(".chip.status");
+      if(card.dataset.cta==="early"){
+        after.querySelector(".msg-body").innerHTML='Not yet! You need to implement the reward function first. <a href="#s3">Scroll down to step 3 &darr;</a>';
+        after.hidden=false;
+        return;
+      }
       btn.disabled=true;
-      var app=btn.closest(".app"),th=app.querySelector(".thinking"),after=app.querySelector(".after-cta"),chip=app.querySelector(".chip.status");
       if(chip){chip.textContent="running";chip.dataset.status="running"}
       th.hidden=false;
-      setTimeout(function(){after.hidden=false},900);
+      setTimeout(function(){after.querySelector(".msg-body").innerHTML='Subagents are now searching for flaws in your reward function. <a href="#s5">Move on to step 5 &darr;</a>';after.hidden=false},900);
     });
   });
 
@@ -316,7 +343,8 @@ page = f'''<!doctype html>
   .app .msg-head{{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}}
   .app .msg-head .label{{font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#4f5363}}
   .app .msg-body{{white-space:pre-wrap}}
-  .app .md p{{margin:8px 0}} .app .md strong{{color:#1a1d29}}
+  .app .md{{white-space:normal}} .app .md p{{margin:8px 0}} .app .md strong{{color:#1a1d29}}
+  .app .msg-status a{{color:#4f46e5;font-weight:600}}
   .app .msg-status{{background:#f0f3fb;border:1px dashed #c8cdde;color:#4f5363;font-size:13.5px;padding:10px 14px;border-radius:10px}}
   .app .msg-q{{border:1px solid #cdd1ff;background:#fafbff}}
   .app .msg-q .label{{color:#4f46e5}}
@@ -393,7 +421,6 @@ page = f'''<!doctype html>
       <div class="note">
         <h3>Choose how to specify your reward function</h3>
         <p>The first thing we will ask is how you want to specify a reward function. You can describe it in plain language and let Claude write the code, or you can write it yourself.</p>
-        <span class="try">Try it: pick an option and press Submit.</span>
       </div>{frame(QUESTION1)}
     </div></li>
 
@@ -401,14 +428,13 @@ page = f'''<!doctype html>
       <div class="note">
         <h3>If you choose “I will write it myself”</h3>
         <p>You will see this page. <b>You will need to switch to your IDE and write the code for your reward function in <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code></b> inside the cloned repo.</p>
-      </div>{frame(SETUP_FEED)}
+      </div>{frame(setup_feed('early'))}
     </div></li>
 
     <li id="s3"><div>
       <div class="note">
         <h3>Write your reward function</h3>
         <p>Open <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> in your IDE and fill in the body. <b>This is the only time you will need to write code.</b></p>
-        <span class="try">Below is the reward function we wrote for Meta-World's drawer-open task.</span>
       </div>{EDITOR}
     </div></li>
 
@@ -417,8 +443,7 @@ page = f'''<!doctype html>
         <h3>Press “Identify possible flaws”</h3>
         <p>When you are done, return to your browser and press <b>Identify possible flaws</b>. You will be asked a few more quick questions, and then our system will spawn subagents to find flaws in your reward function.</p>
         <div class="callout"><b>This step can take up to an hour,</b> depending on the speed of your simulator. Feel free to come back to the page later, but don't close it!</div>
-        <span class="try">Try it: press the button.</span>
-      </div>{frame(SETUP_FEED)}
+      </div>{frame(setup_feed('go'))}
     </div></li>
 
     <li id="s5"><div>
@@ -426,35 +451,26 @@ page = f'''<!doctype html>
         <h3>Review the trajectory pairs</h3>
         <p>We will show you hypothesized reward misspecifications in the form of trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Underneath each pair is a one-line “why they disagree”.</p>
         <p>The hypotheses are not always right! Expand the other trajectory pairs the system identified to see more.</p>
-        <span class="try">Try it: the videos play when scrolled into view. Expand PAIR 2/3 and 3/3.</span>
-      </div>{frame(pair_card(1,True)+pair_card(2,False)+pair_card(3,False), status='awaiting')}
+      </div>{frame(''.join(pair_card(i, i==1) for i in range(1,NPAIRS+1)), status='awaiting')}
     </div></li>
 
     <li id="s6"><div>
       <div class="note">
         <h3>Review the lotteries</h3>
         <p>Some hypotheses are shown as lotteries instead. A lottery asks: would you rather have the certain trajectory <b>C</b>, or a gamble that gives you trajectory <b>A</b> with one probability and trajectory <b>B</b> with the other? A badge marks which side your reward function assigns higher return to.</p>
-      </div>{frame(lottery_card(1,True)+lottery_card(2,False), status='awaiting')}
+      </div>{frame(''.join(lottery_card(i, i==1) for i in range(1,NLOTS+1)), status='awaiting')}
     </div></li>
 
     <li id="s7"><div>
       <div class="note">
         <h3>Decide what to do next</h3>
         <p>Below the comparisons, the page asks you to pick one:</p>
-        <dl>
-          <dt>Edit the reward function</dt>
-          <dd>Change the code yourself, or tell Claude in plain language what to change.</dd>
-          <dt>Add another characteristic</dt>
-          <dd>Name something you need in order to judge the comparisons; it gets measured and folded in.</dd>
-          <dt>View more comparisons</dt>
-          <dd>Surface more pairs and lotteries from the behavior already collected.</dd>
-          <dt>Finish and submit</dt>
-          <dd>Locks the current reward in as your final answer. Not reversible.</dd>
-        </dl>
+      </div>{frame(QUESTION7)}
+      <div class="note">
         <div class="aside">
           <b>Didn't find a flaw?</b> If none of the pairs identified a flaw in your reward function, you can run another round of this process. In our experience, after two more rounds (three rounds total) the system has covered many different hypothesized flaws.
         </div>
-      </div>{frame(QUESTION7)}
+      </div>
     </div></li>
 
   </ol>

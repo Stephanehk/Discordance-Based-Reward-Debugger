@@ -125,7 +125,8 @@
   .app .msg-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
   .app .msg-head .label{font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#4f5363}
   .app .msg-body{white-space:pre-wrap}
-  .app .md p{margin:8px 0} .app .md strong{color:#1a1d29}
+  .app .md{white-space:normal} .app .md p{margin:8px 0} .app .md strong{color:#1a1d29}
+  .app .msg-status a{color:#4f46e5;font-weight:600}
   .app .msg-status{background:#f0f3fb;border:1px dashed #c8cdde;color:#4f5363;font-size:13.5px;padding:10px 14px;border-radius:10px}
   .app .msg-q{border:1px solid #cdd1ff;background:#fafbff}
   .app .msg-q .label{color:#4f46e5}
@@ -202,7 +203,6 @@
       <div class="note">
         <h3>Choose how to specify your reward function</h3>
         <p>The first thing we will ask is how you want to specify a reward function. You can describe it in plain language and let Claude write the code, or you can write it yourself.</p>
-        <span class="try">Try it: pick an option and press Submit.</span>
       </div>
     <div class="frame">
       <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">127.0.0.1:8000</span></div>
@@ -248,12 +248,12 @@
         <p><strong>What the agent can do.</strong> On each step the agent nudges its hand a small amount along three directions — left/right, forward/back, and up/down — and sends a command to open or close the gripper. Repeating these small moves is how it reaches the handle and pulls the drawer open.</p>
       </div></article>
       <article class="msg msg-status"><div class="msg-body">A stub reward function is in place. Implement its body, then continue.</div></article>
-      <article class="msg msg-cta" data-cta>
+      <article class="msg msg-cta" data-cta="early">
         <div class="cta-prompt muted">The environment and reward function are set up.</div>
         <button type="button" class="btn btn-cta">Identify possible flaws</button>
       </article>
       <div class="thinking" hidden><span class="spinner"></span><span>Claude is thinking…</span></div>
-      <div class="msg msg-status after-cta" hidden><div class="msg-body">Asking a few quick questions, then spawning subagents to look for flaws. This can take up to an hour.</div></div>
+      <div class="msg msg-status after-cta" hidden><div class="msg-body"></div></div>
         </div>
       </div>
     </div>
@@ -263,45 +263,18 @@
       <div class="note">
         <h3>Write your reward function</h3>
         <p>Open <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> in your IDE and fill in the body. <b>This is the only time you will need to write code.</b></p>
-        <span class="try">Below is the reward function we wrote for Meta-World's drawer-open task.</span>
       </div>
     <div class="frame ide">
       <div class="frame-bar dark"><span class="fdots"><i></i><i></i><i></i></span><span class="ftab">designed_reward_fn.py</span><span class="fpath">workspaces / metaworld_drawer_open</span></div>
       <div class="editor"><pre><code class="py">"""Designed reward for the Meta-World `drawer-open-v3` task.
 
-What this reward pays for
--------------------------
-Over an episode, the rewards below sum to
-
-    return(tau)  ~=  OPEN_WEIGHT * (how far open the drawer is at the END)
-                     + a small, bounded guidance term for reaching the handle
-
-so a trajectory is worth exactly the state it leaves the drawer in. Opening the
-drawer and letting it slide back gives that credit up; opening it and shoving it
-shut again is worth nothing at all. Nothing is paid for *dwelling* near the goal,
-so the reward cannot be collected by parking the arm half-way and idling.
-
-How it gets there
------------------
-Both terms are written as **differences** between the step's two observations
-rather than as levels. A per-step level is integrated over the episode, which is
-what makes an idle-in-a-good-pose trajectory score like a finished one. A per-step
-difference telescopes: summed over the episode it collapses to (final - initial),
-i.e. a property of the endpoints alone.
-
-  * Opening: `OPEN_WEIGHT * (openness(next_obs) - openness(obs))`, where openness
-    runs 0 (shut, as the episode starts) to 1 (fully open). It sums to
-    `OPEN_WEIGHT * openness(final)`. Progress pays, backsliding costs the same,
-    and standing still pays zero.
-
-  * Caging: the same hand-to-handle term the task has always used, but entered as
-    a *potential* — only its change is paid. It sums to
-    `CAGE_WEIGHT * (cage(final) - cage(initial))`, which is bounded by
-    +/- CAGE_WEIGHT and cannot outweigh the opening term. It keeps a dense
-    "get to the handle" gradient for learning without letting a trajectory earn
-    anything by hovering there.
-
-The action is unused: how hard or how jerkily the arm moves is not scored.
+This is the environment's own dense reward (`SawyerDrawerOpenEnvV3.compute_reward`
+with the default `reward_function_version="v2"`), reproduced here so it can be
+evaluated from a `(obs, act, next_obs)` transition alone. It is the sum of a
+*caging* term (bring the gripper to the handle) and an *opening* term (bring the
+handle to the fully-open target), each shaped with dm_control's `tolerance`,
+scaled by 5. It is computed on `next_obs`, matching the env, which evaluates the
+post-step observation. The action is unused.
 
 Observation — Box(shape=(45,), float64):
   [0:3]   hand (end-effector) position (x, y, z), meters
@@ -327,9 +300,7 @@ import numpy as np
 MAX_DIST = 0.2  # meters the handle travels from closed to fully open
 VALUE_AT_MARGIN = 0.1  # tolerance() output once the error reaches `margin`
 XY_SCALE = np.array([3.0, 3.0, 1.0])  # emphasize XY hand-to-handle error over Z
-
-OPEN_WEIGHT = 10.0  # a full open, held to the end, is worth this much
-CAGE_WEIGHT = 0.5  # guidance only; bounded by +/- this over a whole episode
+REWARD_SCALE = 5.0  # env multiplies the summed terms by this
 
 
 def _long_tail(x: float) -&gt; float:
@@ -345,39 +316,28 @@ def _tolerance(x: float, upper_bound: float, margin: float) -&gt; float:
     return _long_tail((x - upper_bound) / margin)
 
 
-def _openness(o) -&gt; float:
-    """How far open the drawer is: 0.0 = shut (as it starts), 1.0 = fully open."""
-    handle = o[4:7]
-    target_pos = o[39:42]  # handle position when fully open
-    remaining = float(np.linalg.norm(handle - target_pos))
-    return float(np.clip(1.0 - remaining / MAX_DIST, 0.0, 1.0))
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+    next_obs = np.asarray(next_obs, dtype=np.float64)
 
+    gripper = next_obs[0:3]  # hand position, meters
+    handle = next_obs[4:7]  # drawer-handle position, meters
+    target_pos = next_obs[39:42]  # handle position when fully open, meters
+    init_tcp = next_obs[42:45]  # hand position at episode start, meters
 
-def _caging_potential(o) -&gt; float:
-    """Hand-to-handle proximity, 0 (far) to 1 (at the handle). Guidance only."""
-    gripper = o[0:3]  # hand position
-    handle = o[4:7]  # drawer-handle position
-    target_pos = o[39:42]
-    init_tcp = o[42:45]  # hand position at episode start
+    # Opening: how far the handle still is from the fully-open pose, meters.
+    handle_error = float(np.linalg.norm(handle - target_pos))
+    reward_for_opening = _tolerance(handle_error, upper_bound=0.02, margin=MAX_DIST)
 
-    # Normalize by the same error at episode start: hand at its initial pose,
-    # drawer shut (so the handle sits MAX_DIST from its fully-open target).
+    # Caging: XY-emphasized hand-to-handle error, normalized by the same error at
+    # episode start (hand at its initial pose, drawer closed).
     handle_pos_init = target_pos + np.array([0.0, MAX_DIST, 0.0])
     gripper_error = float(np.linalg.norm((handle - gripper) * XY_SCALE))
     gripper_error_init = float(np.linalg.norm((handle_pos_init - init_tcp) * XY_SCALE))
-    return _tolerance(gripper_error, upper_bound=0.01, margin=gripper_error_init)
+    reward_for_caging = _tolerance(
+        gripper_error, upper_bound=0.01, margin=gripper_error_init
+    )
 
-
-def designed_reward_fn(obs, act, next_obs) -&gt; float:
-    obs = np.asarray(obs, dtype=np.float64)
-    next_obs = np.asarray(next_obs, dtype=np.float64)
-
-    # Both terms are paid on their *change* over the step, so that summing them
-    # over an episode leaves only the endpoints (see the module docstring).
-    opening = _openness(next_obs) - _openness(obs)
-    caging = _caging_potential(next_obs) - _caging_potential(obs)
-
-    return OPEN_WEIGHT * opening + CAGE_WEIGHT * caging
+    return REWARD_SCALE * (reward_for_caging + reward_for_opening)
 </code></pre></div>
     </div>
     </div></li>
@@ -387,7 +347,6 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         <h3>Press “Identify possible flaws”</h3>
         <p>When you are done, return to your browser and press <b>Identify possible flaws</b>. You will be asked a few more quick questions, and then our system will spawn subagents to find flaws in your reward function.</p>
         <div class="callout"><b>This step can take up to an hour,</b> depending on the speed of your simulator. Feel free to come back to the page later, but don't close it!</div>
-        <span class="try">Try it: press the button.</span>
       </div>
     <div class="frame">
       <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">127.0.0.1:8000</span></div>
@@ -403,12 +362,12 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         <p><strong>What the agent can do.</strong> On each step the agent nudges its hand a small amount along three directions — left/right, forward/back, and up/down — and sends a command to open or close the gripper. Repeating these small moves is how it reaches the handle and pulls the drawer open.</p>
       </div></article>
       <article class="msg msg-status"><div class="msg-body">A stub reward function is in place. Implement its body, then continue.</div></article>
-      <article class="msg msg-cta" data-cta>
+      <article class="msg msg-cta" data-cta="go">
         <div class="cta-prompt muted">The environment and reward function are set up.</div>
         <button type="button" class="btn btn-cta">Identify possible flaws</button>
       </article>
       <div class="thinking" hidden><span class="spinner"></span><span>Claude is thinking…</span></div>
-      <div class="msg msg-status after-cta" hidden><div class="msg-body">Asking a few quick questions, then spawning subagents to look for flaws. This can take up to an hour.</div></div>
+      <div class="msg msg-status after-cta" hidden><div class="msg-body"></div></div>
         </div>
       </div>
     </div>
@@ -419,7 +378,6 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         <h3>Review the trajectory pairs</h3>
         <p>We will show you hypothesized reward misspecifications in the form of trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Underneath each pair is a one-line “why they disagree”.</p>
         <p>The hypotheses are not always right! Expand the other trajectory pairs the system identified to see more.</p>
-        <span class="try">Try it: the videos play when scrolled into view. Expand PAIR 2/3 and 3/3.</span>
       </div>
     <div class="frame">
       <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">127.0.0.1:8000</span></div>
@@ -431,7 +389,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         <div class="feed">
       <article class="msg msg-cmp">
         <details class="cmp-details" open>
-          <summary class="msg-head"><span class="label">PAIR 1/3</span></summary>
+          <summary class="msg-head"><span class="label">PAIR 1/5</span></summary>
           <div class="cmp-viz">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair1-A.mp4"></video>
@@ -444,23 +402,26 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           </div>
           <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
           <ul class="cmp-chars">
-          <li><strong>higher</strong> average size of the arm's per-step movement command (1.42 vs. 1.06)</li>
-          <li><strong>higher</strong> how far open the drawer ended (0=shut, 1=fully open) (0.94 vs. 0.88)</li>
-          <li><strong>higher</strong> total distance the hand travelled over the attempt (meters) (0.61 vs. 0.43)</li>
-          <li><strong>lower</strong> fraction of the episode elapsed before first opening (1.0 = never) (0.44 vs. 1)</li>
-          <li><strong>higher</strong> final minus initial openness (what the opening reward sums to) (0.89 vs. 0.83)</li>
-          <li><strong>higher</strong> peak openness reached at any point in the attempt (0.99 vs. 0.88)</li>
-          <li><strong>higher</strong> peak minus final openness (opened then let slide/pushed back) (0.05 vs. 0)</li>
-          <li><strong>same</strong> 1.0 if the handle actually reached the fully-open target (1 vs. 1)</li>
-          <li><strong>lower</strong> how close the hand was to the handle at the end (0..1) (0.85 vs. 0.97)</li>
-          <li><strong>lower</strong> final minus initial hand-to-handle proximity (what the guidance reward sums to) (0.51 vs. 0.64)</li>
-          <li><strong>lower</strong> fraction of steps the hand dwelt right at the handle (0.03 vs. 0.57)</li>
+          <li><strong>lower</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0 vs. 0.88)</li>
+          <li><strong>lower</strong> the furthest the drawer was opened at any point in the attempt (0 vs. 0.88)</li>
+          <li><strong>lower</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (0 vs. 1)</li>
+          <li><strong>higher</strong> steps taken to first reach the fully-open position (episode length if never) (150 vs. 148)</li>
+          <li><strong>same</strong> how much of the opening was given back after the furthest point (fraction) (0 vs. 0)</li>
+          <li><strong>lower</strong> fraction of steps with the drawer at the fully-open position (0 vs. 0.02)</li>
+          <li><strong>higher</strong> average distance from the handle to its fully-open position (m) (0.19 vs. 0.18)</li>
+          <li><strong>lower</strong> average distance from the hand to the drawer handle (m) (0.05 vs. 0.13)</li>
+          <li><strong>higher</strong> fraction of steps with the hand touching-distance from the handle (0.75 vs. 0.13)</li>
+          <li><strong>same</strong> fraction of steps with the fingers closed rather than splayed open (0 vs. 0)</li>
+          <li><strong>lower</strong> fraction of steps where the hand is on the handle and the handle is actually moving (0 vs. 0.06)</li>
+          <li><strong>lower</strong> average size of the commanded movement each step (0-1) (0.32 vs. 0.38)</li>
+          <li><strong>lower</strong> average step-to-step change in the command — how jerky the motion is (0.01 vs. 0.02)</li>
+          <li><strong>lower</strong> total distance the hand travelled over the attempt (m) (0.30 vs. 0.52)</li>
           </ul>
         </details>
       </article>
       <article class="msg msg-cmp">
         <details class="cmp-details">
-          <summary class="msg-head"><span class="label">PAIR 2/3</span></summary>
+          <summary class="msg-head"><span class="label">PAIR 2/5</span></summary>
           <div class="cmp-viz">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair2-A.mp4"></video>
@@ -473,23 +434,26 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           </div>
           <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
           <ul class="cmp-chars">
-          <li><strong>higher</strong> fraction of the episode elapsed before first opening (1.0 = never) (0.80 vs. 0.43)</li>
-          <li><strong>higher</strong> how far open the drawer ended (0=shut, 1=fully open) (1.00 vs. 0.99)</li>
-          <li><strong>lower</strong> peak openness reached at any point in the attempt (1.00 vs. 1.00)</li>
-          <li><strong>higher</strong> final minus initial openness (what the opening reward sums to) (0.95 vs. 0.94)</li>
-          <li><strong>lower</strong> peak minus final openness (opened then let slide/pushed back) (0 vs. 0.01)</li>
-          <li><strong>same</strong> 1.0 if the handle actually reached the fully-open target (1 vs. 1)</li>
-          <li><strong>lower</strong> how close the hand was to the handle at the end (0..1) (0.86 vs. 0.86)</li>
-          <li><strong>lower</strong> final minus initial hand-to-handle proximity (what the guidance reward sums to) (0.52 vs. 0.53)</li>
-          <li><strong>same</strong> fraction of steps the hand dwelt right at the handle (0.03 vs. 0.03)</li>
-          <li><strong>lower</strong> average size of the arm's per-step movement command (1.22 vs. 1.26)</li>
-          <li><strong>lower</strong> total distance the hand travelled over the attempt (meters) (0.53 vs. 0.65)</li>
+          <li><strong>lower</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0 vs. 0.88)</li>
+          <li><strong>higher</strong> the furthest the drawer was opened at any point in the attempt (0.88 vs. 0.88)</li>
+          <li><strong>lower</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (0 vs. 1)</li>
+          <li><strong>lower</strong> steps taken to first reach the fully-open position (episode length if never) (72 vs. 143)</li>
+          <li><strong>higher</strong> how much of the opening was given back after the furthest point (fraction) (0.88 vs. 0)</li>
+          <li><strong>higher</strong> fraction of steps with the drawer at the fully-open position (0.33 vs. 0.05)</li>
+          <li><strong>lower</strong> average distance from the handle to its fully-open position (m) (0.11 vs. 0.15)</li>
+          <li><strong>higher</strong> average distance from the hand to the drawer handle (m) (0.06 vs. 0.06)</li>
+          <li><strong>lower</strong> fraction of steps with the hand touching-distance from the handle (0.33 vs. 0.59)</li>
+          <li><strong>lower</strong> fraction of steps with the fingers closed rather than splayed open (0 vs. 0.45)</li>
+          <li><strong>lower</strong> fraction of steps where the hand is on the handle and the handle is actually moving (0.18 vs. 0.40)</li>
+          <li><strong>higher</strong> average size of the commanded movement each step (0-1) (0.45 vs. 0.34)</li>
+          <li><strong>higher</strong> average step-to-step change in the command — how jerky the motion is (0.03 vs. 0.01)</li>
+          <li><strong>higher</strong> total distance the hand travelled over the attempt (m) (0.73 vs. 0.44)</li>
           </ul>
         </details>
       </article>
       <article class="msg msg-cmp">
         <details class="cmp-details">
-          <summary class="msg-head"><span class="label">PAIR 3/3</span></summary>
+          <summary class="msg-head"><span class="label">PAIR 3/5</span></summary>
           <div class="cmp-viz">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair3-A.mp4"></video>
@@ -502,17 +466,84 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           </div>
           <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
           <ul class="cmp-chars">
-          <li><strong>lower</strong> peak minus final openness (opened then let slide/pushed back) (0.03 vs. 0.17)</li>
-          <li><strong>higher</strong> how close the hand was to the handle at the end (0..1) (0.87 vs. 0)</li>
-          <li><strong>higher</strong> how far open the drawer ended (0=shut, 1=fully open) (0.86 vs. 0.73)</li>
-          <li><strong>higher</strong> final minus initial hand-to-handle proximity (what the guidance reward sums to) (0.54 vs. -0.33)</li>
-          <li><strong>higher</strong> 1.0 if the handle actually reached the fully-open target (1 vs. 0)</li>
-          <li><strong>higher</strong> final minus initial openness (what the opening reward sums to) (0.81 vs. 0.68)</li>
-          <li><strong>higher</strong> peak openness reached at any point in the attempt (0.89 vs. 0.89)</li>
-          <li><strong>same</strong> fraction of the episode elapsed before first opening (1.0 = never) (1 vs. 1)</li>
-          <li><strong>same</strong> fraction of steps the hand dwelt right at the handle (0.05 vs. 0.05)</li>
-          <li><strong>lower</strong> average size of the arm's per-step movement command (1.19 vs. 1.27)</li>
-          <li><strong>lower</strong> total distance the hand travelled over the attempt (meters) (0.57 vs. 0.98)</li>
+          <li><strong>lower</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0.94 vs. 0.99)</li>
+          <li><strong>higher</strong> the furthest the drawer was opened at any point in the attempt (1.00 vs. 0.99)</li>
+          <li><strong>same</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (1 vs. 1)</li>
+          <li><strong>lower</strong> steps taken to first reach the fully-open position (episode length if never) (63 vs. 125)</li>
+          <li><strong>higher</strong> how much of the opening was given back after the furthest point (fraction) (0.06 vs. 0)</li>
+          <li><strong>higher</strong> fraction of steps with the drawer at the fully-open position (0.59 vs. 0.17)</li>
+          <li><strong>lower</strong> average distance from the handle to its fully-open position (m) (0.08 vs. 0.14)</li>
+          <li><strong>higher</strong> average distance from the hand to the drawer handle (m) (0.06 vs. 0.06)</li>
+          <li><strong>lower</strong> fraction of steps with the hand touching-distance from the handle (0.05 vs. 0.59)</li>
+          <li><strong>lower</strong> fraction of steps with the fingers closed rather than splayed open (0 vs. 0.45)</li>
+          <li><strong>lower</strong> fraction of steps where the hand is on the handle and the handle is actually moving (0 vs. 0.39)</li>
+          <li><strong>higher</strong> average size of the commanded movement each step (0-1) (0.58 vs. 0.36)</li>
+          <li><strong>higher</strong> average step-to-step change in the command — how jerky the motion is (0.36 vs. 0.01)</li>
+          <li><strong>higher</strong> total distance the hand travelled over the attempt (m) (0.61 vs. 0.46)</li>
+          </ul>
+        </details>
+      </article>
+      <article class="msg msg-cmp">
+        <details class="cmp-details">
+          <summary class="msg-head"><span class="label">PAIR 4/5</span></summary>
+          <div class="cmp-viz">
+          <figure>
+            <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair4-A.mp4"></video>
+            <figcaption>Designed reward function's preferred trajectory</figcaption>
+          </figure>
+          <figure>
+            <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair4-B.mp4"></video>
+            <figcaption>The alternative trajectory</figcaption>
+          </figure>
+          </div>
+          <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
+          <ul class="cmp-chars">
+          <li><strong>higher</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0.85 vs. 0.85)</li>
+          <li><strong>higher</strong> the furthest the drawer was opened at any point in the attempt (0.89 vs. 0.86)</li>
+          <li><strong>same</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (1 vs. 1)</li>
+          <li><strong>lower</strong> steps taken to first reach the fully-open position (episode length if never) (62 vs. 128)</li>
+          <li><strong>higher</strong> how much of the opening was given back after the furthest point (fraction) (0.05 vs. 0.02)</li>
+          <li><strong>higher</strong> fraction of steps with the drawer at the fully-open position (0.54 vs. 0.15)</li>
+          <li><strong>lower</strong> average distance from the handle to its fully-open position (m) (0.08 vs. 0.14)</li>
+          <li><strong>lower</strong> average distance from the hand to the drawer handle (m) (0.05 vs. 0.07)</li>
+          <li><strong>lower</strong> fraction of steps with the hand touching-distance from the handle (0.25 vs. 0.54)</li>
+          <li><strong>same</strong> fraction of steps with the fingers closed rather than splayed open (0 vs. 0)</li>
+          <li><strong>lower</strong> fraction of steps where the hand is on the handle and the handle is actually moving (0.07 vs. 0.31)</li>
+          <li><strong>higher</strong> average size of the commanded movement each step (0-1) (0.42 vs. 0.37)</li>
+          <li><strong>higher</strong> average step-to-step change in the command — how jerky the motion is (0.03 vs. 0.01)</li>
+          <li><strong>higher</strong> total distance the hand travelled over the attempt (m) (0.57 vs. 0.53)</li>
+          </ul>
+        </details>
+      </article>
+      <article class="msg msg-cmp">
+        <details class="cmp-details">
+          <summary class="msg-head"><span class="label">PAIR 5/5</span></summary>
+          <div class="cmp-viz">
+          <figure>
+            <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair5-A.mp4"></video>
+            <figcaption>Designed reward function's preferred trajectory</figcaption>
+          </figure>
+          <figure>
+            <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair5-B.mp4"></video>
+            <figcaption>The alternative trajectory</figcaption>
+          </figure>
+          </div>
+          <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
+          <ul class="cmp-chars">
+          <li><strong>lower</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0.85 vs. 0.99)</li>
+          <li><strong>lower</strong> the furthest the drawer was opened at any point in the attempt (0.89 vs. 0.99)</li>
+          <li><strong>same</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (1 vs. 1)</li>
+          <li><strong>lower</strong> steps taken to first reach the fully-open position (episode length if never) (62 vs. 125)</li>
+          <li><strong>higher</strong> how much of the opening was given back after the furthest point (fraction) (0.05 vs. 0)</li>
+          <li><strong>higher</strong> fraction of steps with the drawer at the fully-open position (0.54 vs. 0.17)</li>
+          <li><strong>lower</strong> average distance from the handle to its fully-open position (m) (0.08 vs. 0.14)</li>
+          <li><strong>lower</strong> average distance from the hand to the drawer handle (m) (0.05 vs. 0.06)</li>
+          <li><strong>lower</strong> fraction of steps with the hand touching-distance from the handle (0.25 vs. 0.59)</li>
+          <li><strong>lower</strong> fraction of steps with the fingers closed rather than splayed open (0 vs. 0.45)</li>
+          <li><strong>lower</strong> fraction of steps where the hand is on the handle and the handle is actually moving (0.07 vs. 0.39)</li>
+          <li><strong>higher</strong> average size of the commanded movement each step (0-1) (0.42 vs. 0.36)</li>
+          <li><strong>higher</strong> average step-to-step change in the command — how jerky the motion is (0.03 vs. 0.01)</li>
+          <li><strong>higher</strong> total distance the hand travelled over the attempt (m) (0.57 vs. 0.46)</li>
           </ul>
         </details>
       </article>
@@ -542,12 +573,12 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery1-A.mp4"></video>
             <figcaption>Trajectory A</figcaption>
-            <div class="viz-prob">79% chance</div>
+            <div class="viz-prob">61% chance</div>
           </figure>
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery1-B.mp4"></video>
             <figcaption>Trajectory B</figcaption>
-            <div class="viz-prob">21% chance</div>
+            <div class="viz-prob">39% chance</div>
           </figure>
           </div>
           <div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this certain trajectory</div>
@@ -568,12 +599,12 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery2-A.mp4"></video>
             <figcaption>Trajectory A</figcaption>
-            <div class="viz-prob">58% chance</div>
+            <div class="viz-prob">13% chance</div>
           </figure>
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery2-B.mp4"></video>
             <figcaption>Trajectory B</figcaption>
-            <div class="viz-prob">42% chance</div>
+            <div class="viz-prob">87% chance</div>
           </figure>
           </div>
           <div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this certain trajectory</div>
@@ -595,19 +626,6 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
       <div class="note">
         <h3>Decide what to do next</h3>
         <p>Below the comparisons, the page asks you to pick one:</p>
-        <dl>
-          <dt>Edit the reward function</dt>
-          <dd>Change the code yourself, or tell Claude in plain language what to change.</dd>
-          <dt>Add another characteristic</dt>
-          <dd>Name something you need in order to judge the comparisons; it gets measured and folded in.</dd>
-          <dt>View more comparisons</dt>
-          <dd>Surface more pairs and lotteries from the behavior already collected.</dd>
-          <dt>Finish and submit</dt>
-          <dd>Locks the current reward in as your final answer. Not reversible.</dd>
-        </dl>
-        <div class="aside">
-          <b>Didn't find a flaw?</b> If none of the pairs identified a flaw in your reward function, you can run another round of this process. In our experience, after two more rounds (three rounds total) the system has covered many different hypothesized flaws.
-        </div>
       </div>
     <div class="frame">
       <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">127.0.0.1:8000</span></div>
@@ -634,6 +652,11 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         </div>
       </div>
     </div>
+      <div class="note">
+        <div class="aside">
+          <b>Didn't find a flaw?</b> If none of the pairs identified a flaw in your reward function, you can run another round of this process. In our experience, after two more rounds (three rounds total) the system has covered many different hypothesized flaws.
+        </div>
+      </div>
     </div></li>
 
   </ol>
@@ -682,10 +705,12 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
     var lines=hl(c.textContent).split("\n");
     c.innerHTML=lines.map(function(l,k){return '<span class="ln">'+(k+1)+'</span>'+l}).join("\n");
   });
+  // Start the editor scrolled to the bottom, where designed_reward_fn lives.
+  document.querySelectorAll(".editor").forEach(function(e){e.scrollTop=e.scrollHeight});
 
   // ---- Question cards: select an option, submit, show what happens next
   var NOTES={
-    describe:'With this choice you fill in three short boxes (what to achieve, what to avoid, trade-offs) and Claude writes the Python for you. This tour follows the other path. <a href="#s2">Continue to step 2 &darr;</a>',
+    describe:'With this choice you fill in three short text boxes, and Claude will implement a reward function in Python for you. This tour follows the other path. <a href="#s2">Continue to step 2 &darr;</a>',
     myself:'Claude leaves a stub <code>designed_reward_fn.py</code> for you to fill in. <a href="#s2">Continue to step 2 &darr;</a>',
     edit:'Claude asks whether you want to edit the file yourself or describe the change in plain language. Either way, the comparisons are re-scored against the new reward.',
     char:'You name the characteristic; Claude writes a small measurement for it, and every comparison gains a new “higher / lower / same” line.',
@@ -707,11 +732,16 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
   // ---- CTA: pressing "Identify possible flaws" starts the pipeline
   document.querySelectorAll(".app [data-cta] .btn-cta").forEach(function(btn){
     btn.addEventListener("click",function(){
+      var card=btn.closest("[data-cta]"),app=btn.closest(".app"),th=app.querySelector(".thinking"),after=app.querySelector(".after-cta"),chip=app.querySelector(".chip.status");
+      if(card.dataset.cta==="early"){
+        after.querySelector(".msg-body").innerHTML='Not yet! You need to implement the reward function first. <a href="#s3">Scroll down to step 3 &darr;</a>';
+        after.hidden=false;
+        return;
+      }
       btn.disabled=true;
-      var app=btn.closest(".app"),th=app.querySelector(".thinking"),after=app.querySelector(".after-cta"),chip=app.querySelector(".chip.status");
       if(chip){chip.textContent="running";chip.dataset.status="running"}
       th.hidden=false;
-      setTimeout(function(){after.hidden=false},900);
+      setTimeout(function(){after.querySelector(".msg-body").innerHTML='Subagents are now searching for flaws in your reward function. <a href="#s5">Move on to step 5 &darr;</a>';after.hidden=false},900);
     });
   });
 

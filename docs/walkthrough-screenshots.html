@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Walkthrough — Discordant-Based Reward Debugger</title>
+<meta name="description" content="A short tour of what you will see when you run the Discordant-Based Reward Debugger.">
+<style>
+  :root{
+    --bg:#fbfaf7; --fg:#1c1b19; --muted:#66625b; --rule:#e4e0d8;
+    --accent:#1f6f5f; --accent-bg:#eef5f2; --accent-fg:#ffffff;
+    --code-bg:#f1efe9; --code-fg:#1c1b19;
+    --shot-shadow:0 12px 32px rgba(28,27,25,.12), 0 1px 2px rgba(28,27,25,.08);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Charter,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
+      --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
+      --code-bg:#1f2023; --code-fg:#ebe8e1;
+      --shot-shadow:0 12px 32px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.4);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
+    --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
+    --code-bg:#1f2023; --code-fg:#ebe8e1;
+    --shot-shadow:0 12px 32px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.4);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+  a:hover{border-bottom-color:currentColor}
+  code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:.1em .35em;border-radius:4px}
+  h1,h2,h3{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;margin:0}
+  h1{font-size:clamp(34px,5.4vw,46px);line-height:1.12}
+  h2{font-size:28px;line-height:1.2;margin-bottom:22px}
+  h3{font-size:21px;line-height:1.3;margin-bottom:8px}
+  p{margin:0 0 14px}
+  p:last-child{margin-bottom:0}
+  .muted{color:var(--muted)}
+  b{font-weight:600}
+
+  .page{max-width:1040px;margin:0 auto;padding:0 20px}
+  .text{max-width:660px}
+
+  header{padding:calc(56px + env(safe-area-inset-top,0px)) 0 44px;border-bottom:1px solid var(--rule)}
+  header .lede{font-family:var(--serif);font-size:24px;line-height:1.4;margin:22px 0 18px}
+  header nav{display:flex;gap:22px;flex-wrap:wrap;margin-top:24px;font-size:15.5px}
+  header nav a{font-weight:600}
+  .crumb{font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .crumb a{color:var(--muted)}
+
+  section{padding:48px 0;border-bottom:1px solid var(--rule)}
+  section:last-of-type{border-bottom:0}
+
+  /* tour steps: hanging numerals, full-width screenshot under each note */
+  ol.tour{list-style:none;margin:0;padding:0;counter-reset:step}
+  ol.tour>li{counter-increment:step;display:grid;grid-template-columns:72px 1fr;gap:0 18px;padding:36px 0;border-top:1px solid var(--rule)}
+  ol.tour>li:first-child{border-top:0;padding-top:0}
+  ol.tour>li::before{content:counter(step);font-family:var(--serif);font-size:40px;line-height:1;color:var(--accent);padding-top:2px}
+  ol.tour>li>div{min-width:0}
+  ol.tour .note{max-width:660px}
+  @media (max-width:640px){
+    ol.tour>li{grid-template-columns:1fr;gap:6px}
+    ol.tour>li::before{font-size:26px}
+  }
+
+  figure.shot{margin:20px 0 0;max-width:100%}
+  figure.shot img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:10px;box-shadow:var(--shot-shadow);background:var(--code-bg)}
+  figure.shot figcaption{margin-top:10px;font-size:14px;color:var(--muted)}
+
+  .aside{margin-top:20px;padding:16px 18px;border-left:3px solid var(--accent);background:var(--accent-bg);border-radius:0 8px 8px 0;font-size:16px}
+  .callout{margin-top:16px;padding:14px 16px;border:1px solid var(--rule);border-radius:8px;font-size:15.5px}
+
+  dl{margin:0}
+  dl dt{font-weight:600;margin-top:14px}
+  dl dd{margin:2px 0 0;color:var(--muted)}
+
+  .cta{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:14px 24px;border-radius:10px;
+       background:var(--accent);color:var(--accent-fg);font-weight:600;font-size:17px;border-bottom:0;
+       box-shadow:0 6px 18px rgba(31,111,95,.22);transition:transform .12s ease,box-shadow .12s ease}
+  .cta:hover{border-bottom:0;transform:translateY(-1px);box-shadow:0 10px 24px rgba(31,111,95,.3)}
+  .cta.ghost{background:transparent;color:var(--accent);border:2px solid var(--accent);box-shadow:none}
+  .cta.ghost:hover{background:var(--accent-bg)}
+
+  footer{padding:36px 0 calc(48px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:15px;border-top:1px solid var(--rule)}
+  footer .links{display:flex;gap:22px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="text">
+    <p class="crumb"><a href="./">Discordant-Based Reward Debugger</a> &nbsp;/&nbsp; Walkthrough</p>
+    <p>Once you have run <code>/repair-setup &lt;env_name&gt;</code> and opened <b>http://127.0.0.1:8000</b>, everything below happens on that page.</p>
+    <nav>
+      <a href="#tour">Start the tour &darr;</a>
+      <a href="./#setup">Set up</a>
+      <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section id="tour">
+  <ol class="tour">
+
+    <li><div>
+      <div class="note">
+        <h3>Choose how to specify your reward function</h3>
+        <p>The first thing we will ask is how you want to specify a reward function. You can describe it in plain language and let Claude write the code, or you can write it yourself.</p>
+      </div>
+      <figure class="shot">
+        <img src="walkthrough/01-specify.png" alt="The web page asking how you would like to specify the reward function, with the options to describe it or write it yourself.">
+      </figure>
+    </div></li>
+
+    <li><div>
+      <div class="note">
+        <h3>If you choose “I will write it myself”</h3>
+        <p>You will see this page. <b>You will need to switch to your IDE and write the code for your reward function in <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code></b> inside the cloned repo.</p>
+      </div>
+      <figure class="shot">
+        <img src="walkthrough/02-write-it-myself.png" alt="The page shown after selecting “I will write it myself”, with a button labeled “Identify possible flaws”.">
+      </figure>
+    </div></li>
+
+    <li><div>
+      <div class="note">
+        <h3>Write your reward function</h3>
+        <p>Open <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> in your IDE and fill in the body. <b>This is the only time you will need to write code.</b></p>
+      </div>
+      <figure class="shot">
+        <img src="walkthrough/03-ide.png" alt="An IDE showing designed_reward_fn.py open for editing.">
+      </figure>
+    </div></li>
+
+    <li><div>
+      <div class="note">
+        <h3>Press “Identify possible flaws”</h3>
+        <p>When you are done, return to your browser and press <b>Identify possible flaws</b>. You will be asked a few more quick questions, and then our system will spawn subagents to find flaws in your reward function.</p>
+        <div class="callout"><b>This step can take up to an hour,</b> depending on the speed of your simulator. Feel free to come back to the page later, but don't close it!</div>
+      </div>
+      <figure class="shot">
+        <img src="walkthrough/02-write-it-myself.png" alt="The same page, with the “Identify possible flaws” button to press once your reward function is written.">
+      </figure>
+    </div></li>
+
+    <li><div>
+      <div class="note">
+        <h3>Review the trajectory pairs</h3>
+        <p>We will show you hypothesized reward misspecifications in the form of trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Underneath each pair is a one-line “why they disagree”.</p>
+        <p>The hypothesized misspecifications may not always be actual misspecifications! Expand the other trajectory pairs the system identified to see more.</p>
+      </div>
+      <figure class="shot">
+        <img src="walkthrough/04-pairs.png" alt="A trajectory pair: two side-by-side videos, the left preferred by the reward function and the right the hypothesized alternative, with a “why they disagree” line below.">
+      </figure>
+    </div></li>
+
+    <li><div>
+      <div class="note">
+        <h3>Review the lotteries</h3>
+        <p>Some hypotheses are shown as lotteries instead. A lottery asks: would you rather have the certain trajectory <b>C</b>, or a gamble that gives you trajectory <b>A</b> with one probability and trajectory <b>B</b> with the other? A badge marks which side your reward function assigns higher return to.</p>
+      </div>
+      <figure class="shot">
+        <img src="walkthrough/05-lottery.png" alt="A lottery comparison: a gamble between trajectories A and B on one side and a certain trajectory C on the other.">
+      </figure>
+    </div></li>
+
+    <li><div>
+      <div class="note">
+        <h3>Decide what to do next</h3>
+        <p>Below the comparisons, the page asks you to pick one:</p>
+        <dl>
+          <dt>Edit the reward function</dt>
+          <dd>Change the code yourself, or tell Claude in plain language what to change.</dd>
+          <dt>Add another characteristic</dt>
+          <dd>Name something you need in order to judge the comparisons; it gets measured and folded in.</dd>
+          <dt>View more comparisons</dt>
+          <dd>Surface more pairs and lotteries from the behavior already collected.</dd>
+          <dt>Finish and submit</dt>
+          <dd>Locks the current reward in as your final answer. Not reversible.</dd>
+        </dl>
+        <div class="aside">
+          <b>Didn't find a flaw?</b> If none of the pairs identified a flaw in your reward function, you can run another round of this process. In our experience, after two more rounds (three rounds total) the system has covered many different hypothesized flaws.
+        </div>
+      </div>
+    </div></li>
+
+  </ol>
+</section>
+
+<section>
+  <div class="text">
+    <h2>Ready to try it?</h2>
+    <p>Head back to the setup guide to get the tool running on your own environment.</p>
+    <a class="cta" href="./#setup">Back to set up &rarr;</a>
+  </div>
+</section>
+
+<footer>
+  <div class="links">
+    <a href="./">Home</a>
+    <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger">GitHub</a>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

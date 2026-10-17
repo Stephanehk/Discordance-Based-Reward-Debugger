@@ -88,33 +88,44 @@
   footer{padding:36px 0 calc(48px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:15px;border-top:1px solid var(--rule)}
   footer .links{display:flex;gap:22px;flex-wrap:wrap}
 
-  /* ===== Flying robot buddy ===== */
-  .buddy{display:flex;align-items:flex-end;justify-content:flex-end;gap:14px;margin:22px 0 -6px;min-height:120px;overflow:hidden;padding:6px 4px 0}
-  .buddy .bubble{position:relative;max-width:520px;padding:14px 18px;border-radius:16px;background:#fff;color:#1c1b19;border:2px solid #3a2e2a;font-size:15.5px;line-height:1.5;
-     opacity:0;transform:scale(.7) translateY(8px);transform-origin:100% 80%}
-  .buddy .bubble::after,.buddy .bubble::before{content:"";position:absolute;right:-10px;bottom:22px;border:8px solid transparent;border-left-color:#3a2e2a;border-right:0}
-  .buddy .bubble::after{right:-7px;border-left-color:#fff}
-  .buddy .bot{flex:none;opacity:0;transform:translateX(220px) translateY(-20px) rotate(8deg)}
-  .buddy .bot svg{display:block;overflow:visible;filter:drop-shadow(0 6px 10px rgba(58,46,42,.18))}
-  .buddy .wing{transform-box:fill-box;transform-origin:100% 90%}
-  .buddy .wing-r{transform-origin:0% 90%}
+  /* ===== Flying robot buddy (sits beside the figure, stays level while you scroll) ===== */
+  .frame-wrap{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:16px;align-items:start;overflow-x:clip}
+  .frame-wrap .frame{min-width:0}
+  .buddy{position:sticky;top:calc(28vh + env(safe-area-inset-top,0px));display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:20px;padding:6px 0 10px}
+  .buddy .bubble{position:relative;width:100%;padding:12px 14px;border-radius:14px;background:#fff;color:#1c1b19;border:2px solid #2f3340;font-size:14.5px;line-height:1.45;
+     opacity:0;transform:scale(.7) translateY(8px);transform-origin:50% 100%}
+  .buddy .bubble::before,.buddy .bubble::after{content:"";position:absolute;left:50%;margin-left:-8px;bottom:-10px;border:8px solid transparent;border-top-color:#2f3340;border-bottom:0}
+  .buddy .bubble::after{bottom:-7px;border-top-color:#fff}
+  .buddy .bot{flex:none;opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}
+  .buddy .bot svg{display:block;overflow:visible;filter:drop-shadow(0 8px 12px rgba(47,51,64,.2))}
+  .buddy .wing{transform-box:fill-box;transform-origin:100% 85%}
+  .buddy .wing-r{transform-origin:0% 85%}
+  .buddy .eyes{transform-box:fill-box;transform-origin:50% 50%}
   .buddy.on .bot{animation:flyin 1.3s cubic-bezier(.22,.9,.3,1) forwards}
   .buddy.on .bot svg{animation:hover 2.6s ease-in-out 1.3s infinite}
-  .buddy.on .wing-l{animation:flapL .14s ease-in-out infinite alternate}
-  .buddy.on .wing-r{animation:flapR .14s ease-in-out infinite alternate}
+  .buddy.on .wing-l{animation:flapL .13s ease-in-out infinite alternate}
+  .buddy.on .wing-r{animation:flapR .13s ease-in-out infinite alternate}
   .buddy.on .eyes{animation:blink 4.5s ease-in-out 2s infinite}
+  .buddy.on .lamp{animation:pulse 1.8s ease-in-out infinite}
   .buddy.on .bubble{animation:pop .5s cubic-bezier(.3,1.4,.5,1) 1.15s forwards}
-  @keyframes flyin{0%{opacity:0;transform:translateX(220px) translateY(-20px) rotate(8deg)}15%{opacity:1}60%{transform:translateX(-14px) translateY(6px) rotate(-5deg)}100%{opacity:1;transform:translateX(0) translateY(0) rotate(0)}}
+  @keyframes flyin{0%{opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}15%{opacity:1}60%{transform:translateX(-10px) translateY(6px) rotate(-5deg)}100%{opacity:1;transform:translateX(0) translateY(0) rotate(0)}}
   @keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-  @keyframes flapL{from{transform:rotate(14deg)}to{transform:rotate(-16deg)}}
-  @keyframes flapR{from{transform:rotate(-14deg)}to{transform:rotate(16deg)}}
+  @keyframes flapL{from{transform:rotate(16deg)}to{transform:rotate(-18deg)}}
+  @keyframes flapR{from{transform:rotate(-16deg)}to{transform:rotate(18deg)}}
   @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
-  .buddy .eyes{transform-box:fill-box;transform-origin:50% 50%}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
   @keyframes pop{from{opacity:0;transform:scale(.7) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
-  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .buddy .bubble{background:#23242a;color:#ebe8e1;border-color:#a39e94} :root:not([data-theme="light"]) .buddy .bubble::after{border-left-color:#23242a} :root:not([data-theme="light"]) .buddy .bubble::before{border-left-color:#a39e94}}
-  :root[data-theme="dark"] .buddy .bubble{background:#23242a;color:#ebe8e1;border-color:#a39e94} :root[data-theme="dark"] .buddy .bubble::after{border-left-color:#23242a} :root[data-theme="dark"] .buddy .bubble::before{border-left-color:#a39e94}
-  @media (prefers-reduced-motion: reduce){.buddy .bot,.buddy .bubble{opacity:1;transform:none;animation:none!important} .buddy .wing,.buddy .bot svg,.buddy .eyes{animation:none!important}}
-  @media (max-width:640px){.buddy{flex-direction:column;align-items:flex-end} .buddy .bubble::after,.buddy .bubble::before{right:28px;bottom:-10px;border:8px solid transparent;border-top-color:#3a2e2a;border-bottom:0} .buddy .bubble::after{bottom:-7px;border-top-color:#fff}}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .buddy .bubble{background:#23242a;color:#ebe8e1;border-color:#a39e94} :root:not([data-theme="light"]) .buddy .bubble::after{border-top-color:#23242a} :root:not([data-theme="light"]) .buddy .bubble::before{border-top-color:#a39e94}}
+  :root[data-theme="dark"] .buddy .bubble{background:#23242a;color:#ebe8e1;border-color:#a39e94} :root[data-theme="dark"] .buddy .bubble::after{border-top-color:#23242a} :root[data-theme="dark"] .buddy .bubble::before{border-top-color:#a39e94}
+  @media (prefers-reduced-motion: reduce){.buddy .bot,.buddy .bubble{opacity:1;transform:none;animation:none!important} .buddy .wing,.buddy .bot svg,.buddy .eyes,.buddy .lamp{animation:none!important}}
+  @media (max-width:760px){
+    .frame-wrap{grid-template-columns:1fr}
+    .buddy{position:static;order:-1;flex-direction:row;align-items:flex-end;justify-content:flex-end;margin:22px 0 -6px;padding:0 4px}
+    .buddy .bubble{width:auto;max-width:520px;transform-origin:100% 80%}
+    .buddy .bot svg{width:120px;height:89px}
+    .buddy .bubble::before,.buddy .bubble::after{left:auto;margin-left:0;right:-10px;bottom:22px;border:8px solid transparent;border-left-color:#2f3340;border-right:0;border-top-color:transparent}
+    .buddy .bubble::after{right:-7px;border-left-color:#fff;border-top-color:transparent}
+  }
 
   /* ===== Browser-like frame around each embedded component ===== */
   .frame{margin-top:20px;border:1px solid var(--rule);border-radius:12px;overflow:hidden;box-shadow:var(--shot-shadow);background:#f6f7fb}
@@ -407,39 +418,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         <p>We will show you hypothesized reward misspecifications in the form of trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Underneath each pair is a one-line “why they disagree”.</p>
         <p>The hypothesized misspecifications may not always be actual misspecifications! Expand the other trajectory pairs the system identified to see more.</p>
       </div>
-    <div class="buddy" aria-live="polite">
-      <div class="bubble">Notice how the reward function assigns higher return to a trajectory where the robot doesn't open the drawer over one where it does.</div>
-      <div class="bot"><svg viewBox="-6 -4 152 134" width="132" height="120" aria-hidden="true">
-  <defs>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff3a8"/><stop offset="1" stop-color="#f7d44c"/></radialGradient>
-  </defs>
-  <g class="wing wing-l"><ellipse cx="30" cy="34" rx="30" ry="16" transform="rotate(-38 30 34)" fill="#fff" fill-opacity=".94" stroke="#3a2e2a" stroke-width="3"/><ellipse cx="30" cy="34" rx="16" ry="7" transform="rotate(-38 30 34)" fill="#eef4ff"/></g>
-  <g class="wing wing-r"><ellipse cx="110" cy="34" rx="30" ry="16" transform="rotate(38 110 34)" fill="#fff" fill-opacity=".94" stroke="#3a2e2a" stroke-width="3"/><ellipse cx="110" cy="34" rx="16" ry="7" transform="rotate(38 110 34)" fill="#eef4ff"/></g>
-  <g class="body">
-    <line x1="70" y1="28" x2="70" y2="12" stroke="#3a2e2a" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="70" cy="9" r="6" fill="url(#glow)" stroke="#3a2e2a" stroke-width="3"/>
-    <rect x="48" y="86" width="44" height="30" rx="14" fill="#f7d44c" stroke="#3a2e2a" stroke-width="3"/>
-    <rect x="48" y="95" width="44" height="7" fill="#3a2e2a"/>
-    <rect x="48" y="107" width="44" height="6" fill="#3a2e2a"/>
-    <rect x="48" y="86" width="44" height="30" rx="14" fill="none" stroke="#3a2e2a" stroke-width="3"/>
-    <path d="M44 98 q-12 2 -10 12" fill="none" stroke="#3a2e2a" stroke-width="3" stroke-linecap="round"/>
-    <path d="M96 98 q12 2 10 12" fill="none" stroke="#3a2e2a" stroke-width="3" stroke-linecap="round"/>
-    <rect x="56" y="114" width="10" height="7" rx="3.5" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
-    <rect x="74" y="114" width="10" height="7" rx="3.5" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
-    <rect x="30" y="28" width="80" height="62" rx="24" fill="#eef2f8" stroke="#3a2e2a" stroke-width="3"/>
-    <circle cx="30" cy="60" r="6" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
-    <circle cx="110" cy="60" r="6" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
-    <rect x="38" y="36" width="64" height="46" rx="18" fill="#2b2f3a"/>
-    <g class="eyes">
-      <circle cx="56" cy="58" r="9" fill="#fff"/><circle cx="84" cy="58" r="9" fill="#fff"/>
-      <circle cx="57.5" cy="59.5" r="5.5" fill="#2b2a33"/><circle cx="85.5" cy="59.5" r="5.5" fill="#2b2a33"/>
-      <circle cx="59.5" cy="57" r="2" fill="#fff"/><circle cx="87.5" cy="57" r="2" fill="#fff"/>
-    </g>
-    <circle cx="47" cy="68" r="4" fill="#f6a9a0" fill-opacity=".85"/><circle cx="93" cy="68" r="4" fill="#f6a9a0" fill-opacity=".85"/>
-    <path d="M64 71 q6 5 12 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-  </g>
-</svg></div>
-    </div>
+    <div class="frame-wrap">
     <div class="frame">
       <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">127.0.0.1:8000</span></div>
       <div class="app">
@@ -611,6 +590,54 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         </div>
       </div>
     </div>
+      <div class="buddy" aria-live="polite">
+        <div class="bubble">Notice how the reward function assigns higher return to a trajectory where the robot doesn't open the drawer over one where it does.</div>
+        <div class="bot"><svg viewBox="-26 -4 192 142" width="170" height="126" aria-hidden="true">
+  <defs>
+    <radialGradient id="lamp" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#e6fbff"/><stop offset="1" stop-color="#4fc3f7"/></radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f6fa"/><stop offset="1" stop-color="#d4dce8"/></linearGradient>
+    <linearGradient id="wingfill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset="1" stop-color="#cfe3ff" stop-opacity=".8"/></linearGradient>
+  </defs>
+  <g class="wing wing-l">
+    <path d="M40 58 C 22 10, -22 4, -14 44 C -10 68, 18 74, 40 58 Z" fill="url(#wingfill)" stroke="#2f3340" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M36 54 C 24 32, 6 22, -6 34" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+    <path d="M36 58 C 22 48, 4 48, -8 56" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+  </g>
+  <g class="wing wing-r">
+    <path d="M100 58 C 118 10, 162 4, 154 44 C 150 68, 122 74, 100 58 Z" fill="url(#wingfill)" stroke="#2f3340" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M104 54 C 116 32, 134 22, 146 34" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+    <path d="M104 58 C 118 48, 136 48, 148 56" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+  </g>
+  <g class="body">
+    <line x1="70" y1="26" x2="70" y2="10" stroke="#2f3340" stroke-width="3" stroke-linecap="round"/>
+    <circle class="lamp" cx="70" cy="7" r="6" fill="url(#lamp)" stroke="#2f3340" stroke-width="3"/>
+    <rect x="62" y="84" width="16" height="8" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="42" y="90" width="56" height="36" rx="12" fill="url(#metal)" stroke="#2f3340" stroke-width="3"/>
+    <rect x="54" y="98" width="32" height="20" rx="6" fill="#2f3340"/>
+    <circle cx="63" cy="108" r="5" fill="url(#lamp)"/>
+    <rect x="73" y="103" width="8" height="3.5" rx="1.75" fill="#ffd166"/>
+    <rect x="73" y="110" width="8" height="3.5" rx="1.75" fill="#ff8a80"/>
+    <path d="M42 100 q-14 4 -12 18" fill="none" stroke="#2f3340" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M98 100 q14 4 12 18" fill="none" stroke="#2f3340" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="30" cy="119" r="5" fill="#d4dce8" stroke="#2f3340" stroke-width="2.5"/>
+    <circle cx="110" cy="119" r="5" fill="#d4dce8" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="50" y="125" width="14" height="9" rx="4" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="76" y="125" width="14" height="9" rx="4" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="28" y="26" width="84" height="62" rx="22" fill="url(#metal)" stroke="#2f3340" stroke-width="3"/>
+    <rect x="22" y="48" width="8" height="18" rx="3" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="110" y="48" width="8" height="18" rx="3" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="36" y="34" width="68" height="46" rx="16" fill="#232838"/>
+    <g class="eyes">
+      <circle cx="56" cy="57" r="9" fill="#fff"/><circle cx="84" cy="57" r="9" fill="#fff"/>
+      <circle cx="57.5" cy="58.5" r="5.5" fill="#2b2a33"/><circle cx="85.5" cy="58.5" r="5.5" fill="#2b2a33"/>
+      <circle cx="59.5" cy="56" r="2" fill="#fff"/><circle cx="87.5" cy="56" r="2" fill="#fff"/>
+    </g>
+    <circle cx="47" cy="67" r="3.5" fill="#f6a9a0" fill-opacity=".8"/><circle cx="93" cy="67" r="3.5" fill="#f6a9a0" fill-opacity=".8"/>
+    <path d="M64 70 q6 5 12 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg></div>
+      </div>
+    </div>
     </div></li>
 
     <li id="s6"><div>
@@ -618,39 +645,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         <h3>Review the lotteries</h3>
         <p>Some hypotheses are shown as lotteries instead. A lottery asks: would you rather have the certain trajectory <b>C</b>, or a gamble that gives you trajectory <b>A</b> with one probability and trajectory <b>B</b> with the other? A badge marks which side your reward function assigns higher return to.</p>
       </div>
-    <div class="buddy" aria-live="polite">
-      <div class="bubble">And here, the reward function assigns higher return to a lottery with a 31% chance that the robot doesn't open the drawer over a trajectory where it opens the drawer for certain. This gives you information about the reward function's cardinal ranking of trajectories.</div>
-      <div class="bot"><svg viewBox="-6 -4 152 134" width="132" height="120" aria-hidden="true">
-  <defs>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff3a8"/><stop offset="1" stop-color="#f7d44c"/></radialGradient>
-  </defs>
-  <g class="wing wing-l"><ellipse cx="30" cy="34" rx="30" ry="16" transform="rotate(-38 30 34)" fill="#fff" fill-opacity=".94" stroke="#3a2e2a" stroke-width="3"/><ellipse cx="30" cy="34" rx="16" ry="7" transform="rotate(-38 30 34)" fill="#eef4ff"/></g>
-  <g class="wing wing-r"><ellipse cx="110" cy="34" rx="30" ry="16" transform="rotate(38 110 34)" fill="#fff" fill-opacity=".94" stroke="#3a2e2a" stroke-width="3"/><ellipse cx="110" cy="34" rx="16" ry="7" transform="rotate(38 110 34)" fill="#eef4ff"/></g>
-  <g class="body">
-    <line x1="70" y1="28" x2="70" y2="12" stroke="#3a2e2a" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="70" cy="9" r="6" fill="url(#glow)" stroke="#3a2e2a" stroke-width="3"/>
-    <rect x="48" y="86" width="44" height="30" rx="14" fill="#f7d44c" stroke="#3a2e2a" stroke-width="3"/>
-    <rect x="48" y="95" width="44" height="7" fill="#3a2e2a"/>
-    <rect x="48" y="107" width="44" height="6" fill="#3a2e2a"/>
-    <rect x="48" y="86" width="44" height="30" rx="14" fill="none" stroke="#3a2e2a" stroke-width="3"/>
-    <path d="M44 98 q-12 2 -10 12" fill="none" stroke="#3a2e2a" stroke-width="3" stroke-linecap="round"/>
-    <path d="M96 98 q12 2 10 12" fill="none" stroke="#3a2e2a" stroke-width="3" stroke-linecap="round"/>
-    <rect x="56" y="114" width="10" height="7" rx="3.5" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
-    <rect x="74" y="114" width="10" height="7" rx="3.5" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
-    <rect x="30" y="28" width="80" height="62" rx="24" fill="#eef2f8" stroke="#3a2e2a" stroke-width="3"/>
-    <circle cx="30" cy="60" r="6" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
-    <circle cx="110" cy="60" r="6" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
-    <rect x="38" y="36" width="64" height="46" rx="18" fill="#2b2f3a"/>
-    <g class="eyes">
-      <circle cx="56" cy="58" r="9" fill="#fff"/><circle cx="84" cy="58" r="9" fill="#fff"/>
-      <circle cx="57.5" cy="59.5" r="5.5" fill="#2b2a33"/><circle cx="85.5" cy="59.5" r="5.5" fill="#2b2a33"/>
-      <circle cx="59.5" cy="57" r="2" fill="#fff"/><circle cx="87.5" cy="57" r="2" fill="#fff"/>
-    </g>
-    <circle cx="47" cy="68" r="4" fill="#f6a9a0" fill-opacity=".85"/><circle cx="93" cy="68" r="4" fill="#f6a9a0" fill-opacity=".85"/>
-    <path d="M64 71 q6 5 12 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-  </g>
-</svg></div>
-    </div>
+    <div class="frame-wrap">
     <div class="frame">
       <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">127.0.0.1:8000</span></div>
       <div class="app">
@@ -712,6 +707,54 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         </details>
       </article>
         </div>
+      </div>
+    </div>
+      <div class="buddy" aria-live="polite">
+        <div class="bubble">And here, the reward function assigns higher return to a lottery with a 31% chance that the robot doesn't open the drawer over a trajectory where it opens the drawer for certain. This gives you information about the reward function's cardinal ranking of trajectories.</div>
+        <div class="bot"><svg viewBox="-26 -4 192 142" width="170" height="126" aria-hidden="true">
+  <defs>
+    <radialGradient id="lamp" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#e6fbff"/><stop offset="1" stop-color="#4fc3f7"/></radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f6fa"/><stop offset="1" stop-color="#d4dce8"/></linearGradient>
+    <linearGradient id="wingfill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset="1" stop-color="#cfe3ff" stop-opacity=".8"/></linearGradient>
+  </defs>
+  <g class="wing wing-l">
+    <path d="M40 58 C 22 10, -22 4, -14 44 C -10 68, 18 74, 40 58 Z" fill="url(#wingfill)" stroke="#2f3340" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M36 54 C 24 32, 6 22, -6 34" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+    <path d="M36 58 C 22 48, 4 48, -8 56" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+  </g>
+  <g class="wing wing-r">
+    <path d="M100 58 C 118 10, 162 4, 154 44 C 150 68, 122 74, 100 58 Z" fill="url(#wingfill)" stroke="#2f3340" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M104 54 C 116 32, 134 22, 146 34" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+    <path d="M104 58 C 118 48, 136 48, 148 56" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+  </g>
+  <g class="body">
+    <line x1="70" y1="26" x2="70" y2="10" stroke="#2f3340" stroke-width="3" stroke-linecap="round"/>
+    <circle class="lamp" cx="70" cy="7" r="6" fill="url(#lamp)" stroke="#2f3340" stroke-width="3"/>
+    <rect x="62" y="84" width="16" height="8" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="42" y="90" width="56" height="36" rx="12" fill="url(#metal)" stroke="#2f3340" stroke-width="3"/>
+    <rect x="54" y="98" width="32" height="20" rx="6" fill="#2f3340"/>
+    <circle cx="63" cy="108" r="5" fill="url(#lamp)"/>
+    <rect x="73" y="103" width="8" height="3.5" rx="1.75" fill="#ffd166"/>
+    <rect x="73" y="110" width="8" height="3.5" rx="1.75" fill="#ff8a80"/>
+    <path d="M42 100 q-14 4 -12 18" fill="none" stroke="#2f3340" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M98 100 q14 4 12 18" fill="none" stroke="#2f3340" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="30" cy="119" r="5" fill="#d4dce8" stroke="#2f3340" stroke-width="2.5"/>
+    <circle cx="110" cy="119" r="5" fill="#d4dce8" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="50" y="125" width="14" height="9" rx="4" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="76" y="125" width="14" height="9" rx="4" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="28" y="26" width="84" height="62" rx="22" fill="url(#metal)" stroke="#2f3340" stroke-width="3"/>
+    <rect x="22" y="48" width="8" height="18" rx="3" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="110" y="48" width="8" height="18" rx="3" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="36" y="34" width="68" height="46" rx="16" fill="#232838"/>
+    <g class="eyes">
+      <circle cx="56" cy="57" r="9" fill="#fff"/><circle cx="84" cy="57" r="9" fill="#fff"/>
+      <circle cx="57.5" cy="58.5" r="5.5" fill="#2b2a33"/><circle cx="85.5" cy="58.5" r="5.5" fill="#2b2a33"/>
+      <circle cx="59.5" cy="56" r="2" fill="#fff"/><circle cx="87.5" cy="56" r="2" fill="#fff"/>
+    </g>
+    <circle cx="47" cy="67" r="3.5" fill="#f6a9a0" fill-opacity=".8"/><circle cx="93" cy="67" r="3.5" fill="#f6a9a0" fill-opacity=".8"/>
+    <path d="M64 70 q6 5 12 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg></div>
       </div>
     </div>
     </div></li>
@@ -841,7 +884,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
 
   // ---- Robot buddy: fly in when the step's first video scrolls into view
   document.querySelectorAll(".buddy").forEach(function(bd){
-    var frame=bd.nextElementSibling, vid=frame&&frame.querySelector("video");
+    var wrap=bd.closest(".frame-wrap"), vid=wrap&&wrap.querySelector("video");
     if(!vid){bd.classList.add("on");return}
     if(!("IntersectionObserver" in window)){bd.classList.add("on");return}
     var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){bd.classList.add("on");o.disconnect()}})},{threshold:.3});

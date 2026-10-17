@@ -2,6 +2,7 @@ import json, html, re, pathlib
 ROOT = pathlib.Path('/next/u/stephhk/automated_reward_repairer')
 RUN = pathlib.Path('/next/u/stephhk/traj_pair_comparison_automated_reward_repairer/user_study_rfs/metaworld_drawer_open/our_system_collected_data/default_rf')
 SNAP = json.loads((RUN/'shown_to_user/pref_round_001.json').read_text())
+SNAP_L = json.loads((RUN/'shown_to_user/pref_round_003.json').read_text())
 FEATURE_KEY = json.loads((RUN/'shown_to_user/_ui_payload/feature_key.json').read_text())
 OUT = ROOT/'docs/walkthrough-live.html'
 
@@ -26,7 +27,7 @@ def inline(s):
     s = esc(s)
     return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', s)
 
-NPAIRS = len(SNAP['pairs']); NLOTS = len(SNAP['lotteries'])
+NPAIRS = len(SNAP['pairs']); NLOTS = len(SNAP_L['lotteries'])
 def pair_card(n, open_):
     p = SNAP['pairs'][n-1]
     head = "Designed reward function's preferred trajectory has a"
@@ -50,7 +51,7 @@ def pair_card(n, open_):
       </article>'''
 
 def lottery_card(n, open_):
-    l = SNAP['lotteries'][n-1]
+    l = SNAP_L['lotteries'][n-1]
     pa = round(l['p']*100); pb = 100-pa
     prefC = bool(l['snapshot_reward_prefers_c'])
     def fig(role, cap, prob=None):
@@ -135,6 +136,48 @@ QUESTION7 = '''
         <div class="q-note" hidden></div>
       </article>'''
 
+ROBOT_SVG = '''<svg viewBox="-6 -4 152 134" width="132" height="120" aria-hidden="true">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff3a8"/><stop offset="1" stop-color="#f7d44c"/></radialGradient>
+  </defs>
+  <g class="wing wing-l"><ellipse cx="30" cy="34" rx="30" ry="16" transform="rotate(-38 30 34)" fill="#fff" fill-opacity=".94" stroke="#3a2e2a" stroke-width="3"/><ellipse cx="30" cy="34" rx="16" ry="7" transform="rotate(-38 30 34)" fill="#eef4ff"/></g>
+  <g class="wing wing-r"><ellipse cx="110" cy="34" rx="30" ry="16" transform="rotate(38 110 34)" fill="#fff" fill-opacity=".94" stroke="#3a2e2a" stroke-width="3"/><ellipse cx="110" cy="34" rx="16" ry="7" transform="rotate(38 110 34)" fill="#eef4ff"/></g>
+  <g class="body">
+    <line x1="70" y1="28" x2="70" y2="12" stroke="#3a2e2a" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="70" cy="9" r="6" fill="url(#glow)" stroke="#3a2e2a" stroke-width="3"/>
+    <rect x="48" y="86" width="44" height="30" rx="14" fill="#f7d44c" stroke="#3a2e2a" stroke-width="3"/>
+    <rect x="48" y="95" width="44" height="7" fill="#3a2e2a"/>
+    <rect x="48" y="107" width="44" height="6" fill="#3a2e2a"/>
+    <rect x="48" y="86" width="44" height="30" rx="14" fill="none" stroke="#3a2e2a" stroke-width="3"/>
+    <path d="M44 98 q-12 2 -10 12" fill="none" stroke="#3a2e2a" stroke-width="3" stroke-linecap="round"/>
+    <path d="M96 98 q12 2 10 12" fill="none" stroke="#3a2e2a" stroke-width="3" stroke-linecap="round"/>
+    <rect x="56" y="114" width="10" height="7" rx="3.5" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
+    <rect x="74" y="114" width="10" height="7" rx="3.5" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
+    <rect x="30" y="28" width="80" height="62" rx="24" fill="#eef2f8" stroke="#3a2e2a" stroke-width="3"/>
+    <circle cx="30" cy="60" r="6" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
+    <circle cx="110" cy="60" r="6" fill="#cfd6e2" stroke="#3a2e2a" stroke-width="2.5"/>
+    <rect x="38" y="36" width="64" height="46" rx="18" fill="#2b2f3a"/>
+    <g class="eyes">
+      <circle cx="56" cy="58" r="9" fill="#fff"/><circle cx="84" cy="58" r="9" fill="#fff"/>
+      <circle cx="57.5" cy="59.5" r="5.5" fill="#2b2a33"/><circle cx="85.5" cy="59.5" r="5.5" fill="#2b2a33"/>
+      <circle cx="59.5" cy="57" r="2" fill="#fff"/><circle cx="87.5" cy="57" r="2" fill="#fff"/>
+    </g>
+    <circle cx="47" cy="68" r="4" fill="#f6a9a0" fill-opacity=".85"/><circle cx="93" cy="68" r="4" fill="#f6a9a0" fill-opacity=".85"/>
+    <path d="M64 71 q6 5 12 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>'''
+
+def buddy(text):
+    return f'''
+    <div class="buddy" aria-live="polite">
+      <div class="bubble">{text}</div>
+      <div class="bot">{ROBOT_SVG}</div>
+    </div>'''
+
+PAIR_NOTE = "Notice how the reward function assigns higher return to a trajectory where the robot doesn't open the drawer over one where it does."
+_l1 = SNAP_L['lotteries'][0]; _pfail = 100 - round(_l1['p']*100)
+LOT_NOTE = f"And here, the reward function assigns higher return to a lottery with a {_pfail}% chance that the robot doesn't open the drawer over a trajectory where it opens the drawer for certain. This gives you information about the reward function's cardinal ranking of trajectories."
+
 EDITOR = f'''
     <div class="frame ide">
       <div class="frame-bar dark"><span class="fdots"><i></i><i></i><i></i></span><span class="ftab">designed_reward_fn.py</span><span class="fpath">workspaces / metaworld_drawer_open</span></div>
@@ -205,6 +248,15 @@ JS = r"""<script>
       th.hidden=false;
       setTimeout(function(){after.querySelector(".msg-body").innerHTML='Subagents are now searching for flaws in your reward function. <a href="#s5">Move on to step 5 &darr;</a>';after.hidden=false},900);
     });
+  });
+
+  // ---- Robot buddy: fly in when the step's first video scrolls into view
+  document.querySelectorAll(".buddy").forEach(function(bd){
+    var frame=bd.nextElementSibling, vid=frame&&frame.querySelector("video");
+    if(!vid){bd.classList.add("on");return}
+    if(!("IntersectionObserver" in window)){bd.classList.add("on");return}
+    var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){bd.classList.add("on");o.disconnect()}})},{threshold:.3});
+    o.observe(vid);
   });
 
   // ---- Videos: play while visible, pause when not
@@ -305,6 +357,34 @@ page = f'''<!doctype html>
 
   footer{{padding:36px 0 calc(48px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:15px;border-top:1px solid var(--rule)}}
   footer .links{{display:flex;gap:22px;flex-wrap:wrap}}
+
+  /* ===== Flying robot buddy ===== */
+  .buddy{{display:flex;align-items:flex-end;justify-content:flex-end;gap:14px;margin:22px 0 -6px;min-height:120px;overflow:hidden;padding:6px 4px 0}}
+  .buddy .bubble{{position:relative;max-width:520px;padding:14px 18px;border-radius:16px;background:#fff;color:#1c1b19;border:2px solid #3a2e2a;font-size:15.5px;line-height:1.5;
+     opacity:0;transform:scale(.7) translateY(8px);transform-origin:100% 80%}}
+  .buddy .bubble::after,.buddy .bubble::before{{content:"";position:absolute;right:-10px;bottom:22px;border:8px solid transparent;border-left-color:#3a2e2a;border-right:0}}
+  .buddy .bubble::after{{right:-7px;border-left-color:#fff}}
+  .buddy .bot{{flex:none;opacity:0;transform:translateX(220px) translateY(-20px) rotate(8deg)}}
+  .buddy .bot svg{{display:block;overflow:visible;filter:drop-shadow(0 6px 10px rgba(58,46,42,.18))}}
+  .buddy .wing{{transform-box:fill-box;transform-origin:100% 90%}}
+  .buddy .wing-r{{transform-origin:0% 90%}}
+  .buddy.on .bot{{animation:flyin 1.3s cubic-bezier(.22,.9,.3,1) forwards}}
+  .buddy.on .bot svg{{animation:hover 2.6s ease-in-out 1.3s infinite}}
+  .buddy.on .wing-l{{animation:flapL .14s ease-in-out infinite alternate}}
+  .buddy.on .wing-r{{animation:flapR .14s ease-in-out infinite alternate}}
+  .buddy.on .eyes{{animation:blink 4.5s ease-in-out 2s infinite}}
+  .buddy.on .bubble{{animation:pop .5s cubic-bezier(.3,1.4,.5,1) 1.15s forwards}}
+  @keyframes flyin{{0%{{opacity:0;transform:translateX(220px) translateY(-20px) rotate(8deg)}}15%{{opacity:1}}60%{{transform:translateX(-14px) translateY(6px) rotate(-5deg)}}100%{{opacity:1;transform:translateX(0) translateY(0) rotate(0)}}}}
+  @keyframes hover{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-6px)}}}}
+  @keyframes flapL{{from{{transform:rotate(14deg)}}to{{transform:rotate(-16deg)}}}}
+  @keyframes flapR{{from{{transform:rotate(-14deg)}}to{{transform:rotate(16deg)}}}}
+  @keyframes blink{{0%,92%,100%{{transform:scaleY(1)}}95%{{transform:scaleY(.1)}}}}
+  .buddy .eyes{{transform-box:fill-box;transform-origin:50% 50%}}
+  @keyframes pop{{from{{opacity:0;transform:scale(.7) translateY(8px)}}to{{opacity:1;transform:scale(1) translateY(0)}}}}
+  @media (prefers-color-scheme: dark){{:root:not([data-theme="light"]) .buddy .bubble{{background:#23242a;color:#ebe8e1;border-color:#a39e94}} :root:not([data-theme="light"]) .buddy .bubble::after{{border-left-color:#23242a}} :root:not([data-theme="light"]) .buddy .bubble::before{{border-left-color:#a39e94}}}}
+  :root[data-theme="dark"] .buddy .bubble{{background:#23242a;color:#ebe8e1;border-color:#a39e94}} :root[data-theme="dark"] .buddy .bubble::after{{border-left-color:#23242a}} :root[data-theme="dark"] .buddy .bubble::before{{border-left-color:#a39e94}}
+  @media (prefers-reduced-motion: reduce){{.buddy .bot,.buddy .bubble{{opacity:1;transform:none;animation:none!important}} .buddy .wing,.buddy .bot svg,.buddy .eyes{{animation:none!important}}}}
+  @media (max-width:640px){{.buddy{{flex-direction:column;align-items:flex-end}} .buddy .bubble::after,.buddy .bubble::before{{right:28px;bottom:-10px;border:8px solid transparent;border-top-color:#3a2e2a;border-bottom:0}} .buddy .bubble::after{{bottom:-7px;border-top-color:#fff}}}}
 
   /* ===== Browser-like frame around each embedded component ===== */
   .frame{{margin-top:20px;border:1px solid var(--rule);border-radius:12px;overflow:hidden;box-shadow:var(--shot-shadow);background:#f6f7fb}}
@@ -451,14 +531,14 @@ page = f'''<!doctype html>
         <h3>Review the trajectory pairs</h3>
         <p>We will show you hypothesized reward misspecifications in the form of trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Underneath each pair is a one-line “why they disagree”.</p>
         <p>The hypothesized misspecifications may not always be actual misspecifications! Expand the other trajectory pairs the system identified to see more.</p>
-      </div>{frame(''.join(pair_card(i, i==1) for i in range(1,NPAIRS+1)), status='awaiting')}
+      </div>{buddy(PAIR_NOTE)}{frame(''.join(pair_card(i, i==1) for i in range(1,NPAIRS+1)), status='awaiting')}
     </div></li>
 
     <li id="s6"><div>
       <div class="note">
         <h3>Review the lotteries</h3>
         <p>Some hypotheses are shown as lotteries instead. A lottery asks: would you rather have the certain trajectory <b>C</b>, or a gamble that gives you trajectory <b>A</b> with one probability and trajectory <b>B</b> with the other? A badge marks which side your reward function assigns higher return to.</p>
-      </div>{frame(''.join(lottery_card(i, i==1) for i in range(1,NLOTS+1)), status='awaiting')}
+      </div>{buddy(LOT_NOTE)}{frame(''.join(lottery_card(i, i==1) for i in range(1,NLOTS+1)), status='awaiting')}
     </div></li>
 
     <li id="s7"><div>

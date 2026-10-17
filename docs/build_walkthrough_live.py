@@ -450,7 +450,7 @@ page = f'''<!doctype html>
       <div class="note">
         <h3>Review the trajectory pairs</h3>
         <p>We will show you hypothesized reward misspecifications in the form of trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Underneath each pair is a one-line “why they disagree”.</p>
-        <p>The hypotheses are not always right! Expand the other trajectory pairs the system identified to see more.</p>
+        <p>The hypothesized misspecifications may not always be actual misspecifications! Expand the other trajectory pairs the system identified to see more.</p>
       </div>{frame(''.join(pair_card(i, i==1) for i in range(1,NPAIRS+1)), status='awaiting')}
     </div></li>
 

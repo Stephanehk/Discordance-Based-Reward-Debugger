@@ -330,12 +330,15 @@ def main(argv=None) -> int:
     sp_post.add_argument("--label")
     sp_post.add_argument("--viz",
                           help='JSON list of viz items. Each item: {"src","caption",'
-                               '"preferred"?: bool, "role"?: "A"|"B"|"C", '
+                               '"preferred"?: bool, "reward_preferred"?: bool, '
+                               '"role"?: "A"|"B"|"C", '
                                '"probability"?: float}. `preferred` adds a '
                                '"Designed reward function prefers this trajectory" '
                                'badge under that item (use only on the reward-preferred '
                                'side of a pair). `role` + `probability` are read in the '
-                               'lottery layout.')
+                               'lottery layout, where `reward_preferred` flags the side '
+                               '(lottery branches A/B, or the certain trajectory C) the '
+                               'designed reward assigns higher return to.')
     sp_post.add_argument("--layout", choices=["row", "lottery"], default=None,
                           help='Comparison layout. "row" (default) renders viz items '
                                'in one flex row. "lottery" places items with role A '

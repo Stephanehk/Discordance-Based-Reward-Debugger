@@ -482,19 +482,27 @@ def _do_render(records, metrics, selection_path: str, workspace_dir: str) -> int
                     if b_saved:
                         print(f"    Branch B:    {_ws_display_path(workspace_dir, b_saved)}")
                 p = lot["p"]
+                # Which side the designed reward assigns higher return to: the
+                # certain trajectory C, or the lottery (the gamble over A and B).
+                # Carried on each viz item so the UI can flag the preferred side,
+                # mirroring the preference shown on trajectory pairs.
+                prefers_c = bool(lot["reward_prefers_c"])
                 # Render order matches the lottery layout: A, B (top row with
                 # probabilities), then C below.
                 if a_saved:
                     viz_items.append({"src": _viz_url(ws_name, a_saved),
                                       "caption": "Trajectory A", "role": "A",
-                                      "probability": round(p, 6)})
+                                      "probability": round(p, 6),
+                                      "reward_preferred": not prefers_c})
                 if b_saved:
                     viz_items.append({"src": _viz_url(ws_name, b_saved),
                                       "caption": "Trajectory B", "role": "B",
-                                      "probability": round(1.0 - p, 6)})
+                                      "probability": round(1.0 - p, 6),
+                                      "reward_preferred": not prefers_c})
                 if c_saved:
                     viz_items.append({"src": _viz_url(ws_name, c_saved),
-                                      "caption": "Certain (C)", "role": "C"})
+                                      "caption": "Certain (C)", "role": "C",
+                                      "reward_preferred": prefers_c})
             cards.append({
                 "kind": "lottery", "rank": rank,
                 "label": f"LOTTERY {rank}/{total}", "layout": "lottery",

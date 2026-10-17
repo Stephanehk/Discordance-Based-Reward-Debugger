@@ -1,1 +1,22 @@
-[{"src": "/workspace/metaworld_drawer_open/viz/round3/lottery2/A.mp4", "caption": "Trajectory A", "role": "A", "probability": 0.05}, {"src": "/workspace/metaworld_drawer_open/viz/round3/lottery2/B.mp4", "caption": "Trajectory B", "role": "B", "probability": 0.95}, {"src": "/workspace/metaworld_drawer_open/viz/round3/lottery2/C.mp4", "caption": "Certain (C)", "role": "C"}]
+[
+  {
+    "src": "/workspace/metaworld_drawer_open/viz/round1/lottery2/A.mp4",
+    "caption": "Trajectory A",
+    "role": "A",
+    "probability": 0.58,
+    "reward_preferred": false
+  },
+  {
+    "src": "/workspace/metaworld_drawer_open/viz/round1/lottery2/B.mp4",
+    "caption": "Trajectory B",
+    "role": "B",
+    "probability": 0.42,
+    "reward_preferred": false
+  },
+  {
+    "src": "/workspace/metaworld_drawer_open/viz/round1/lottery2/C.mp4",
+    "caption": "Certain (C)",
+    "role": "C",
+    "reward_preferred": true
+  }
+]

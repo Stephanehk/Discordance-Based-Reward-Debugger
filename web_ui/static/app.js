@@ -437,6 +437,25 @@
     bottomItems.forEach(v => cRow.appendChild(_makeVizFigure(v)));
     if (!topItems.length) abRow.remove();
     if (!bottomItems.length) cRow.remove();
+    // Indicate which side the designed reward assigns higher return to — the
+    // lottery (the gamble over A and B) or the certain trajectory C — mirroring
+    // the preference shown on trajectory pairs.
+    if (items.some(v => v.reward_preferred !== undefined)) {
+      const cItem = items.find(v => /^C$/i.test(String(v.role || "")));
+      const rewardPrefersC = cItem
+        ? !!cItem.reward_preferred
+        : !(topItems[0] && topItems[0].reward_preferred);
+      const prefRow = rewardPrefersC ? cRow : abRow;
+      const lotViz = el.querySelector(".lot-viz");
+      if (prefRow && prefRow.parentNode === lotViz) {
+        const badge = document.createElement("div");
+        badge.className = "viz-preferred lot-preferred";
+        badge.textContent = rewardPrefersC
+          ? "Designed reward function assigns higher return to this certain trajectory"
+          : "Designed reward function assigns higher return to this lottery";
+        lotViz.insertBefore(badge, prefRow);
+      }
+    }
     if (m.why) {
       el.querySelector(".cmp-why").innerHTML =
         '<strong>Why they disagree:</strong> ' + inline(m.why);

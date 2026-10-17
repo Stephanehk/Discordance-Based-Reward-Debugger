@@ -616,6 +616,12 @@ body.has-key .sidebar { display: block; }
   /* Single trajectory below — don't let it stretch full width on wide screens. */
   flex: 0 1 360px;
 }
+.lot-preferred {
+  /* Labels the row (lottery or certain trajectory) the designed reward prefers. */
+  margin-top: 0;
+  margin-bottom: -4px;
+  align-self: flex-start;
+}
 
 /* ===== Scrollbar ===== */
 ::-webkit-scrollbar { width: 10px; height: 10px; }

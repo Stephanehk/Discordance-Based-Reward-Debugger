@@ -136,48 +136,74 @@ QUESTION7 = '''
         <div class="q-note" hidden></div>
       </article>'''
 
-ROBOT_SVG = '''<svg viewBox="-26 -4 192 142" width="170" height="126" aria-hidden="true">
+ROBOT_SVG = '''<svg viewBox="-20 -6 200 226" width="172" height="194" aria-hidden="true">
   <defs>
-    <radialGradient id="lamp" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#e6fbff"/><stop offset="1" stop-color="#4fc3f7"/></radialGradient>
-    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f6fa"/><stop offset="1" stop-color="#d4dce8"/></linearGradient>
+    <radialGradient id="lamp" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#fff6d5"/><stop offset="1" stop-color="#ffb84d"/></radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#dfe7ee"/><stop offset=".55" stop-color="#f4f7fa"/><stop offset="1" stop-color="#c9d4de"/></linearGradient>
     <linearGradient id="wingfill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset="1" stop-color="#cfe3ff" stop-opacity=".8"/></linearGradient>
   </defs>
+  <!-- wings (behind the body) -->
   <g class="wing wing-l">
-    <path d="M40 58 C 22 10, -22 4, -14 44 C -10 68, 18 74, 40 58 Z" fill="url(#wingfill)" stroke="#2f3340" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M36 54 C 24 32, 6 22, -6 34" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
-    <path d="M36 58 C 22 48, 4 48, -8 56" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+    <path d="M56 86 C 40 40, -14 30, -6 74 C -2 98, 30 104, 56 86 Z" fill="url(#wingfill)" stroke="#2f3340" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M52 82 C 40 60, 20 50, 4 62" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+    <path d="M52 86 C 38 78, 20 78, 6 86" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
   </g>
   <g class="wing wing-r">
-    <path d="M100 58 C 118 10, 162 4, 154 44 C 150 68, 122 74, 100 58 Z" fill="url(#wingfill)" stroke="#2f3340" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M104 54 C 116 32, 134 22, 146 34" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
-    <path d="M104 58 C 118 48, 136 48, 148 56" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+    <path d="M104 86 C 120 40, 174 30, 166 74 C 162 98, 130 104, 104 86 Z" fill="url(#wingfill)" stroke="#2f3340" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M108 82 C 120 60, 140 50, 156 62" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
+    <path d="M108 86 C 122 78, 140 78, 154 86" fill="none" stroke="#2f3340" stroke-width="1.6" opacity=".45"/>
   </g>
+  <!-- dangling legs -->
+  <g class="limb leg leg-l">
+    <path d="M68 152 C 66 170, 56 182, 60 202" fill="none" stroke="#2f3340" stroke-width="9" stroke-linecap="round"/>
+    <path d="M68 152 C 66 170, 56 182, 60 202" fill="none" stroke="#dfe7ee" stroke-width="4.5" stroke-linecap="round"/>
+    <rect x="48" y="200" width="24" height="10" rx="5" fill="#b9c3d2" stroke="#2f3340" stroke-width="3"/>
+  </g>
+  <g class="limb leg leg-r">
+    <path d="M92 152 C 94 170, 104 182, 100 202" fill="none" stroke="#2f3340" stroke-width="9" stroke-linecap="round"/>
+    <path d="M92 152 C 94 170, 104 182, 100 202" fill="none" stroke="#dfe7ee" stroke-width="4.5" stroke-linecap="round"/>
+    <rect x="88" y="200" width="24" height="10" rx="5" fill="#b9c3d2" stroke="#2f3340" stroke-width="3"/>
+  </g>
+  <!-- torso -->
   <g class="body">
-    <line x1="70" y1="26" x2="70" y2="10" stroke="#2f3340" stroke-width="3" stroke-linecap="round"/>
-    <circle class="lamp" cx="70" cy="7" r="6" fill="url(#lamp)" stroke="#2f3340" stroke-width="3"/>
-    <rect x="62" y="84" width="16" height="8" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
-    <rect x="42" y="90" width="56" height="36" rx="12" fill="url(#metal)" stroke="#2f3340" stroke-width="3"/>
-    <rect x="54" y="98" width="32" height="20" rx="6" fill="#2f3340"/>
-    <circle cx="63" cy="108" r="5" fill="url(#lamp)"/>
-    <rect x="73" y="103" width="8" height="3.5" rx="1.75" fill="#ffd166"/>
-    <rect x="73" y="110" width="8" height="3.5" rx="1.75" fill="#ff8a80"/>
-    <path d="M42 100 q-14 4 -12 18" fill="none" stroke="#2f3340" stroke-width="3.5" stroke-linecap="round"/>
-    <path d="M98 100 q14 4 12 18" fill="none" stroke="#2f3340" stroke-width="3.5" stroke-linecap="round"/>
-    <circle cx="30" cy="119" r="5" fill="#d4dce8" stroke="#2f3340" stroke-width="2.5"/>
-    <circle cx="110" cy="119" r="5" fill="#d4dce8" stroke="#2f3340" stroke-width="2.5"/>
-    <rect x="50" y="125" width="14" height="9" rx="4" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
-    <rect x="76" y="125" width="14" height="9" rx="4" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
-    <rect x="28" y="26" width="84" height="62" rx="22" fill="url(#metal)" stroke="#2f3340" stroke-width="3"/>
-    <rect x="22" y="48" width="8" height="18" rx="3" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
-    <rect x="110" y="48" width="8" height="18" rx="3" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
-    <rect x="36" y="34" width="68" height="46" rx="16" fill="#232838"/>
+    <rect x="52" y="74" width="56" height="80" rx="22" fill="url(#metal)" stroke="#2f3340" stroke-width="3"/>
+    <circle cx="80" cy="104" r="13" fill="#232838" stroke="#2f3340" stroke-width="2.5"/>
+    <circle cx="80" cy="104" r="9" fill="#eef4ff"/>
+    <path d="M80 104 L 86 97" stroke="#e5484d" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="80" cy="104" r="1.8" fill="#2f3340"/>
+    <rect x="70" y="124" width="8" height="4" rx="2" fill="#ffd166"/>
+    <rect x="82" y="124" width="8" height="4" rx="2" fill="#5cc8ff"/>
+    <line x1="60" y1="138" x2="100" y2="138" stroke="#2f3340" stroke-width="1.5" opacity=".35"/>
+  </g>
+  <!-- dangling arms -->
+  <g class="limb arm arm-l">
+    <path d="M54 92 C 46 104, 40 128, 42 154" fill="none" stroke="#2f3340" stroke-width="9" stroke-linecap="round"/>
+    <path d="M54 92 C 46 104, 40 128, 42 154" fill="none" stroke="#dfe7ee" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M42 154 l-5 10 M42 154 l6 10" stroke="#2f3340" stroke-width="5" stroke-linecap="round"/>
+    <path d="M42 154 l-5 10 M42 154 l6 10" stroke="#b9c3d2" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <g class="limb arm arm-r">
+    <path d="M106 92 C 114 104, 120 128, 118 154" fill="none" stroke="#2f3340" stroke-width="9" stroke-linecap="round"/>
+    <path d="M106 92 C 114 104, 120 128, 118 154" fill="none" stroke="#dfe7ee" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M118 154 l5 10 M118 154 l-6 10" stroke="#2f3340" stroke-width="5" stroke-linecap="round"/>
+    <path d="M118 154 l5 10 M118 154 l-6 10" stroke="#b9c3d2" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <!-- head -->
+  <g class="head">
+    <rect x="72" y="64" width="16" height="12" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <line x1="80" y1="18" x2="80" y2="4" stroke="#2f3340" stroke-width="3" stroke-linecap="round"/>
+    <circle class="lamp" cx="80" cy="2" r="5.5" fill="url(#lamp)" stroke="#2f3340" stroke-width="3"/>
+    <rect x="50" y="18" width="60" height="50" rx="12" fill="url(#metal)" stroke="#2f3340" stroke-width="3"/>
+    <rect x="44" y="34" width="7" height="16" rx="3" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
+    <rect x="109" y="34" width="7" height="16" rx="3" fill="#b9c3d2" stroke="#2f3340" stroke-width="2.5"/>
     <g class="eyes">
-      <circle cx="56" cy="57" r="9" fill="#fff"/><circle cx="84" cy="57" r="9" fill="#fff"/>
-      <circle cx="57.5" cy="58.5" r="5.5" fill="#2b2a33"/><circle cx="85.5" cy="58.5" r="5.5" fill="#2b2a33"/>
-      <circle cx="59.5" cy="56" r="2" fill="#fff"/><circle cx="87.5" cy="56" r="2" fill="#fff"/>
+      <circle cx="68" cy="40" r="10" fill="#232838"/><circle cx="92" cy="40" r="10" fill="#232838"/>
+      <circle cx="68" cy="40" r="7" fill="#fff"/><circle cx="92" cy="40" r="7" fill="#fff"/>
+      <circle cx="69.5" cy="41.5" r="4" fill="#2b2a33"/><circle cx="93.5" cy="41.5" r="4" fill="#2b2a33"/>
+      <circle cx="71" cy="39.5" r="1.5" fill="#fff"/><circle cx="95" cy="39.5" r="1.5" fill="#fff"/>
     </g>
-    <circle cx="47" cy="67" r="3.5" fill="#f6a9a0" fill-opacity=".8"/><circle cx="93" cy="67" r="3.5" fill="#f6a9a0" fill-opacity=".8"/>
-    <path d="M64 70 q6 5 12 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M70 56 q10 7 20 0" fill="none" stroke="#2f3340" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="57" cy="24" r="1.6" fill="#2f3340" opacity=".5"/><circle cx="103" cy="24" r="1.6" fill="#2f3340" opacity=".5"/>
   </g>
 </svg>'''
 
@@ -384,8 +410,10 @@ page = f'''<!doctype html>
   .buddy .bubble::after{{bottom:-7px;border-top-color:#fff}}
   .buddy .bot{{flex:none;opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}}
   .buddy .bot svg{{display:block;overflow:visible;filter:drop-shadow(0 8px 12px rgba(47,51,64,.2))}}
-  .buddy .wing{{transform-box:fill-box;transform-origin:100% 85%}}
-  .buddy .wing-r{{transform-origin:0% 85%}}
+  .buddy .wing,.buddy .limb{{transform-box:view-box}}
+  .buddy .wing-l{{transform-origin:56px 86px}} .buddy .wing-r{{transform-origin:104px 86px}}
+  .buddy .arm-l{{transform-origin:54px 88px}} .buddy .arm-r{{transform-origin:106px 88px}}
+  .buddy .leg-l{{transform-origin:68px 150px}} .buddy .leg-r{{transform-origin:92px 150px}}
   .buddy .eyes{{transform-box:fill-box;transform-origin:50% 50%}}
   .buddy.on .bot{{animation:flyin 1.3s cubic-bezier(.22,.9,.3,1) forwards}}
   .buddy.on .bot svg{{animation:hover 2.6s ease-in-out 1.3s infinite}}
@@ -393,6 +421,11 @@ page = f'''<!doctype html>
   .buddy.on .wing-r{{animation:flapR .13s ease-in-out infinite alternate}}
   .buddy.on .eyes{{animation:blink 4.5s ease-in-out 2s infinite}}
   .buddy.on .lamp{{animation:pulse 1.8s ease-in-out infinite}}
+  .buddy.on .arm-l{{animation:swayA 2.6s ease-in-out 1.3s infinite}}
+  .buddy.on .arm-r{{animation:swayB 2.6s ease-in-out 1.3s infinite}}
+  .buddy.on .leg-l{{animation:swayB 2.6s ease-in-out 1.5s infinite}}
+  .buddy.on .leg-r{{animation:swayA 2.6s ease-in-out 1.5s infinite}}
+  .buddy .bot.flying .limb{{transform:rotate(0)}}
   .buddy.on .bubble{{animation:pop .5s cubic-bezier(.3,1.4,.5,1) 1.15s forwards}}
   @keyframes flyin{{0%{{opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}}15%{{opacity:1}}60%{{transform:translateX(-10px) translateY(6px) rotate(-5deg)}}100%{{opacity:1;transform:translateX(0) translateY(0) rotate(0)}}}}
   @keyframes hover{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-6px)}}}}
@@ -400,15 +433,17 @@ page = f'''<!doctype html>
   @keyframes flapR{{from{{transform:rotate(-16deg)}}to{{transform:rotate(18deg)}}}}
   @keyframes blink{{0%,92%,100%{{transform:scaleY(1)}}95%{{transform:scaleY(.1)}}}}
   @keyframes pulse{{0%,100%{{opacity:1}}50%{{opacity:.55}}}}
+  @keyframes swayA{{0%,100%{{transform:rotate(-6deg)}}50%{{transform:rotate(7deg)}}}}
+  @keyframes swayB{{0%,100%{{transform:rotate(6deg)}}50%{{transform:rotate(-7deg)}}}}
   @keyframes pop{{from{{opacity:0;transform:scale(.7) translateY(8px)}}to{{opacity:1;transform:scale(1) translateY(0)}}}}
   @media (prefers-color-scheme: dark){{:root:not([data-theme="light"]) .buddy .bubble{{background:#23242a;color:#ebe8e1;border-color:#a39e94}} :root:not([data-theme="light"]) .buddy .bubble::after{{border-top-color:#23242a}} :root:not([data-theme="light"]) .buddy .bubble::before{{border-top-color:#a39e94}}}}
   :root[data-theme="dark"] .buddy .bubble{{background:#23242a;color:#ebe8e1;border-color:#a39e94}} :root[data-theme="dark"] .buddy .bubble::after{{border-top-color:#23242a}} :root[data-theme="dark"] .buddy .bubble::before{{border-top-color:#a39e94}}
-  @media (prefers-reduced-motion: reduce){{.buddy .bot,.buddy .bubble{{opacity:1;transform:none;animation:none!important}} .buddy .wing,.buddy .bot svg,.buddy .eyes,.buddy .lamp{{animation:none!important}}}}
+  @media (prefers-reduced-motion: reduce){{.buddy .bot,.buddy .bubble{{opacity:1;transform:none;animation:none!important}} .buddy .wing,.buddy .bot svg,.buddy .eyes,.buddy .lamp,.buddy .limb{{animation:none!important}}}}
   @media (max-width:760px){{
     .frame-wrap{{grid-template-columns:1fr}}
     .buddy{{position:static;order:-1;flex-direction:row;align-items:flex-end;justify-content:flex-end;margin:22px 0 -6px;padding:0 4px}}
     .buddy .bubble{{width:auto;max-width:520px;transform-origin:100% 80%}}
-    .buddy .bot svg{{width:120px;height:89px}}
+    .buddy .bot svg{{width:120px;height:135px}}
     .buddy .bubble::before,.buddy .bubble::after{{left:auto;margin-left:0;right:-10px;bottom:22px;border:8px solid transparent;border-left-color:#2f3340;border-right:0;border-top-color:transparent}}
     .buddy .bubble::after{{right:-7px;border-left-color:#fff;border-top-color:transparent}}
   }}

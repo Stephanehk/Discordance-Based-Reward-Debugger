@@ -1,5 +1,12 @@
 # Discordance-Based Reward Debugger
 
+> **Looking for the abstract-trajectory version?** The companion repo
+> [Discordance-Based-Reward-Debugger-Abstract](https://github.com/Stephanehk/Discordance-Based-Reward-Debugger-Abstract)
+> contains the codebase needed to debug reward functions with **abstract
+> trajectories** (short text descriptions of runs instead of simulator
+> rollouts) and **text-based reward functions** (natural-language rubrics
+> instead of Python), as we did for the ExploitGym experiments.
+
 A tool for debugging reward functions. The tool inputs a candidate reward function implemented in Python and the environment source code, and then construct comparisons where it hypothesizes your preferences will most likely differ from the ranking induced by candidate reward function. In lite of those hypotheses, you can update your reward function as you see fit. 
 
 The tool implements policies, rolls them out in the environment to build a pool of trajectories, and then construct from that pool the comparisons. We found that in popular RL environments, such as Meta-World, this discordance-based reward debugger uncovers previously documented and novel reward misspecifications. Further, in ExploitGym, both the reward debugger uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.

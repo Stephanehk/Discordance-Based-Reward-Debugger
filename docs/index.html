@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Discordant-Based Reward Debugger</title>
+<title>Discordance-Based Reward Debugger</title>
 <meta name="description" content="A tool for debugging reward functions, built on Claude Code. How to set it up.">
 <style>
   :root{
@@ -117,10 +117,10 @@
 
 <header>
   <div class="text">
-    <h1>Discordant-Based Reward Debugger</h1>
+    <h1>Discordance-Based Reward Debugger</h1>
     <p class="lede">A tool for debugging reward functions.</p>
     <p>You give it a reward function implemented in Python and your environment's source code. It constructs comparisons where it hypothesizes your preferences will most likely differ from the ranking induced by the reward function. In light of those hypotheses, you update your reward function as you see fit.</p>
-    <p class="muted">In popular RL environments such as Meta-World, our discordant-based reward debugger uncovers previously documented and novel reward misspecifications. In ExploitGym, it uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.</p>
+    <p class="muted">In popular RL environments such as Meta-World, our discordance-based reward debugger uncovers previously documented and novel reward misspecifications. In ExploitGym, it uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.</p>
     <p>In this codebase, we provide our proposed Scaffolded Reward Debugger.</p>
     <nav>
       <a href="#setup">Set up &darr;</a>
@@ -185,7 +185,7 @@ pip install -r requirements.txt</code></pre>
       <details>
         <summary>A prompt that works well</summary>
         <div class="inner">
-<pre id="prompt">I'm setting up the Discordant-Based Reward Debugger on a new environment. Read my environment's source code (below / at &lt;path&gt;) and write workspaces/&lt;name&gt;/env_config.py conforming to the tool's contract:
+<pre id="prompt">I'm setting up the Discordance-Based Reward Debugger on a new environment. Read my environment's source code (below / at &lt;path&gt;) and write workspaces/&lt;name&gt;/env_config.py conforming to the tool's contract:
 
 - make_env() returning a Gym/Gymnasium-compatible env. If the env can render RGB frames, make make_env accept a render_mode kwarg and set CAPTURE_FRAMES = True at module level so rollouts record a video per episode.
 - OBS_DESCRIPTION: str describing what each observation dimension means, in plain English.

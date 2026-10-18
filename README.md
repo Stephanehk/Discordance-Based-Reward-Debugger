@@ -1,8 +1,8 @@
-# Discordant-Based Reward Debugger
+# Discordance-Based Reward Debugger
 
 A tool for debugging reward functions. The tool inputs a candidate reward function implemented in Python and the environment source code, and then construct comparisons where it hypothesizes your preferences will most likely differ from the ranking induced by candidate reward function. In lite of those hypotheses, you can update your reward function as you see fit. 
 
-The tool implements policies, rolls them out in the environment to build a pool of trajectories, and then construct from that pool the comparisons. We found that in popular RL environments, such as Meta-World, this discordant-based reward debugger uncovers previously documented and novel reward misspecifications. Further, in ExploitGym, both the reward debugger uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.
+The tool implements policies, rolls them out in the environment to build a pool of trajectories, and then construct from that pool the comparisons. We found that in popular RL environments, such as Meta-World, this discordance-based reward debugger uncovers previously documented and novel reward misspecifications. Further, in ExploitGym, both the reward debugger uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.
 
 For more details and results, check out our paper!
 
@@ -52,7 +52,7 @@ You don't have to write `env_config.py` by hand. Point Claude Code at
 your environment's source and ask it to generate the file. A prompt that
 works well:
 
-> I'm setting up the Discordant-Based Reward Debugger on a new environment. Read
+> I'm setting up the Discordance-Based Reward Debugger on a new environment. Read
 > my environment's source code (below / at `<path>`) and write
 > `workspaces/<name>/env_config.py` conforming to the tool's contract:
 >

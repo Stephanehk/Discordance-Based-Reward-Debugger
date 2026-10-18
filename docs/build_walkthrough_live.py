@@ -497,7 +497,7 @@ page = f'''<!doctype html>
     <nav>
       <a href="#tour">Start the tour &darr;</a>
       <a href="./#setup">Set up</a>
-      <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger">GitHub</a>
+      <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger">GitHub</a>
     </nav>
   </div>
 </header>
@@ -575,7 +575,7 @@ page = f'''<!doctype html>
 <footer>
   <div class="links">
     <a href="./">Home</a>
-    <a href="https://github.com/Stephanehk/Discordant-Based-Reward-Debugger">GitHub</a>
+    <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger">GitHub</a>
   </div>
 </footer>
 

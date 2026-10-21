@@ -211,15 +211,17 @@ VALUE=$(printf %s "$ANSWER" | python -c "import json,sys;print(json.load(sys.std
   Renders one labelled textarea per field; the returned `value` is a JSON
   object `{name: text, …}`.
 
-### Single "Continue" button (CTA)
+### Single button (CTA) — only when the user has something to do first
 
-When a skill ends and the user should advance to the next step, post a
-**call-to-action button** instead of telling them to type a slash-
-command in the terminal:
+When the next step needs nothing from the user, do not post a button:
+call the next skill directly via the `Skill` tool. Post a
+**call-to-action button** only when the user must finish something
+first (e.g. writing the reward file), and never tell them to type a
+slash-command in the terminal:
 
 ```bash
 ANSWER=$(python -m web_ui.cli cta \
-    --prompt "Setup is complete." \
+    --prompt "The environment is set up. Press when your reward function is written." \
     --label  "Identify possible flaws" \
     --value  "repair-init")
 NEXT=$(printf %s "$ANSWER" | python -c "import json,sys;print(json.load(sys.stdin)['value'])")

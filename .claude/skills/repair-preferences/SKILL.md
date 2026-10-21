@@ -329,7 +329,7 @@ Read `value` from the returned JSON.
   ```bash
   python -m web_ui.cli ask --prompt "Who should make the reward edit?" \
       --options '[{"label":"You (Claude) make it","description":"I describe the change in the next message; Claude applies it and reshows the file."},
-                  {"label":"I will make it myself","description":"I edit it in a text box here, or in the file directly."}]'
+                  {"label":"I will make it myself","description":"I edit the file directly and press a button when done."}]'
   ```
 
   - *Claude makes the edit:* first post the reward-edit tip box (below)
@@ -338,18 +338,16 @@ Read `value` from the returned JSON.
     source as a code message, and re-score: re-run this skill
     (trajectories on disk are unchanged, so it just re-scores under
     the new reward) or suggest `/repair-verify`.
-  - *User edits it themselves:* show the current reward in an editable
-    Python text box, naming the file so they can edit it there instead:
+  - *User edits it themselves:* name the file, then wait for the
+    user's signal that the edit is done (the button is that signal):
 
     ```bash
-    python -m web_ui.cli ask --input longtext --code \
-        --prompt "Edit your reward function below (Python), or paste a new one. You can also edit the file directly at \`workspaces/<WORKSPACE>/designed_reward_fn.py\` in the repo and submit the box as is." \
-        --prefill-file workspaces/<WORKSPACE>/designed_reward_fn.py
+    python -m web_ui.cli post --type markdown --content "Edit \`workspaces/<WORKSPACE>/designed_reward_fn.py\` in the repo, then press the button below."
+    python -m web_ui.cli cta --prompt "Waiting for your reward edit." --label "Done editing" --value "done"
     ```
 
-    If the returned `value` differs from the file on disk, write it to
-    `designed_reward_fn.py`. Then continue exactly as in the Claude
-    branch: post the new source as a code message and re-score.
+    Then continue exactly as in the Claude branch: post the new source
+    as a code message and re-score.
 
 - **Propose more discordances** → behaviour depends on
   whether this is the *first* "Propose more" click in a row or the

@@ -1,6 +1,6 @@
 ---
 name: repair-setup
-description: Step 0+1 of the Automated Reward Repairer. Launches the web UI, sets up env_config.py and designed_reward_fn.py — by showing a stub reward function for the user to fill in (Python only, for now). Invoke when the user is starting a new repairer session.
+description: Step 0+1 of the Automated Reward Repairer. Launches the web UI, sets up env_config.py and designed_reward_fn.py — by leaving a stub reward function file for the user to fill in (Python only, for now). Invoke when the user is starting a new repairer session.
 ---
 
 # /repair-setup — environment + reward function
@@ -138,20 +138,13 @@ def designed_reward_fn(obs, act, next_obs) -> float:
     raise NotImplementedError("Fill in designed_reward_fn before running /repair-init.")
 ```
 
-Post the obs/action summary, then show the stub in an editable Python
-text box, naming the file so the user can edit it there instead:
+Post the obs/action summary, then tell the user where to write the
+reward (this is the one place a file path is named):
 
 ```bash
 python -m web_ui.cli post --type markdown --content "<plain-English obs + action summary>"
-python -m web_ui.cli ask --input longtext --code \
-    --prompt "Write your reward function below (Python), or paste an existing one. You can also edit the file directly at \`workspaces/<WORKSPACE>/designed_reward_fn.py\` in the repo and submit the box as is." \
-    --prefill-file workspaces/<WORKSPACE>/designed_reward_fn.py
+python -m web_ui.cli post --type markdown --content "A stub reward function is in place. Fill in its body in \`workspaces/<WORKSPACE>/designed_reward_fn.py\`, then press the button below."
 ```
-
-If the returned `value` differs from the file on disk, write it to
-`<WORKSPACE_DIR>/designed_reward_fn.py`. Then post the file back as a
-code message (`post --type code --language python --caption
-"designed_reward_fn.py" --content-file ...`).
 
 ### Step 3 — sanity check
 
@@ -171,15 +164,15 @@ print('reward sample:', designed_reward_fn(obs, a, next_obs))"
 
 If the stub body was left unfilled, `NotImplementedError` is expected — that's fine.
 
-### Step 4 — close out with a Continue button, then chain to /repair-init
+### Step 4 — wait for the reward to be written, then chain to /repair-init
 
-Don't tell the user to type a slash-command. Post a CTA button on the
-website; when the user clicks it, the agent invokes the next skill
-directly via the `Skill` tool.
+The button here is the user's signal that the reward file is written;
+it is the only button in the setup flow. When the user clicks it, the
+agent invokes the next skill directly via the `Skill` tool.
 
 ```bash
 ANSWER=$(python -m web_ui.cli cta \
-    --prompt "The environment and reward function are set up." \
+    --prompt "The environment is set up. Press when your reward function is written." \
     --label  "Identify possible flaws" \
     --value  "repair-init")
 NEXT=$(printf %s "$ANSWER" | python -c "import json,sys;print(json.load(sys.stdin)['value'])")

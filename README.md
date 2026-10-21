@@ -162,9 +162,9 @@ preference differs from the ranking your reward function induces.
 - **Pairs** (up to five). Two videos on top: on the left, the run *your
   reward function preferred*; on the right, the alternative, each with
   its return under your reward function. Underneath, a one-line "why
-  they disagree", then two dropdowns: how the two runs differ in more
-  detail (the most telling difference comes first), and how the return
-  is computed. The first pair is expanded, the rest are collapsed.
+  they disagree", then a dropdown showing how the two runs differ in
+  more detail (the most telling difference comes first). The first pair
+  is expanded, the rest are collapsed.
 - **Lotteries** (up to two). A gamble: "would you rather have this
   certain run C, or a probability distribution between run A and run B?"
 

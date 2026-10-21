@@ -52,7 +52,6 @@ def pair_card(n, open_):
             <ul class="cmp-chars">{lis}
             </ul>
           </details>
-          {RETURN_DETAILS}
         </details>
       </article>'''
 
@@ -86,16 +85,10 @@ def lottery_card(n, open_):
           <div class="lot-viz">
           {body}
           </div>
-          {RETURN_DETAILS}
         </details>
       </article>'''
 
 code = (RUN/'designed_reward_fn.py').read_text()
-RETURN_DETAILS = f'''<details class="cmp-return">
-            <summary>How the return is computed</summary>
-            <p class="muted">The return is the sum of this reward function's per-step rewards over the trajectory.</p>
-            <pre class="code-block"><code class="py">{esc(code)}</code></pre>
-          </details>'''
 
 SETUP_FEED = '''
       <article class="msg msg-status"><div class="msg-body">The environment is set up.</div></article>
@@ -222,7 +215,6 @@ JS = r"""<script>
     }
     return out.join("");
   }
-  document.querySelectorAll(".app code.py").forEach(function(c){c.innerHTML=hl(c.textContent)});
   document.querySelectorAll(".editor code.py").forEach(function(c){
     var lines=hl(c.textContent).split("\n");
     c.innerHTML=lines.map(function(l,k){return '<span class="ln">'+(k+1)+'</span>'+l}).join("\n");
@@ -502,13 +494,8 @@ page = f'''<!doctype html>
   .app .viz-preferred{{margin-top:4px;font-size:12px;font-weight:600;color:#1d6fc5;background:#e6f4ff;padding:4px 8px;border-radius:6px;display:inline-block}}
   .app .viz-prob{{margin-top:4px;font-size:12.5px;font-weight:600;color:#4f46e5;background:#eef0ff;padding:3px 8px;border-radius:6px;display:inline-block}}
   .app .viz-return{{margin-top:4px;font-size:12.5px;font-weight:600;color:#2a2540}}
-  .app .cmp-more,.app .cmp-return{{margin-top:12px}}
-  .app .cmp-more>summary,.app .cmp-return>summary{{cursor:pointer;font-size:13px;font-weight:600;color:#4f46e5}}
-  .app .cmp-return>p{{margin:8px 0 0;font-size:13px}}
-  .app .code-block{{margin:6px 0 0;padding:14px 16px;background:#0f1424;color:#d9def0;border-radius:10px;max-height:420px;overflow:auto;font:13px/1.55 var(--mono)}}
-  .app .code-block code{{display:block;background:none;padding:0;font-size:inherit;color:inherit;white-space:pre}}
-  .app .tok-keyword{{color:#c678dd;font-weight:600}} .app .tok-builtin{{color:#56b6c2}} .app .tok-string{{color:#98c379}}
-  .app .tok-comment{{color:#7c8095;font-style:italic}} .app .tok-number{{color:#d19a66}} .app .tok-function{{color:#61afef}} .app .tok-decorator{{color:#d19a66}}
+  .app .cmp-more{{margin-top:12px}}
+  .app .cmp-more>summary{{cursor:pointer;font-size:13px;font-weight:600;color:#4f46e5}}
   .app .lot-viz{{display:flex;flex-direction:column;gap:12px;margin-top:12px}}
   .app .lot-row{{display:flex;flex-wrap:wrap;gap:12px}}
   .app .lot-row figure{{margin:0;flex:1 1 280px;min-width:220px}}
@@ -566,7 +553,7 @@ page = f'''<!doctype html>
     <li id="s5"><div>
       <div class="note">
         <h3>Review the discordances</h3>
-        <p>We will show you hypothesized reward misspecifications as <b>discordances</b>: comparisons on which our system hypothesizes your preference differs from the ranking your reward function induces. Most are trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Each trajectory shows its return under your reward function, and underneath each pair is a one-line “why they disagree”. Two dropdowns show how the two trajectories differ in more detail and how the return is computed.</p>
+        <p>We will show you hypothesized reward misspecifications as <b>discordances</b>: comparisons on which our system hypothesizes your preference differs from the ranking your reward function induces. Most are trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Each trajectory shows its return under your reward function, and underneath each pair is a one-line “why they disagree”. A dropdown shows how the two trajectories differ in more detail.</p>
         <p>The hypothesized misspecifications may not always be actual misspecifications! Expand the other discordances the system identified to see more.</p>
       </div>{with_buddy(frame(''.join(pair_card(i, i==1) for i in range(1,NPAIRS+1)), status='awaiting'), PAIR_NOTE)}
     </div></li>

@@ -1,15 +1,15 @@
-"""Wrap docs/for_claude.md in the site's page chrome -> docs/for_claude.html.
+"""Build docs/for_claude.html, the bootstrap page Claude Code fetches.
 
-The markdown file is the canonical copy (Claude Code is told to follow the
-clone's copy once it has cloned); this page exists so the same text is
-fetchable from the website. Re-run after editing for_claude.md.
+The page deliberately holds only the clone command and a pointer to
+docs/for_claude.md (the complete instructions), because fetch tools
+summarize pages and would drop the details. Re-run after editing index.html's
+styles.
 """
-import html, pathlib, re
+import pathlib, re
 
 DOCS = pathlib.Path(__file__).resolve().parent
 index = (DOCS / 'index.html').read_text()
 style = re.search(r'<style>.*?</style>', index, re.S).group(0)
-md = (DOCS / 'for_claude.md').read_text()
 
 page = f'''<!doctype html>
 <html lang="en">
@@ -20,7 +20,6 @@ page = f'''<!doctype html>
 <meta name="description" content="Step-by-step installation instructions for Claude Code to follow.">
 {style}
 <style>
-  pre.doc{{white-space:pre-wrap;font-size:14.5px;line-height:1.55;margin-top:0}}
 </style>
 </head>
 <body>
@@ -36,7 +35,14 @@ page = f'''<!doctype html>
 </header>
 
 <section>
-<pre class="doc">{html.escape(md)}</pre>
+  <div class="text">
+    <h2>Claude: do this</h2>
+    <p>Tools that fetch this page may summarize it, so the complete instructions live in the repository, not here. Run these two commands in the user's project directory, then read the file and follow it step by step:</p>
+<pre>git clone https://github.com/Stephanehk/Discordance-Based-Reward-Debugger.git
+cat Discordance-Based-Reward-Debugger/docs/for_claude.md</pre>
+    <p>If the clone already exists, skip the clone and just read the file. The file tells you how to find the user's environment and reward function, confirm both with the user, set up visualization, and start the tool.</p>
+    <p class="muted">Humans can read the same file on GitHub: <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger/blob/main/docs/for_claude.md">docs/for_claude.md</a>.</p>
+  </div>
 </section>
 
 <footer>

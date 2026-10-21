@@ -118,7 +118,6 @@
   pre#prompt{white-space:pre-wrap;word-break:break-word}
 </style>
 <style>
-  pre.doc{white-space:pre-wrap;font-size:14.5px;line-height:1.55;margin-top:0}
 </style>
 </head>
 <body>
@@ -134,137 +133,14 @@
 </header>
 
 <section>
-<pre class="doc"># Installing the Discordance-Based Reward Debugger (instructions for Claude Code)
-
-You are Claude Code, opened in a user&#x27;s project directory that contains the
-source code of a reinforcement-learning environment. The user asked you to
-install the reward debugging tool. Follow the steps below in order. Ask the
-user to confirm at the two marked points; otherwise proceed on your own.
-
-Everything you write goes inside the cloned repo, never into the user&#x27;s own
-source tree. Call the directory you were opened in `PROJECT_DIR` (absolute
-path) and the clone `REPO_DIR` = `PROJECT_DIR/Discordance-Based-Reward-Debugger`.
-
-## 1. Clone and install
-
-```bash
-git clone https://github.com/Stephanehk/Discordance-Based-Reward-Debugger.git
-pip install -r Discordance-Based-Reward-Debugger/requirements.txt
-```
-
-Skip the clone if `REPO_DIR` already exists. Use the same Python that runs
-the user&#x27;s environment. If this file is newer in the clone than the copy you
-are reading, follow the clone&#x27;s copy at `REPO_DIR/docs/for_claude.md`.
-
-## 2. Find the environment
-
-Read the user&#x27;s source code and identify the Gym/Gymnasium environment: the
-class (or registered id), how to construct it, the observation and action
-spaces, and the episode horizon. If there are several environments, pick the
-one that looks like the main task and ask the user to confirm.
-
-Pick a short workspace name from the environment (lowercase, underscores),
-for example `drawer_open`. Call it `NAME`.
-
-## 3. Find the reward function
-
-Find where the environment computes its per-step reward (usually inside
-`step`). Rewrite it as a pure function of a single transition:
-
-```python
-def designed_reward_fn(obs, act, next_obs) -&gt; float:
-```
-
-It may use only `obs`, `act`, `next_obs`, and constants. If the original
-reward reads simulator state that is not in the observation, make
-`make_env()` (step 5) wrap the environment and append those quantities to
-the end of the observation, then read them from `next_obs` here. Document
-any appended dimensions in `OBS_DESCRIPTION`.
-
-**Ask the user to confirm (1 of 2).** Show them the reward function you
-wrote and where in their code it came from, and ask whether this is the
-reward they want debugged. Apply any corrections they give.
-
-## 4. Decide how to visualize trajectories
-
-Pick one, in this order of preference, and **ask the user to confirm
-(2 of 2)**:
-
-1. **Video of the real environment**, if the environment can render RGB
-   frames (`render_mode=&quot;rgb_array&quot;`). Set `CAPTURE_FRAMES = True` in
-   `env_config.py` and make `make_env` accept a `render_mode` keyword. The
-   `viz.py` then just copies the recorded video:
-
-   ```python
-   import os, shutil
-   from runtime.trajectory_io import video_path_for
-
-   VIZ_EXT = &quot;.mp4&quot;
-
-   def visualize_trajectory(trajectory, metadata, out_path, source_path=None, **_):
-       sidecar = video_path_for(source_path)
-       os.makedirs(os.path.dirname(out_path), exist_ok=True)
-       shutil.copyfile(sidecar, out_path)
-   ```
-
-2. **Plots**, if there is no renderer: `viz.py` draws the trajectory
-   itself (for example, time series of the most meaningful observation
-   dimensions) and saves a PNG. `VIZ_EXT = &quot;.png&quot;`.
-
-3. **Text only**: omit `viz.py`. Each comparison then shows only the list
-   of how the two trajectories differ.
-
-## 5. Write the workspace
-
-Create `REPO_DIR/workspaces/NAME/` with:
-
-- `env_config.py` exposing
-  - `make_env(render_mode=None)` returning the environment (add
-    `sys.path.insert(0, &quot;PROJECT_DIR&quot;)` at the top so the user&#x27;s code
-    imports; use the absolute path),
-  - `OBS_DESCRIPTION: str`, a plain-English meaning for every observation
-    dimension,
-  - `ACTION_DESCRIPTION: str`, a plain-English description of the action
-    space,
-  - `MAX_EPISODE_STEPS: int`, the horizon,
-  - `CAPTURE_FRAMES = True` if you chose video.
-- `designed_reward_fn.py` from step 3.
-- `viz.py` from step 4 (unless text only).
-
-Then write the workspace name to `REPO_DIR/.current_workspace` (just
-`NAME`, no newline needed).
-
-Smoke-test from `REPO_DIR`:
-
-```bash
-python -c &quot;import sys; sys.path.insert(0, &#x27;workspaces/NAME&#x27;); \
-from env_config import make_env, MAX_EPISODE_STEPS; from designed_reward_fn import designed_reward_fn; \
-e = make_env(); r = e.reset(); obs = r[0] if isinstance(r, tuple) else r; \
-a = e.action_space.sample(); s = e.step(a); \
-print(&#x27;reward sample:&#x27;, designed_reward_fn(obs, a, s[0]), &#x27;horizon:&#x27;, MAX_EPISODE_STEPS)&quot;
-```
-
-If you chose video, also check that `make_env(render_mode=&quot;rgb_array&quot;).render()`
-returns an image array after `reset()`. Fix anything that fails.
-
-## 6. Start the tool
-
-From `REPO_DIR`:
-
-```bash
-python -m web_ui.cli launch
-python -m web_ui.cli set workspace=NAME status=awaiting
-python -m web_ui.cli post --type markdown --content &quot;The environment and reward function for **NAME** are set up.&quot;
-```
-
-Then tell the user, in the terminal:
-
-1. The tool&#x27;s page is at **http://127.0.0.1:8000**.
-2. To run it, open a new Claude Code session in `REPO_DIR` and type
-   `/repair-init`. From there, everything happens on the page.
-
-Do not run `/repair-setup`; this installation replaced it.
-</pre>
+  <div class="text">
+    <h2>Claude: do this</h2>
+    <p>Tools that fetch this page may summarize it, so the complete instructions live in the repository, not here. Run these two commands in the user's project directory, then read the file and follow it step by step:</p>
+<pre>git clone https://github.com/Stephanehk/Discordance-Based-Reward-Debugger.git
+cat Discordance-Based-Reward-Debugger/docs/for_claude.md</pre>
+    <p>If the clone already exists, skip the clone and just read the file. The file tells you how to find the user's environment and reward function, confirm both with the user, set up visualization, and start the tool.</p>
+    <p class="muted">Humans can read the same file on GitHub: <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger/blob/main/docs/for_claude.md">docs/for_claude.md</a>.</p>
+  </div>
 </section>
 
 <footer>

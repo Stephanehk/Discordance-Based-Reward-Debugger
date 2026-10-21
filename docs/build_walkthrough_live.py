@@ -126,8 +126,30 @@ QUESTION1 = '''
         <div class="q-body">
           <div class="q-options">
             <button type="button" class="q-option" data-value="describe"><span class="opt-label">Describe it — I will implement</span><span class="opt-desc">Fill in a short template; I translate it into Python and show it back for review.</span></button>
-            <button type="button" class="q-option" data-value="myself"><span class="opt-label">I will write it myself</span><span class="opt-desc">I leave a stub file with the observation/action summary as a docstring; you fill in the body.</span></button>
+            <button type="button" class="q-option" data-value="myself"><span class="opt-label">I will write it myself</span><span class="opt-desc">I show a stub with the observation/action summary as a docstring; you fill in the body here or in the file.</span></button>
           </div>
+          <div class="q-actions"><button type="button" class="btn">Submit</button></div>
+        </div>
+        <div class="q-note" hidden></div>
+      </article>'''
+
+QUESTION2 = '''
+      <article class="msg msg-q" data-q="reward">
+        <header class="msg-head"><span class="label">Question</span><span class="qstatus muted">awaiting your answer</span></header>
+        <div class="q-prompt">Write your reward function below (Python), or paste an existing one. You can also edit the file directly at <code>&lt;repo&gt;/workspaces/metaworld_drawer_open/designed_reward_fn.py</code> and submit the box as is.</div>
+        <div class="q-body">
+          <textarea class="q-textarea" spellcheck="false">&quot;&quot;&quot;Designed reward for Meta-World drawer-open-v3.
+
+Observation (45 floats): hand position (x, y, z); gripper aperture; drawer handle
+position and orientation; target handle position when fully open; hand position at
+the start of the episode. All positions in meters.
+Action (4 floats): delta x, y, z of the hand; gripper command (&gt; 0 closes).
+
+Fill in the body. Signature must be unchanged.
+&quot;&quot;&quot;
+
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+    raise NotImplementedError(&quot;Fill in designed_reward_fn before running /repair-init.&quot;)</textarea>
           <div class="q-actions"><button type="button" class="btn">Submit</button></div>
         </div>
         <div class="q-note" hidden></div>
@@ -140,7 +162,6 @@ QUESTION7 = '''
         <div class="q-body">
           <div class="q-options">
             <button type="button" class="q-option" data-value="edit"><span class="opt-label">Edit the reward function</span><span class="opt-desc">Modify the reward to reflect what you actually want, based on the discordances above.</span></button>
-            <button type="button" class="q-option" data-value="char"><span class="opt-label">Add a trajectory characteristic</span><span class="opt-desc">Name a characteristic of the trajectories to add to each comparison’s list of how they differ. This does not change the reward function.</span></button>
             <button type="button" class="q-option" data-value="more"><span class="opt-label">Propose more discordances</span><span class="opt-desc">Propose more pairs or lotteries from the trajectories already collected.</span></button>
             <button type="button" class="q-option" data-value="finish"><span class="opt-label">End session</span><span class="opt-desc">Keep the current reward function and close the tool.</span></button>
           </div>
@@ -225,20 +246,20 @@ JS = r"""<script>
   // ---- Question cards: select an option, submit, show what happens next
   var NOTES={
     describe:'With this choice you fill in three short text boxes, and Claude will implement a reward function in Python for you. This tour follows the other path. <a href="#s2">Continue to step 2 &darr;</a>',
-    myself:'Claude leaves a stub <code>designed_reward_fn.py</code> for you to fill in. <a href="#s2">Continue to step 2 &darr;</a>',
+    myself:'Claude shows a Python text box prefilled with a stub for you to fill in. <a href="#s2">Continue to step 2 &darr;</a>',
+    reward:'Claude saves what you submitted to <code>designed_reward_fn.py</code> and shows it back. <a href="#s4">Continue to step 4 &darr;</a>',
     edit:'Claude asks whether you want to edit the file yourself or describe the change in plain language. Either way, the comparisons are re-scored against the new reward.',
-    char:'You name the characteristic; Claude writes a small measurement for it, and every comparison gains a new “higher / lower / same” line. The reward function is unchanged.',
     more:'More discordances appear from the trajectories already collected. No new rollouts are needed.',
     finish:'The session ends and the current reward function is kept.'
   };
   document.querySelectorAll(".app .msg-q").forEach(function(card){
-    var sel=null,opts=card.querySelectorAll(".q-option"),submit=card.querySelector(".q-actions .btn"),note=card.querySelector(".q-note"),st=card.querySelector(".qstatus");
+    var sel=null,opts=card.querySelectorAll(".q-option"),ta=card.querySelector(".q-textarea"),submit=card.querySelector(".q-actions .btn"),note=card.querySelector(".q-note"),st=card.querySelector(".qstatus");
     opts.forEach(function(o){o.addEventListener("click",function(){if(o.disabled)return;if(sel)sel.classList.remove("selected");o.classList.add("selected");sel=o})});
     submit.addEventListener("click",function(){
-      if(!sel)return;
-      opts.forEach(function(o){o.disabled=true});submit.disabled=true;
+      if(!sel&&!ta)return;
+      opts.forEach(function(o){o.disabled=true});submit.disabled=true;if(ta)ta.disabled=true;
       st.textContent="answered";st.classList.add("answered");
-      note.innerHTML=NOTES[sel.dataset.value]||"";note.hidden=false;
+      note.innerHTML=NOTES[sel?sel.dataset.value:card.dataset.q]||"";note.hidden=false;
       var chip=card.closest(".app").querySelector(".chip.status");if(chip){chip.textContent="running";chip.dataset.status="running"}
     });
   });
@@ -453,6 +474,8 @@ page = f'''<!doctype html>
   .app .msg-q .qstatus.answered{{color:#1a7f3c}}
   .app .q-prompt{{font-size:15px;margin-bottom:14px;color:#1a1d29}}
   .app .q-body{{display:flex;flex-direction:column;gap:10px}}
+  .app .q-textarea{{width:100%;box-sizing:border-box;min-height:220px;padding:10px 12px;background:#fff;border:1px solid #d9dceb;border-radius:10px;font:13px/1.55 var(--mono);color:#1a1d29;resize:vertical}}
+  .app .q-prompt code{{font-size:13px}}
   .app .q-options{{display:grid;gap:8px}}
   .app .q-option{{display:flex;flex-direction:column;gap:4px;padding:12px 14px;background:#fff;border:1px solid #e7e9f1;border-radius:10px;cursor:pointer;transition:border-color 100ms ease,background 100ms ease;text-align:left;font:inherit;color:inherit}}
   .app .q-option:hover:not(:disabled){{border-color:#aeb4ff;background:#f4f5ff}}
@@ -531,21 +554,21 @@ page = f'''<!doctype html>
     <li id="s2"><div>
       <div class="note">
         <h3>If you choose “I will write it myself”</h3>
-        <p>You will see this page. <b>You will need to switch to your IDE and write the code for your reward function in <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code></b> inside the cloned repo.</p>
-      </div>{frame(setup_feed('early'))}
+        <p>You will see a Python text box prefilled with a stub. <b>Write or paste your reward function there and press Submit.</b> If you would rather use your IDE, edit <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> inside the cloned repo and submit the box as is.</p>
+      </div>{frame(QUESTION2)}
     </div></li>
 
     <li id="s3"><div>
       <div class="note">
         <h3>Write your reward function</h3>
-        <p>Open <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> in your IDE and fill in the body. <b>This is the only time you will need to write code.</b></p>
+        <p>Fill in the body of the stub. <b>This is the only time you will need to write code.</b> Below is the reward function used in this walkthrough.</p>
       </div>{EDITOR}
     </div></li>
 
     <li id="s4"><div>
       <div class="note">
         <h3>Press “Identify possible flaws”</h3>
-        <p>When you are done, return to your browser and press <b>Identify possible flaws</b>. You will be asked a few more quick questions, and then our system will spawn subagents to find flaws in your reward function.</p>
+        <p>When you are done, press <b>Identify possible flaws</b>. You will be asked a few more quick questions, and then our system will spawn subagents to find flaws in your reward function.</p>
         <div class="callout"><b>This step can take up to an hour,</b> depending on the speed of your simulator. Feel free to come back to the page later, but don't close it!</div>
       </div>{frame(setup_feed('go'))}
     </div></li>

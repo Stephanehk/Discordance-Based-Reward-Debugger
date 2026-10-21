@@ -128,7 +128,7 @@ want to author the reward:
 python -m web_ui.cli ask --prompt "How would you like to specify the reward function?" \
     --options '[
       {"label":"Describe it — I will implement","description":"Fill in a short template; I translate it into Python and show it back for review."},
-      {"label":"I will write it myself","description":"I leave a stub file with the observation/action summary as a docstring; you fill in the body."}
+      {"label":"I will write it myself","description":"I show a stub with the observation/action summary as a docstring; you fill in the body here or in the file."}
     ]'
 ```
 
@@ -218,13 +218,20 @@ def designed_reward_fn(obs, act, next_obs) -> float:
     raise NotImplementedError("Fill in designed_reward_fn before running /repair-init.")
 ```
 
-Post the obs/action summary plus a status message telling the user the
-stub is ready (do not name file paths):
+Post the obs/action summary, then show the stub in an editable Python
+text box, naming the file so the user can edit it there instead:
 
 ```bash
 python -m web_ui.cli post --type markdown --content "<plain-English obs + action summary>"
-python -m web_ui.cli post --type status --content "A stub reward function is in place. Implement its body, then continue."
+python -m web_ui.cli ask --input longtext \
+    --prompt "Write your reward function below (Python), or paste an existing one. You can also edit the file directly at <absolute path to WORKSPACE_DIR>/designed_reward_fn.py and submit the box as is." \
+    --prefill-file workspaces/<WORKSPACE>/designed_reward_fn.py
 ```
+
+If the returned `value` differs from the file on disk, write it to
+`<WORKSPACE_DIR>/designed_reward_fn.py`. Then post the file back as a
+code message (`post --type code --language python --caption
+"designed_reward_fn.py" --content-file ...`).
 
 ### Step 3 — sanity check
 

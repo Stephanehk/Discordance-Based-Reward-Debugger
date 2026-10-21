@@ -18,8 +18,8 @@ Post **only** the comparisons (pairs first, then lotteries), each with
 its `--why` line. Do **not** post a feature key, overall summary,
 pattern paragraph, or misalignment orientation.
 
-Finally, **always** close with the four-option `ask` (edit / add a
-feature / propose more / end session). The skill has not delivered
+Finally, **always** close with the three-option `ask` (edit /
+propose more / end session). The skill has not delivered
 its core output until that question is on the website.
 
 ## Tone for messages to the user
@@ -307,14 +307,13 @@ pair's `content_file` — post it exactly as the render produced it.
 
 ### 3. Always close by asking the user what to do next
 
-Use `python -m web_ui.cli ask` with exactly these four options (or
+Use `python -m web_ui.cli ask` with exactly these three options (or
 wording very close to them):
 
 ```bash
 python -m web_ui.cli ask --prompt "What would you like to do next?" \
     --options '[
       {"label":"Edit the reward function","description":"Modify the reward to reflect what you actually want, based on the discordances above."},
-      {"label":"Add a trajectory characteristic","description":"Name a characteristic of the trajectories to add to each comparison's list of how they differ. This does not change the reward function."},
       {"label":"Propose more discordances","description":"Propose more pairs or lotteries from the trajectories already collected."},
       {"label":"End session","description":"Keep the current reward function and close the tool."}
     ]'
@@ -330,7 +329,7 @@ Read `value` from the returned JSON.
   ```bash
   python -m web_ui.cli ask --prompt "Who should make the reward edit?" \
       --options '[{"label":"You (Claude) make it","description":"I describe the change in the next message; Claude applies it and reshows the file."},
-                  {"label":"I will make it myself","description":"I edit the file directly and continue when ready."}]'
+                  {"label":"I will make it myself","description":"I edit it in a text box here, or in the file directly."}]'
   ```
 
   - *Claude makes the edit:* first post the reward-edit tip box (below)
@@ -339,22 +338,23 @@ Read `value` from the returned JSON.
     source as a code message, and re-score: re-run this skill
     (trajectories on disk are unchanged, so it just re-scores under
     the new reward) or suggest `/repair-verify`.
-  - *User edits it themselves:* post a status message saying the
-    system is waiting; when they're ready they can run `/repair-verify`
-    to re-check the previously-surfaced pairs, **or** `/repair-round`
-    to gather fresh evidence under the new reward.
+  - *User edits it themselves:* show the current reward in an editable
+    Python text box, naming the file so they can edit it there instead:
 
-- **Add a trajectory characteristic** → ask the user, via a long-text
-  question, what feature they want. Edit
-  `gather_evidence/trajectory_features.py`, re-run
-  `runtime.compute_features` over every existing round so all
-  trajectories carry the new feature, then re-present the evidence
-  (Steps 1–3) with the feature visible.
+    ```bash
+    python -m web_ui.cli ask --input longtext \
+        --prompt "Edit your reward function below (Python), or paste a new one. You can also edit the file directly at <absolute path to workspaces/<WORKSPACE>/designed_reward_fn.py> and submit the box as is." \
+        --prefill-file workspaces/<WORKSPACE>/designed_reward_fn.py
+    ```
+
+    If the returned `value` differs from the file on disk, write it to
+    `designed_reward_fn.py`. Then continue exactly as in the Claude
+    branch: post the new source as a code message and re-score.
 
 - **Propose more discordances** → behaviour depends on
   whether this is the *first* "Propose more" click in a row or the
-  *second* consecutive one (since the last reward edit, feature add,
-  or fresh /repair-round).
+  *second* consecutive one (since the last reward edit or fresh
+  /repair-round).
 
   **Second consecutive click → hand off to /repair-round.** Once
   another batch of within-evidence comparisons has already been
@@ -365,8 +365,7 @@ Read `value` from the returned JSON.
   designed reward that produced the disagreements the user is still
   trying to resolve; that's the intended effect ("run another round
   without modifying the reward"). Reset the within-a-row counter
-  whenever the user edits the reward, adds a feature, or a /repair-
-  round happens for any other reason.
+  whenever the user edits the reward or a /repair-round happens for any other reason.
 
   **First click → re-select within existing evidence (this step's
   default).** Re-run Step 1, but with one crucial extra constraint:

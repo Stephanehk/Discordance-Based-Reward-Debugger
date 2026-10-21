@@ -113,20 +113,33 @@ print('reward sample:', designed_reward_fn(obs, a, s[0]), 'horizon:', MAX_EPISOD
 If you chose video, also check that `make_env(render_mode="rgb_array").render()`
 returns an image array after `reset()`. Fix anything that fails.
 
-## 6. Start the tool
+## 6. Start the tool and keep going in this session
 
 From `REPO_DIR`:
 
 ```bash
 python -m web_ui.cli launch
+python -m web_ui.cli clear
 python -m web_ui.cli set workspace=NAME status=awaiting
 python -m web_ui.cli post --type markdown --content "The environment and reward function for **NAME** are set up."
 ```
 
-Then tell the user, in the terminal:
+(`launch` is fine to run when a server is already up; `clear` empties
+the page of anything from an earlier session.) Tell the user, in the
+terminal, that the tool's page is at **http://127.0.0.1:8000** and that
+everything from here on happens there.
 
-1. The tool's page is at **http://127.0.0.1:8000**.
-2. To run it, open a new Claude Code session in `REPO_DIR` and type
-   `/repair-init`. From there, everything happens on the page.
+Then run the tool yourself, in this same session. Its steps are written
+as instruction files in the clone, not as commands you can call from the
+user's directory, so read them and carry them out:
 
-Do not run `/repair-setup`; this installation replaced it.
+1. `cd REPO_DIR` and keep that as your working directory from now on;
+   every path in the instruction files is relative to it.
+2. Read `CLAUDE.md` and follow its rules for the rest of the session.
+3. Read `.claude/skills/repair-init/SKILL.md` and carry it out.
+4. Whenever an instruction file says to invoke another skill (for example
+   `Skill(skill="repair-round")`, or `/repair-round`), read that skill's
+   `SKILL.md` under `.claude/skills/` and carry it out instead.
+
+Do not run or follow `/repair-setup`; this installation replaced it. Do
+not tell the user to open a new Claude Code session.

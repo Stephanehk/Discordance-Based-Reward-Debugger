@@ -57,7 +57,7 @@ python -m web_ui.cli set workspace=<WORKSPACE> status=running
 ### 1. Run the verifier
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
+ENV=$(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null); if [ -n "$ENV" ]; then source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate "$ENV"; fi; \
 python find_informative_pairs.py --workspace workspaces/<WORKSPACE> --check-snapshots
 ```
 

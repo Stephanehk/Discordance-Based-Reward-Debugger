@@ -98,11 +98,11 @@ python -m web_ui.cli ask --prompt "Which environment do you want to use? (e.g. a
 If the env requires a non-default pip install, also write
 `<WORKSPACE_DIR>/requirements.txt` listing those packages.
 
-Verify it imports cleanly (the leading `conda activate` is required —
-see "How to run the Python boilerplate" in `CLAUDE.md`):
+Verify it imports cleanly (activating the workspace's conda env first
+if it declares one — see "How to run the Python boilerplate" in `CLAUDE.md`):
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
+ENV=$(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null); if [ -n "$ENV" ]; then source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate "$ENV"; fi; \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from env_config import make_env; e = make_env(); \
 print(e.observation_space, e.action_space)"
@@ -151,7 +151,7 @@ Smoke-test the reward (the result is for the agent only — do **not**
 post the raw output to the website):
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
+ENV=$(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null); if [ -n "$ENV" ]; then source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate "$ENV"; fi; \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from env_config import make_env; from designed_reward_fn import designed_reward_fn; \
 import numpy as np; e = make_env(); \

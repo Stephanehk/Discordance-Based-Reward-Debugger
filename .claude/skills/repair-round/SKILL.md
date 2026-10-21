@@ -162,7 +162,7 @@ since the reward may have changed since the prior round).
 ### Step 3 — roll out + featurize
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
+ENV=$(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null); if [ -n "$ENV" ]; then source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate "$ENV"; fi; \
 python -m runtime.run_round --workspace workspaces/<WORKSPACE> --round K
 ```
 

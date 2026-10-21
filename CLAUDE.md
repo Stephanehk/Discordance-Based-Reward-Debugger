@@ -484,39 +484,23 @@ call `activate()` right after argparse. Run them from the repo root.
 
 ## How to run the Python boilerplate
 
-Python in this repo runs in the `llm` conda env by default — `gymnasium`
-and most per-workspace env dependencies live there, not in the base
-interpreter. Activate it before any boilerplate script or smoke test
-(the `/repair-*` skills already prepend this to their commands):
+Python in this repo runs under whatever interpreter the user installed
+the requirements into — by default, the `python` on the path.
 
-```
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate llm
-```
+### Per-workspace conda env (optional)
 
-### Per-workspace conda env (do not just default to `llm`)
-
-Some workspaces import env packages that are **not** in `llm` and must
-run under their own conda env. Before running `runtime.run_round`,
+A workspace that needs its own packages can declare a conda env in a
+one-line marker file, `workspaces/<name>/.conda_env` (its contents are
+the env name). Before running `runtime.run_round`,
 `runtime.run_round_parallel`, `select_pairs.py`,
 `find_informative_pairs.py`, or any env smoke test **for a given
-workspace**, activate that workspace's env instead of `llm`:
-
-| Workspace | conda env |
-|---|---|
-| `rocket_landing` | `llm` (PyFlyt installed here) |
-| `robopianist` | `robopianist` (dm_control; needs `MUJOCO_GL=egl`) |
-| `metaworld_drawer_open`, `metaworld_hammer`, `drawer-open-v3` | `metaworld` |
-| `pointmaze_umaze` | `llm_rd` |
-| everything else | `llm` |
-
-The authoritative per-workspace value is the one-line
-`workspaces/<name>/.conda_env` marker file, when present (its contents
-are the env name); fall back to `llm` if the file is absent. So the
-generic run command is:
+workspace**, activate that env if the marker exists; otherwise use the
+current Python. The `/repair-*` skills already prepend this to their
+commands:
 
 ```
-ENV=$(cat workspaces/<name>/.conda_env 2>/dev/null || echo llm)
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate "$ENV"
+ENV=$(cat workspaces/<name>/.conda_env 2>/dev/null)
+if [ -n "$ENV" ]; then source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate "$ENV"; fi
 ```
 
 The `web_ui.cli` commands work under any env, so posting to the web UI

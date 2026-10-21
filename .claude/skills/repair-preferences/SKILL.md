@@ -121,7 +121,7 @@ the tone rules below (no term names, perspectives, or "exploit").
 **1a. Dump the trajectory table.**
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
+ENV=$(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null); if [ -n "$ENV" ]; then source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate "$ENV"; fi; \
 python select_pairs.py --workspace workspaces/<WORKSPACE> --mode dump
 ```
 
@@ -228,7 +228,7 @@ characteristics that best explain the questionable preference first.
 Then render:
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
+ENV=$(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null); if [ -n "$ENV" ]; then source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate "$ENV"; fi; \
 python select_pairs.py --workspace workspaces/<WORKSPACE> --mode render \
        --selection workspaces/<WORKSPACE>/.repair_history/_selection.json
 ```

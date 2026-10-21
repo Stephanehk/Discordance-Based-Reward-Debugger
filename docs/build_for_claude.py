@@ -41,7 +41,7 @@ page = f'''<!doctype html>
     <p>Tools that fetch this page may summarize it, so the complete instructions live in the repository, not here. Run these two commands in the user's project directory, then read the file and follow it step by step:</p>
 <pre>git clone https://github.com/Stephanehk/Discordance-Based-Reward-Debugger.git
 cat Discordance-Based-Reward-Debugger/docs/for_claude.md</pre>
-    <p>If the clone already exists, skip the clone and just read the file. The task named in the user's request is the one to set up. The file tells you how to find that task's environment and reward function, confirm both with the user, set up visualization, and start the tool.</p>
+    <p>If the clone already exists, skip the clone and just read the file. The task named in the user's request is the one to set up. The file tells you how to find that task's environment and reward function, confirm both with the user, set up visualization, start the tool, and then run it from the same session.</p>
     <p class="muted">Humans can read the same file on GitHub: <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger/blob/main/docs/for_claude.md">docs/for_claude.md</a>.</p>
   </div>
 </section>

@@ -244,40 +244,10 @@
 <section id="tour">
   <ol class="tour">
 
-    <li id="s1"><div>
-      <div class="note">
-        <h3>Choose how to specify your reward function</h3>
-        <p>The first thing we will ask is how you want to specify a reward function. You can describe it in plain language and let Claude write the code, or you can write it yourself.</p>
-      </div>
-    <div class="frame">
-      <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">127.0.0.1:8000</span></div>
-      <div class="app">
-        <header class="topbar">
-          <div class="topbar-left"><div class="dot"></div><span class="brand">Automated Reward Repairer</span></div>
-          <div class="topbar-right"><span class="muted">workspace</span><span class="chip">metaworld_drawer_open</span><span class="muted">·</span><span class="chip status" data-status="awaiting">awaiting</span></div>
-        </header>
-        <div class="feed">
-      <article class="msg msg-q" data-q="specify">
-        <header class="msg-head"><span class="label">Question</span><span class="qstatus muted">awaiting your answer</span></header>
-        <div class="q-prompt">How would you like to specify the reward function?</div>
-        <div class="q-body">
-          <div class="q-options">
-            <button type="button" class="q-option" data-value="describe"><span class="opt-label">Describe it — I will implement</span><span class="opt-desc">Fill in a short template; I translate it into Python and show it back for review.</span></button>
-            <button type="button" class="q-option" data-value="myself"><span class="opt-label">I will write it myself</span><span class="opt-desc">I show a stub with the observation/action summary as a docstring; you fill in the body here or in the file.</span></button>
-          </div>
-          <div class="q-actions"><button type="button" class="btn">Submit</button></div>
-        </div>
-        <div class="q-note" hidden></div>
-      </article>
-        </div>
-      </div>
-    </div>
-    </div></li>
-
     <li id="s2"><div>
       <div class="note">
-        <h3>If you choose “I will write it myself”</h3>
-        <p>You will see a Python text box prefilled with a stub. <b>Write or paste your reward function there and press Submit.</b> If you would rather use your IDE, edit <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> inside the cloned repo and submit the box as is.</p>
+        <h3>Write your reward function</h3>
+        <p>The first thing you will see is a Python text box prefilled with a stub. <b>Write or paste your reward function there and press Submit.</b> If you would rather use your IDE, edit <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> inside the cloned repo and submit the box as is.</p>
       </div>
     <div class="frame">
       <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">127.0.0.1:8000</span></div>
@@ -314,7 +284,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
 
     <li id="s3"><div>
       <div class="note">
-        <h3>Write your reward function</h3>
+        <h3>Fill in the stub</h3>
         <p>Fill in the body of the stub. <b>This is the only time you will need to write code.</b> Below is the reward function used in this walkthrough.</p>
       </div>
     <div class="frame ide">

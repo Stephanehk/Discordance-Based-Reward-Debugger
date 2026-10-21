@@ -544,23 +544,16 @@ page = f'''<!doctype html>
 <section id="tour">
   <ol class="tour">
 
-    <li id="s1"><div>
-      <div class="note">
-        <h3>Choose how to specify your reward function</h3>
-        <p>The first thing we will ask is how you want to specify a reward function. You can describe it in plain language and let Claude write the code, or you can write it yourself.</p>
-      </div>{frame(QUESTION1)}
-    </div></li>
-
     <li id="s2"><div>
       <div class="note">
-        <h3>If you choose “I will write it myself”</h3>
-        <p>You will see a Python text box prefilled with a stub. <b>Write or paste your reward function there and press Submit.</b> If you would rather use your IDE, edit <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> inside the cloned repo and submit the box as is.</p>
+        <h3>Write your reward function</h3>
+        <p>The first thing you will see is a Python text box prefilled with a stub. <b>Write or paste your reward function there and press Submit.</b> If you would rather use your IDE, edit <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> inside the cloned repo and submit the box as is.</p>
       </div>{frame(QUESTION2)}
     </div></li>
 
     <li id="s3"><div>
       <div class="note">
-        <h3>Write your reward function</h3>
+        <h3>Fill in the stub</h3>
         <p>Fill in the body of the stub. <b>This is the only time you will need to write code.</b> Below is the reward function used in this walkthrough.</p>
       </div>{EDITOR}
     </div></li>

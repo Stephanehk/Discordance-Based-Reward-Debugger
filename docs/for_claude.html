@@ -127,7 +127,8 @@
   <div class="text">
     <p class="crumb"><a href="./">Discordance-Based Reward Debugger</a> &nbsp;/&nbsp; Install with Claude Code</p>
     <p>This page is written for Claude Code to follow. In your project directory, open Claude Code and say:</p>
-<pre id="prompt">Install the reward debugging tool from https://stephanehk.github.io/Discordance-Based-Reward-Debugger/for_claude.html</pre>
+<pre id="prompt">Install the reward debugging tool from https://stephanehk.github.io/Discordance-Based-Reward-Debugger/for_claude.html for task [task_name]</pre>
+    <p class="muted" style="margin-top:14px">Replace <code>[task_name]</code> with the name of the task in your environment, e.g. <code>drawer-open</code> or <code>hammer</code>.</p>
     <p class="muted" style="margin-top:14px">Prefer to do it by hand? See the <a href="manual_setup.html">manual setup</a>.</p>
   </div>
 </header>
@@ -138,7 +139,7 @@
     <p>Tools that fetch this page may summarize it, so the complete instructions live in the repository, not here. Run these two commands in the user's project directory, then read the file and follow it step by step:</p>
 <pre>git clone https://github.com/Stephanehk/Discordance-Based-Reward-Debugger.git
 cat Discordance-Based-Reward-Debugger/docs/for_claude.md</pre>
-    <p>If the clone already exists, skip the clone and just read the file. The file tells you how to find the user's environment and reward function, confirm both with the user, set up visualization, and start the tool.</p>
+    <p>If the clone already exists, skip the clone and just read the file. The task named in the user's request is the one to set up. The file tells you how to find that task's environment and reward function, confirm both with the user, set up visualization, and start the tool.</p>
     <p class="muted">Humans can read the same file on GitHub: <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger/blob/main/docs/for_claude.md">docs/for_claude.md</a>.</p>
   </div>
 </section>

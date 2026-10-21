@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Discordance-Based Reward Debugger</title>
-<meta name="description" content="A tool for debugging reward functions, built on Claude Code. How to set it up.">
+<meta name="description" content="A tool for finding misspecifications in reward functions. How to set it up.">
 <style>
   :root{
     --bg:#fbfaf7; --fg:#1c1b19; --muted:#66625b; --rule:#e4e0d8;
@@ -118,18 +118,17 @@
 <header>
   <div class="text">
     <h1>Discordance-Based Reward Debugger</h1>
-    <p class="lede">A tool for debugging reward functions.</p>
-    <p>You give it a reward function implemented in Python and your environment's source code. It constructs comparisons where it hypothesizes your preferences will most likely differ from the ranking induced by the reward function. In light of those hypotheses, you update your reward function as you see fit.</p>
-    <p class="muted">In popular RL environments such as Meta-World, our discordance-based reward debugger uncovers previously documented and novel reward misspecifications. In ExploitGym, it uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.</p>
+    <p class="lede">A tool for finding misspecifications in reward functions.</p>
+    <p><b>Input:</b> a reward function implemented in Python and your environment's source code.<br>
+    <b>Output:</b> comparisons where our tool hypothesizes your preferences will most likely differ from the ranking induced by the reward function.</p>
+    <p>In light of those hypotheses, you update your reward function as you see fit.</p>
+    <p class="muted"><b>Our results:</b> In popular RL environments such as Meta-World, our discordance-based reward debugger uncovers previously documented and novel reward misspecifications. In ExploitGym, it uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.</p>
     <p>In this codebase, we provide our proposed Scaffolded Reward Debugger.</p>
     <nav>
       <a href="#setup">Set up &darr;</a>
       <a href="walkthrough.html">See walkthrough</a>
       <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger">GitHub</a>
     </nav>
-    <div class="aside">
-      <b>Built on <a href="https://claude.com/claude-code">Claude Code</a>.</b> The whole workflow is a set of slash commands you run inside Claude Code. We developed and tested it with a Claude Max subscription running Claude Opus 4.8, and that is the setup we recommend.
-    </div>
   </div>
 </header>
 
@@ -150,8 +149,8 @@
   <ol class="steps">
 
     <li><div>
-      <h3>Install Claude Code and pick the model</h3>
-      <p>Install <a href="https://claude.com/claude-code">Claude Code</a>, then select Opus 4.8 with <code>/model</code>. The quality of the comparisons depends on the model doing the reasoning.</p>
+      <h3>Install Claude Code</h3>
+      <p>Install <a href="https://claude.com/claude-code">Claude Code</a>. The quality of the comparisons depends on the model doing the reasoning.</p>
     </div></li>
 
     <li><div>

@@ -47,9 +47,14 @@ reward reads simulator state that is not in the observation, make
 the end of the observation, then read them from `next_obs` here. Document
 any appended dimensions in `OBS_DESCRIPTION`.
 
-**Ask the user to confirm (1 of 2).** Show them the reward function you
-wrote and where in their code it came from, and ask whether this is the
-reward they want debugged. Apply any corrections they give.
+**Always ask the user to confirm (1 of 2), and wait for the answer.**
+Never assume the reward you found is the one they mean. Show them the
+original code you found, where in their codebase it lives, and the
+`designed_reward_fn` you wrote from it, then ask: "Is this the reward
+function you want debugged?" If the codebase has several candidates, list
+them all and ask which one. Do not write any workspace files until the
+user has said yes; if they say no, ask them to point you to the right
+function or paste it, and show the result back for confirmation again.
 
 ## 4. Decide how to visualize trajectories
 

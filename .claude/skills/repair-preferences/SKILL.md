@@ -342,8 +342,8 @@ Read `value` from the returned JSON.
     Python text box, naming the file so they can edit it there instead:
 
     ```bash
-    python -m web_ui.cli ask --input longtext \
-        --prompt "Edit your reward function below (Python), or paste a new one. You can also edit the file directly at <absolute path to workspaces/<WORKSPACE>/designed_reward_fn.py> and submit the box as is." \
+    python -m web_ui.cli ask --input longtext --code \
+        --prompt "Edit your reward function below (Python), or paste a new one. You can also edit the file directly at \`workspaces/<WORKSPACE>/designed_reward_fn.py\` in the repo and submit the box as is." \
         --prefill-file workspaces/<WORKSPACE>/designed_reward_fn.py
     ```
 

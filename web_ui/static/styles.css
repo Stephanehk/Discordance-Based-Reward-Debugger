@@ -373,6 +373,24 @@ body {
   min-height: 40px;
 }
 .q-textarea { min-height: 200px; font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace; font-size: 13px; line-height: 1.55; }
+/* Long-text box holding code: styled like the code blocks. */
+.q-textarea.q-code {
+  min-height: 320px;
+  padding: 14px 16px;
+  background: #0f1424;
+  color: #d9def0;
+  border-color: #0f1424;
+  tab-size: 4;
+  white-space: pre;
+  overflow: auto;
+}
+.q-prompt code {
+  font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+  background: #eef0f7;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 13px;
+}
 .q-textarea:focus, .q-input:focus {
   border-color: #4f46e5;
   outline: none;

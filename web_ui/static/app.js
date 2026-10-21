@@ -561,7 +561,8 @@
       body.appendChild(actions);
     } else if (m.input === "longtext" || m.input === "markdown") {
       const ta = document.createElement("textarea");
-      ta.className = "q-textarea";
+      ta.className = "q-textarea" + (m.code ? " q-code" : "");
+      ta.spellcheck = !m.code;
       ta.placeholder = m.placeholder || "Type here…";
       if (m.prefill) ta.value = m.prefill;
       body.appendChild(ta);

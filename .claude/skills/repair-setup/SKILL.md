@@ -143,8 +143,8 @@ text box, naming the file so the user can edit it there instead:
 
 ```bash
 python -m web_ui.cli post --type markdown --content "<plain-English obs + action summary>"
-python -m web_ui.cli ask --input longtext \
-    --prompt "Write your reward function below (Python), or paste an existing one. You can also edit the file directly at <absolute path to WORKSPACE_DIR>/designed_reward_fn.py and submit the box as is." \
+python -m web_ui.cli ask --input longtext --code \
+    --prompt "Write your reward function below (Python), or paste an existing one. You can also edit the file directly at \`workspaces/<WORKSPACE>/designed_reward_fn.py\` in the repo and submit the box as is." \
     --prefill-file workspaces/<WORKSPACE>/designed_reward_fn.py
 ```
 

@@ -6,8 +6,6 @@
   const empty = document.getElementById("emptyState");
   const workspaceEl = document.getElementById("workspace");
   const statusEl = document.getElementById("status");
-  const sidebar = document.getElementById("sidebar");
-  const sidebarKey = document.getElementById("sidebarKey");
   const thinkingEl = document.getElementById("thinking");
   let pairCount = 0;  // only the first pair card is expanded by default
 
@@ -273,39 +271,6 @@
     return tpl("divider");
   }
 
-  function showFeatureKey(m) {
-    // A feature-key post marks the start of a fresh batch of comparisons, so
-    // the next pair becomes the one expanded by default.
-    pairCount = 0;
-    // Feature keys aren't placed in the chronological feed — they live in the
-    // right sidebar, which is only revealed once a key has been posted.
-    sidebarKey.innerHTML = "";
-    const card = tpl("feature-key");
-    const tbody = card.querySelector("tbody");
-    (m.features || []).forEach(f => {
-      const tr = document.createElement("tr");
-      const tdName = document.createElement("td");
-      tdName.className = "k-name";
-      tdName.textContent = f.name || "";
-      const tdDesc = document.createElement("td");
-      tdDesc.className = "k-desc";
-      tdDesc.textContent = f.description || "";
-      tr.appendChild(tdName);
-      tr.appendChild(tdDesc);
-      tbody.appendChild(tr);
-    });
-    sidebarKey.appendChild(card);
-    document.body.classList.add("has-key");
-    sidebar.setAttribute("aria-hidden", "false");
-    return null;
-  }
-
-  function hideFeatureKey() {
-    sidebarKey.innerHTML = "";
-    document.body.classList.remove("has-key");
-    sidebar.setAttribute("aria-hidden", "true");
-  }
-
   function renderCode(m) {
     const el = tpl("code");
     el.querySelector(".lang").textContent = m.language || "code";
@@ -463,11 +428,15 @@
       el.querySelector(".cmp-why").remove();
     }
     const block = el.querySelector(".cmp-block");
-    (m.content || "").split("\n").map(s => s.trim()).filter(Boolean).forEach(line => {
+    const blockLines = (m.content || "").split("\n").map(s => s.trim()).filter(Boolean);
+    blockLines.forEach(line => {
       const p = document.createElement("p");
       p.innerHTML = inline(line);
       block.appendChild(p);
     });
+    // Drop the (styled) description box entirely when there's no text, so an
+    // empty card doesn't render as a blank purple bar.
+    if (!blockLines.length) block.remove();
     // Lotteries always start collapsed.
     return el;
   }
@@ -679,7 +648,7 @@
 
   function render(m) {
     if (m.type === "feature_key") {
-      showFeatureKey(m);
+      // Feature-key cards are no longer surfaced in the UI.
       return;
     }
     const r = RENDERERS[m.type] || renderText;
@@ -700,7 +669,6 @@
   function clearFeed() {
     pairCount = 0;
     [...feed.querySelectorAll(".msg, .divider")].forEach(n => n.remove());
-    hideFeatureKey();
     setEmpty(false);
     updateThinking();
   }

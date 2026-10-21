@@ -311,7 +311,7 @@ def _capture_and_echo(render_fn, *args, **kwargs) -> str:
     return text
 
 
-def _emit_ui_payload(ws_name: str, snap_id: int, feature_names, cards):
+def _emit_ui_payload(ws_name: str, snap_id: int, cards):
     """Write a ready-to-post UI bundle for this render to `UI_PAYLOAD_DIR`.
 
     The bundle is regenerated on every render, so the per-card visuals it wires
@@ -331,12 +331,6 @@ def _emit_ui_payload(ws_name: str, snap_id: int, feature_names, cards):
             except OSError:
                 pass
     os.makedirs(payload_dir, exist_ok=True)
-
-    feature_key = [{"name": short, "description": desc}
-                   for short, desc in feature_names]
-    fk_path = os.path.join(payload_dir, "feature_key.json")
-    with open(fk_path, "w") as f:
-        json.dump(feature_key, f, indent=2)
 
     manifest_cards = []
     for card in cards:
@@ -364,7 +358,6 @@ def _emit_ui_payload(ws_name: str, snap_id: int, feature_names, cards):
         json.dump({
             "workspace": ws_name,
             "snapshot_id": snap_id,
-            "feature_key_file": fk_path,
             "cards": manifest_cards,
         }, f, indent=2)
     return payload_dir, manifest_path
@@ -515,15 +508,13 @@ def _do_render(records, metrics, selection_path: str, workspace_dir: str) -> int
     print(f"\n[snapshot saved: {snap_path}]")
 
     payload_dir, manifest_path = _emit_ui_payload(
-        ws_name, snap_id, feature_names, cards,
+        ws_name, snap_id, cards,
     )
     print(f"\n[ui_payload] ready-to-post bundle written to {payload_dir}")
     print(f"[ui_payload] manifest: {manifest_path}")
     print(f"[ui_payload] The per-card visuals are this round's — already wired")
-    print(f"[ui_payload] into each card's viz list. Post once:")
-    print(f"[ui_payload]   python -m web_ui.cli post --type feature_key "
-          f"--features-file {os.path.join(payload_dir, 'feature_key.json')}")
-    print(f"[ui_payload] then, for each card in manifest['cards'] (in order),")
+    print(f"[ui_payload] into each card's viz list.")
+    print(f"[ui_payload] For each card in manifest['cards'] (in order),")
     print(f"[ui_payload] supplying ONLY your own --why judgment text:")
     print(f"[ui_payload]   python -m web_ui.cli post --type comparison "
           f"--label <label> [--layout <layout>] \\")

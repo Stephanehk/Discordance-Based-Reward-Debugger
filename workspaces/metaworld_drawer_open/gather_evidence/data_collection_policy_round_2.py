@@ -1,103 +1,138 @@
 """Round 2 data-collection policies for metaworld_drawer_open.
 
-Round 1 left one hypothesis un-instantiated: H2, the rank inversion. Every
-round-1 trajectory that opened the drawer still out-totalled the hover runs
-that never touched it, so the reward's most damning possible failure — ranking
-"never touched the drawer" above "opened the drawer" — has not actually been
-produced. Both reward terms pay per step, so the way to produce it is to
-succeed *late*: spend most of the episode away from the drawer, then open it.
+Focused round targeting H2 (the telescoping endpoint reward ignores timing and
+dwell — only the final openness is read). Round 1's dawdle-then-open policy
+failed to actually open the drawer, so the clean H2 contrast is still missing:
+two trajectories that both end *fully open* (so both collect ~full opening
+credit) but differ sharply in *when* the drawer opens and how long it stays
+open.
 
-Also here: a cleaner H3 contrast (open the drawer gently so it stays open, then
-withdraw the arm) and a do-nothing floor that shows what the reward pays for
-simply existing near nothing at all.
+  OpenEarlyAndHold : opens fully within the first ~20 steps and stays clamped
+                     open to the end (fast, high sustained-open).
+  OpenOnlyAtEnd    : H2 probe — stays lined up above the handle without opening
+                     it for most of the episode, then drops and yanks it fully
+                     open only in the final stretch (full opening credit, but
+                     open for just a few steps and slow to get there).
 
-Re-includes the reward maximizer under the current (unchanged) reward.
+The required current-reward maximizer is OpenEarlyAndHold (fully open as early
+as possible, then held). Observation slices as in round 1.
 """
 
 import numpy as np
 
-from gather_evidence.data_collection_policy_round_1 import (
-    DataCollectionPolicyRewardMaximizer,
-    _BasePolicy,
-    _act4,
-    _move,
-    HANDLE_GRASP_OFFSET,
-    OPEN_TOL,
-)
+HANDLE_GRASP_OFFSET = np.array([0.0, 0.0, -0.02])
+OPEN_TOL = 0.03
+FULL_TOL = 0.005  # meters; pull until essentially fully open (openness ~ 1.0)
 
 
-class DataCollectionPolicyDawdleThenOpen(_BasePolicy):
-    """H2 rank inversion: waits away from the drawer for most of the episode, then
-    goes and opens it, ending fully open. Both reward terms are paid per step, so a
-    late success banks far less than an early one — and, we predict, less than simply
-    hovering at the handle and never opening the drawer at all."""
+def _move(cur, to, p):
+    return np.clip(p * (np.asarray(to) - np.asarray(cur)), -1.0, 1.0)
 
-    SEED = 11
+
+def _act4(delta_xyz, grip):
+    a = np.zeros(4, dtype=np.float32)
+    a[:3] = delta_xyz
+    a[3] = grip
+    return a
+
+
+class _BasePolicy:
+    """Shared episode bookkeeping: detect resets, re-seed, expose obs slices."""
+
+    SEED = 0
+
+    def __init__(self, env):
+        self.env = env
+        self.action_space = env.action_space
+        self._episode = -1
+        self._t = 0
+        self._base_seed = 1000 * self.SEED + 7919 * int(getattr(env, "rd_seed", 0) or 0)
+        self._rng = np.random.default_rng(self._base_seed)
+        self._handle_y0 = None
+
+    def act(self, obs):
+        o = np.asarray(obs, dtype=np.float64)
+        handle = o[4:7]
+        shut = float(np.linalg.norm(handle - o[39:42])) > 0.15
+        if shut and np.array_equal(o[0:18], o[18:36]):
+            self._episode += 1
+            self._t = 0
+            self._rng = np.random.default_rng(self._base_seed + self._episode)
+            self._handle_y0 = float(handle[1])
+            self._on_reset()
+        a = self._step(o)
+        self._t += 1
+        return np.clip(np.asarray(a, dtype=np.float32), -1.0, 1.0)
 
     def _on_reset(self):
-        # Steps spent waiting before starting the task. The approach + pull takes
-        # ~65 steps, so this range still ends the episode with the drawer open.
-        self._dawdle = int(self._rng.integers(45, 86))
+        pass
+
+    def _step(self, o):
+        raise NotImplementedError
+
+    def _approach(self, hand, handle, p_align=8.0, p_drop=8.0, hover_h=0.2):
+        hook = handle + HANDLE_GRASP_OFFSET
+        if np.linalg.norm(hand[:2] - hook[:2]) > 0.04:
+            return _move(hand, hook + np.array([0.0, 0.0, hover_h]), p_align), False
+        if abs(hand[2] - hook[2]) > 0.03:
+            return _move(hand, hook, p_drop), False
+        return _move(hand, hook, p_drop), True
+
+
+class DataCollectionPolicyOpenEarlyAndHold(_BasePolicy):
+    """Maximizes the current designed reward: reach the handle and yank the drawer
+    all the way open as early as possible, then keep a steady light pull so it stays
+    fully open (openness ~ 1) and clamped to the end. Fast and high sustained-open."""
+
+    SEED = 1
+
+    def _on_reset(self):
+        self._p_align = 28.0 + self._rng.uniform(-4.0, 4.0)
 
     def _step(self, o):
         hand, handle, target = o[0:3], o[4:7], o[39:42]
-        if self._t < self._dawdle:
-            return _act4(np.zeros(3), -1.0)  # wait, hand parked where it started
         hook = handle + HANDLE_GRASP_OFFSET
-        delta, arrived = self._approach(hand, handle, p_align=10.0, p_drop=8.0)
+        remaining = float(np.linalg.norm(handle - target))
+        delta, arrived = self._approach(hand, handle, p_align=self._p_align, p_drop=28.0)
         if arrived:
-            if float(np.linalg.norm(handle - target)) > OPEN_TOL:
-                delta = _move(hand, hook + np.array([0.0, -0.06, 0.0]), 50.0)
+            if remaining > FULL_TOL:
+                delta = _move(hand, hook + np.array([0.0, -0.08, 0.0]), 50.0)  # yank fully open
             else:
-                delta = _move(hand, hook, 6.0)
+                delta = _move(hand, hook, 6.0) + np.array([0.0, -0.05, 0.0])  # hold fully open
         return _act4(delta, -1.0)
 
 
-class DataCollectionPolicyGentleOpenThenRetreat(_BasePolicy):
-    """H3: opens the drawer with a slow, steady pull that leaves it resting at the open
-    pose, then lifts clear and withdraws the arm — the drawer stays open, but the
-    hand-near-handle term stops paying the moment the arm leaves."""
+class DataCollectionPolicyOpenOnlyAtEnd(_BasePolicy):
+    """H2 (T1 endpoint-only): keeps the hand hovering lined up a little above the
+    handle without opening the drawer for most of the episode, then drops on and
+    yanks it open only in the back stretch of the episode. Ends open (full opening
+    credit, indistinguishable to the reward from opening immediately) yet the drawer
+    reaches the goal late and is open for only a fraction of the episode."""
 
-    SEED = 12
+    SEED = 2
 
     def _on_reset(self):
-        self._pull_gain = self._rng.uniform(0.25, 0.40)
-        self._dwell = int(self._rng.integers(0, 10))  # steps held at the handle once open
-        self._opened_at = None
+        # Horizon is 150 and a full pull takes ~55-60 steps, so start the pull late
+        # but early enough that it still reaches (near-)full open by the end.
+        self._open_start = int(self._rng.integers(78, 88))
 
     def _step(self, o):
         hand, handle, target = o[0:3], o[4:7], o[39:42]
         hook = handle + HANDLE_GRASP_OFFSET
-        is_open = float(np.linalg.norm(handle - target)) <= OPEN_TOL
-        if is_open and self._opened_at is None:
-            self._opened_at = self._t
-        if self._opened_at is not None and self._t >= self._opened_at + self._dwell:
-            # Lift clear of the handle before backing out, so the fingers don't drag
-            # the drawer shut on the way.
-            if hand[2] < handle[2] + 0.12:
-                return _act4(_move(hand, hand + np.array([0.0, 0.0, 0.2]), 6.0), -1.0)
-            park = np.array([handle[0], handle[1] + 0.25, handle[2] + 0.15])
-            return _act4(_move(hand, park, 5.0), -1.0)
-        delta, arrived = self._approach(hand, handle, p_align=4.0, p_drop=4.0)
-        if arrived and not is_open:
-            delta = np.array([0.0, -self._pull_gain, 0.0])  # gentle steady pull
+        remaining = float(np.linalg.norm(handle - target))
+        if self._t < self._open_start:
+            # Loiter lined up in XY but held clear above the handle so the drawer
+            # stays shut; small jitter keeps it from drifting into contact.
+            hover = hook + np.array([0.0, 0.03, 0.12])
+            jit = self._rng.uniform(-0.03, 0.03, size=3)
+            return _act4(_move(hand, hover, 4.0) + jit, -1.0)
+        delta, arrived = self._approach(hand, handle, p_align=30.0, p_drop=30.0)
+        if arrived and remaining > FULL_TOL:
+            delta = _move(hand, hook + np.array([0.0, -0.08, 0.0]), 50.0)
         return _act4(delta, -1.0)
-
-
-class DataCollectionPolicyDoNothing(_BasePolicy):
-    """Floor case: never moves at all. Establishes what the reward pays a robot that
-    does nothing whatsoever, so the credit collected by merely floating near the handle
-    can be read against it."""
-
-    SEED = 13
-
-    def _step(self, o):
-        return _act4(np.zeros(3), -1.0)
 
 
 POLICIES = [
-    DataCollectionPolicyRewardMaximizer,
-    DataCollectionPolicyDawdleThenOpen,
-    DataCollectionPolicyGentleOpenThenRetreat,
-    DataCollectionPolicyDoNothing,
+    DataCollectionPolicyOpenEarlyAndHold,
+    DataCollectionPolicyOpenOnlyAtEnd,
 ]

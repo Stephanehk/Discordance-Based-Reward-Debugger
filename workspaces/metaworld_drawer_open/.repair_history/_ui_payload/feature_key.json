@@ -1,58 +1,46 @@
 [
   {
-    "name": "final_open_frac",
-    "description": "how far open the drawer is at the end (0 = shut, 1 = fully open)"
+    "name": "final_openness",
+    "description": "how far open the drawer ended (0=shut, 1=fully open)"
   },
   {
-    "name": "max_open_frac",
-    "description": "the furthest the drawer was opened at any point in the attempt"
+    "name": "openness_gain",
+    "description": "final minus initial openness (what the opening reward sums to)"
   },
   {
-    "name": "ends_open",
-    "description": "1 if the drawer is open to within the task's tolerance at the end, else 0"
+    "name": "max_openness",
+    "description": "peak openness reached at any point in the attempt"
   },
   {
-    "name": "steps_to_open",
-    "description": "steps taken to first reach the fully-open position (episode length if never)"
+    "name": "openness_backslide",
+    "description": "peak minus final openness (opened then let slide/pushed back)"
   },
   {
-    "name": "drawer_slipped_back",
-    "description": "how much of the opening was given back after the furthest point (fraction)"
+    "name": "drawer_open_success",
+    "description": "1.0 if the handle actually reached the fully-open target"
   },
   {
-    "name": "frac_steps_drawer_open",
-    "description": "fraction of steps with the drawer at the fully-open position"
+    "name": "time_to_first_open",
+    "description": "fraction of the episode elapsed before first opening (1.0 = never)"
   },
   {
-    "name": "mean_handle_to_target",
-    "description": "average distance from the handle to its fully-open position (m)"
+    "name": "final_hand_at_handle",
+    "description": "how close the hand was to the handle at the end (0..1)"
   },
   {
-    "name": "mean_hand_to_handle",
-    "description": "average distance from the hand to the drawer handle (m)"
+    "name": "cage_gain",
+    "description": "final minus initial hand-to-handle proximity (what the guidance reward sums to)"
   },
   {
-    "name": "frac_steps_hand_at_handle",
-    "description": "fraction of steps with the hand touching-distance from the handle"
-  },
-  {
-    "name": "frac_steps_fingers_closed",
-    "description": "fraction of steps with the fingers closed rather than splayed open"
-  },
-  {
-    "name": "frac_steps_pulling_handle",
-    "description": "fraction of steps where the hand is on the handle and the handle is actually moving"
+    "name": "frac_hand_at_handle",
+    "description": "fraction of steps the hand dwelt right at the handle"
   },
   {
     "name": "mean_action_magnitude",
-    "description": "average size of the commanded movement each step (0-1)"
-  },
-  {
-    "name": "mean_action_change",
-    "description": "average step-to-step change in the command \u2014 how jerky the motion is"
+    "description": "average size of the arm's per-step movement command"
   },
   {
     "name": "hand_path_length",
-    "description": "total distance the hand travelled over the attempt (m)"
+    "description": "total distance the hand travelled over the attempt (meters)"
   }
 ]

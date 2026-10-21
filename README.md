@@ -31,7 +31,7 @@ For more details and results, check out our paper!
    installable (`gym.make("Hopper-v4")`) or your own Python implementation. This
    is the key artifact you must supply; see
    [Getting started](#getting-started-describe-your-environment) below.
-4. **A reward function, or just an idea of one.** You can either input an implementation of a reward function for your environment, or describe a reward function in natural language when the tool asks you to. 
+4. **A reward function implemented in Python** for your environment.
 
 ---
 
@@ -142,11 +142,9 @@ Note that some steps can take quite a while, i.e., up to an hour or longer! The 
 
 ### What the page asks you
 
-First, **how you want to specify the reward**. Either describe in plain
-language what the agent should achieve, what it should avoid, and how to
-trade those off — Claude writes the code and shows it to you for
-approval — or say you'll write it yourself and fill in a stub in a
-Python text box on the page (or in the file it names).
+First, **your reward function**: a Python text box on the page,
+prefilled with a stub, where you write or paste it (or edit the file it
+names).
 
 After that, each step ends with a **Continue** button. Click it and the
 next step starts. You never have to remember a command: the buttons walk

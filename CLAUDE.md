@@ -2,8 +2,8 @@
 
 ## What this project is
 
-The user has a gym/gymnasium environment and a manually written (or
-LLM-elicited) reward function `designed_reward_fn(obs, act, next_obs) -> float`.
+The user has a gym/gymnasium environment and a manually written
+reward function `designed_reward_fn(obs, act, next_obs) -> float`.
 This system surfaces *evidence of reward misspecification* by collecting
 diverse trajectories, scoring them with both the designed reward and a set
 of alternative-perspective performance metrics (used only under the hood

@@ -1,6 +1,6 @@
 ---
 name: repair-setup
-description: Step 0+1 of the Automated Reward Repairer. Launches the web UI, sets up env_config.py and designed_reward_fn.py — either by eliciting a reward-design template from the user on the website or by generating a stub for the user to fill in. Invoke when the user is starting a new repairer session.
+description: Step 0+1 of the Automated Reward Repairer. Launches the web UI, sets up env_config.py and designed_reward_fn.py — by showing a stub reward function for the user to fill in (Python only, for now). Invoke when the user is starting a new repairer session.
 ---
 
 # /repair-setup — environment + reward function
@@ -115,94 +115,14 @@ list file names:
 python -m web_ui.cli post --type status --content "The environment is set up."
 ```
 
-### Step 2 — ask the user how they want to specify the reward
+### Step 2 — get the reward function (Python only, for now)
 
 This is the **first reward decision in every session** — always elicit
 the reward from the user. Do **not** assume a pre-existing
 `designed_reward_fn.py` as a default to show back; if one already
 exists in the workspace (e.g. a leftover from a prior session), it is
-overwritten by whatever the user specifies here. Ask the user how they
-want to author the reward:
-
-```bash
-python -m web_ui.cli ask --prompt "How would you like to specify the reward function?" \
-    --options '[
-      {"label":"Describe it — I will implement","description":"Fill in a short template; I translate it into Python and show it back for review."},
-      {"label":"I will write it myself","description":"I show a stub with the observation/action summary as a docstring; you fill in the body here or in the file."}
-    ]'
-```
-
-Parse `value` to decide the branch.
-
-#### Branch 1a — "Describe it"
-
-Compose a *plain-English* one-paragraph summary of what the agent
-perceives and one paragraph of what it can do — rewritten from
-`OBS_DESCRIPTION` / `ACTION_DESCRIPTION`, with no array indices, no
-normalisation details, no internal flags. Post that summary, then ask
-the user to fill in the reward-design template *as a structured form*
-on the website — one labelled textarea per section:
-
-```bash
-# 1. Plain-language summary of obs + action (post as markdown).
-python -m web_ui.cli post --type markdown --content "<your two paragraphs>"
-
-# 2. Form-style question — three labelled boxes (achieve / avoid / tradeoff).
-python -m web_ui.cli ask --prompt "Fill in the reward design template — one box per section." \
-    --fields '[
-      {"name":"achieve",
-       "label":"What outcomes should the agent try to achieve?",
-       "description":"List specific desired outcomes — what successful behavior looks like.",
-       "placeholder":"e.g. reach the goal location; reach the goal quickly"},
-      {"name":"avoid",
-       "label":"What outcomes should the agent avoid?",
-       "description":"List specific bad outcomes the agent should not produce.",
-       "placeholder":"e.g. collisions with obstacles; excessive control effort"},
-      {"name":"tradeoff",
-       "label":"How should the agent trade off between different objectives?",
-       "description":"Describe when it is acceptable to prioritise one outcome over another.",
-       "placeholder":"e.g. never trade safety for speed; energy is fine if it means succeeding"}
-    ]'
-```
-
-The returned `value` is a JSON object `{"achieve": "...", "avoid": "...",
-"tradeoff": "..."}`. Use the three fields to author
-`<WORKSPACE_DIR>/designed_reward_fn.py`. The file must:
-- Take a single transition `(obs, action, next_obs)` and return a single
-  float.
-- Be a faithful translation of the user's filled template — every listed
-  desired outcome contributes positively, every avoided outcome
-  negatively, with the trade-offs the user described.
-- Have a top-of-file comment containing the filled template verbatim, so
-  the reward design is auditable from the source file.
-- **Be commented inline.** Every weight constant and every intermediate
-  variable with a physical/semantic meaning gets a one-line comment
-  giving its **units** (m/s, fraction of steps, normalised position,
-  dimensionless, etc.) and what it represents. Each contributing term
-  gets a brief comment naming the outcome it credits or penalizes.
-
-**Show the reward function back to the user on the website.** After
-writing the file:
-
-```bash
-python -m web_ui.cli post --type code --language python \
-    --caption "designed_reward_fn.py" \
-    --content-file workspaces/<WORKSPACE>/designed_reward_fn.py
-
-python -m web_ui.cli post --type markdown --content "Key knobs I chose: <one-line summary of the main weights, e.g. 'failure-state weight X vs +Y per step of progress (so a single failure dominates an entire episode of progress reward)'>"
-
-python -m web_ui.cli ask --prompt "Does the reward function above look right, or should I adjust it?" \
-    --options '[
-      {"label":"Looks good"},
-      {"label":"Adjust it","description":"Describe what to change next."}
-    ]'
-```
-
-If the user picks "Adjust it", follow up with a long-text question
-asking what to change, edit the file, re-post the new source, and
-re-ask for confirmation. Loop until confirmed.
-
-#### Branch 1b — "I'll write it myself"
+overwritten by whatever the user submits here. The tool currently takes
+only a Python implementation of the reward, not a description of one.
 
 Write a stub `<WORKSPACE_DIR>/designed_reward_fn.py`:
 
@@ -249,7 +169,7 @@ step = e.step(a); next_obs = step[0]; \
 print('reward sample:', designed_reward_fn(obs, a, next_obs))"
 ```
 
-If branch 1b, `NotImplementedError` is expected — that's fine.
+If the stub body was left unfilled, `NotImplementedError` is expected — that's fine.
 
 ### Step 4 — close out with a Continue button, then chain to /repair-init
 

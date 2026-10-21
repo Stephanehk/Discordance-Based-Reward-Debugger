@@ -136,9 +136,9 @@ QUESTION1 = '''
 QUESTION2 = '''
       <article class="msg msg-q" data-q="reward">
         <header class="msg-head"><span class="label">Question</span><span class="qstatus muted">awaiting your answer</span></header>
-        <div class="q-prompt">Write your reward function below (Python), or paste an existing one. You can also edit the file directly at <code>&lt;repo&gt;/workspaces/metaworld_drawer_open/designed_reward_fn.py</code> and submit the box as is.</div>
+        <div class="q-prompt">Write your reward function below (Python), or paste an existing one. You can also edit the file directly at <code>workspaces/metaworld_drawer_open/designed_reward_fn.py</code> in the repo and submit the box as is.</div>
         <div class="q-body">
-          <textarea class="q-textarea" spellcheck="false">&quot;&quot;&quot;Designed reward for Meta-World drawer-open-v3.
+          <textarea class="q-textarea q-code" spellcheck="false">&quot;&quot;&quot;Designed reward for Meta-World drawer-open-v3.
 
 Observation (45 floats): hand position (x, y, z); gripper aperture; drawer handle
 position and orientation; target handle position when fully open; hand position at
@@ -475,6 +475,7 @@ page = f'''<!doctype html>
   .app .q-prompt{{font-size:15px;margin-bottom:14px;color:#1a1d29}}
   .app .q-body{{display:flex;flex-direction:column;gap:10px}}
   .app .q-textarea{{width:100%;box-sizing:border-box;min-height:220px;padding:10px 12px;background:#fff;border:1px solid #d9dceb;border-radius:10px;font:13px/1.55 var(--mono);color:#1a1d29;resize:vertical}}
+  .app .q-textarea.q-code{{min-height:320px;padding:14px 16px;background:#0f1424;color:#d9def0;border-color:#0f1424;white-space:pre;overflow:auto}}
   .app .q-prompt code{{font-size:13px}}
   .app .q-options{{display:grid;gap:8px}}
   .app .q-option{{display:flex;flex-direction:column;gap:4px;padding:12px 14px;background:#fff;border:1px solid #e7e9f1;border-radius:10px;cursor:pointer;transition:border-color 100ms ease,background 100ms ease;text-align:left;font:inherit;color:inherit}}

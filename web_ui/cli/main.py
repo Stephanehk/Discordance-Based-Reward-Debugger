@@ -231,6 +231,8 @@ def cmd_ask(args) -> int:
             q["multi"] = True
     elif args.input == "longtext":
         q["input"] = "longtext"
+        if getattr(args, "code", False):
+            q["code"] = True
     elif args.input == "text":
         q["input"] = "text"
     else:
@@ -361,6 +363,8 @@ def main(argv=None) -> int:
     sp_ask.add_argument("--fields-file",
                          help="Path to JSON file with the field list (alternative to --fields)")
     sp_ask.add_argument("--input", choices=["text", "longtext"], default="text")
+    sp_ask.add_argument("--code", action="store_true",
+                        help="Style a longtext box as a code editor")
     sp_ask.add_argument("--placeholder")
     sp_ask.add_argument("--prefill")
     sp_ask.add_argument("--prefill-file")

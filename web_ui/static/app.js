@@ -345,36 +345,6 @@
     return fig;
   }
 
-  // The "How the return is computed" dropdown shows the workspace's
-  // designed_reward_fn.py, fetched once per page and only when first opened.
-  let rewardSrcPromise = null;
-  function fetchRewardSource() {
-    if (!rewardSrcPromise) {
-      const ws = (workspaceEl.textContent || "").trim();
-      rewardSrcPromise = fetch(`/workspace/${encodeURIComponent(ws)}/designed_reward_fn.py`)
-        .then(r => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
-        .catch(() => { rewardSrcPromise = null; return null; });
-    }
-    return rewardSrcPromise;
-  }
-  function wireReturnSource(el) {
-    const det = el.querySelector(".cmp-return");
-    if (!det) return;
-    const code = det.querySelector("code");
-    det.addEventListener("toggle", () => {
-      if (!det.open || code.dataset.loaded) return;
-      code.textContent = "Loading…";
-      fetchRewardSource().then(src => {
-        if (src == null) {
-          code.textContent = "The reward function file could not be loaded.";
-          return;
-        }
-        code.innerHTML = highlightPython(src);
-        code.dataset.loaded = "1";
-      });
-    });
-  }
-
   function renderComparison(m) {
     if ((m.layout || "").toLowerCase() === "lottery") return renderLottery(m);
     const el = tpl("comparison");
@@ -405,7 +375,6 @@
     } else {
       el.querySelector(".cmp-more").remove();
     }
-    wireReturnSource(el);
     // Only the first pair is expanded; later pairs start collapsed.
     pairCount++;
     if (pairCount === 1) el.querySelector(".cmp-details").open = true;
@@ -480,7 +449,6 @@
     // Drop the (styled) description box entirely when there's no text, so an
     // empty card doesn't render as a blank purple bar.
     if (!blockLines.length) block.remove();
-    wireReturnSource(el);
     // Lotteries always start collapsed.
     return el;
   }

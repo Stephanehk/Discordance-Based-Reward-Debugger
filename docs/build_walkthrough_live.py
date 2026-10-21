@@ -96,9 +96,9 @@ SETUP_FEED = '''
         <p><strong>What the agent perceives.</strong> The agent controls a Sawyer robot arm. It senses where its own hand is in space, how far the gripper is open or closed, and where the drawer handle is (both its position and the way it is oriented). It also knows where the handle needs to end up for the drawer to count as fully open, where its hand started at the beginning of the attempt, and the overall goal location. All positions are measured in meters.</p>
         <p><strong>What the agent can do.</strong> On each step the agent nudges its hand a small amount along three directions — left/right, forward/back, and up/down — and sends a command to open or close the gripper. Repeating these small moves is how it reaches the handle and pulls the drawer open.</p>
       </div></article>
-      <article class="msg msg-status"><div class="msg-body">A stub reward function is in place. Implement its body, then continue.</div></article>
+      <article class="msg msg-md"><div class="msg-body md"><p>A stub reward function is in place. Fill in its body in <code>workspaces/metaworld_drawer_open/designed_reward_fn.py</code>, then press the button below.</p></div></article>
       <article class="msg msg-cta" data-cta="{mode}">
-        <div class="cta-prompt muted">The environment and reward function are set up.</div>
+        <div class="cta-prompt muted">The environment is set up. Press when your reward function is written.</div>
         <button type="button" class="btn btn-cta">Identify possible flaws</button>
       </article>
       <div class="thinking" hidden><span class="spinner"></span><span>Claude is thinking…</span></div>
@@ -246,8 +246,6 @@ JS = r"""<script>
   // ---- Question cards: select an option, submit, show what happens next
   var NOTES={
     describe:'With this choice you fill in three short text boxes, and Claude will implement a reward function in Python for you. This tour follows the other path. <a href="#s2">Continue to step 2 &darr;</a>',
-    myself:'Claude shows a Python text box prefilled with a stub for you to fill in. <a href="#s2">Continue to step 2 &darr;</a>',
-    reward:'Claude saves what you submitted to <code>designed_reward_fn.py</code> and shows it back. <a href="#s4">Continue to step 4 &darr;</a>',
     edit:'Claude asks whether you want to edit the file yourself or describe the change in plain language. Either way, the comparisons are re-scored against the new reward.',
     more:'More discordances appear from the trajectories already collected. No new rollouts are needed.',
     finish:'The session ends and the current reward function is kept.'
@@ -548,21 +546,21 @@ page = f'''<!doctype html>
     <li id="s2"><div>
       <div class="note">
         <h3>Write your reward function</h3>
-        <p>The first thing you will see is a Python text box prefilled with a stub. <b>Write or paste your reward function there and press Submit.</b> If you would rather use your IDE, edit <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code> inside the cloned repo and submit the box as is.</p>
-      </div>{frame(QUESTION2)}
+        <p>The first thing you will see is this page. <b>Switch to your IDE and write your reward function in <code>workspaces/&lt;your_env_name&gt;/designed_reward_fn.py</code></b> inside the cloned repo.</p>
+      </div>{frame(setup_feed('early'))}
     </div></li>
 
     <li id="s3"><div>
       <div class="note">
         <h3>Fill in the stub</h3>
-        <p>Fill in the body of the stub. <b>This is the only time you will need to write code.</b> Below is the reward function used in this walkthrough.</p>
+        <p>Open the file in your IDE and fill in the body of the stub. <b>This is the only time you will need to write code.</b> Below is the reward function used in this walkthrough.</p>
       </div>{EDITOR}
     </div></li>
 
     <li id="s4"><div>
       <div class="note">
         <h3>Press “Identify possible flaws”</h3>
-        <p>When you are done, press <b>Identify possible flaws</b>. You will be asked a few more quick questions, and then our system will spawn subagents to find flaws in your reward function.</p>
+        <p>When you are done, return to your browser and press <b>Identify possible flaws</b>. You will be asked a few more quick questions, and then our system will spawn subagents to find flaws in your reward function.</p>
         <div class="callout"><b>This step can take up to an hour,</b> depending on the speed of your simulator. Feel free to come back to the page later, but don't close it!</div>
       </div>{frame(setup_feed('go'))}
     </div></li>

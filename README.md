@@ -142,14 +142,13 @@ Note that some steps can take quite a while, i.e., up to an hour or longer! The 
 
 ### What the page asks you
 
-First, **your reward function**: a Python text box on the page,
-prefilled with a stub, where you write or paste it (or edit the file it
-names).
+First, **your reward function**: fill in the stub at
+`workspaces/<env_name>/designed_reward_fn.py`, then press **Identify
+possible flaws** on the page.
 
-After that, each step ends with a **Continue** button. Click it and the
-next step starts. You never have to remember a command: the buttons walk
-you from setup, through deciding what to measure about each run, through
-collecting behavior, to the disagreements.
+After that, the steps run on their own, from deciding what to measure
+about each run, through collecting behavior, to the discordances. You
+never have to remember a command.
 
 ### What you get back
 
@@ -172,7 +171,7 @@ Below the comparisons, the page asks you to pick one:
 
 | Option | What happens |
 |---|---|
-| **Edit the reward function** | You change the code yourself in a text box on the page (or in the file it names), or you tell Claude in plain language what to change — including pinning it to an outcome, e.g. "increase this penalty until the alternative run wins discordance 2" — and Claude applies it. |
+| **Edit the reward function** | You change the code yourself in the file and press a button when done, or you tell Claude in plain language what to change — including pinning it to an outcome, e.g. "increase this penalty until the alternative run wins discordance 2" — and Claude applies it. |
 | **Propose more discordances** | Surface more pairs and lotteries from the behavior already collected. Click it twice in a row and the system goes and collects fresh behavior instead. |
 | **End session** | Keeps the current reward function and closes the tool. |
 

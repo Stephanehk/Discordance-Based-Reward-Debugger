@@ -167,19 +167,10 @@ names:
 python -m web_ui.cli post --type status --content "The trajectory characteristics and other perspectives are in place."
 ```
 
-## Exit — Continue button that chains to /repair-round
+## Exit — chain straight into /repair-round
 
-Post a CTA button on the website and invoke the next skill when the
-user clicks it.
-
-```bash
-ANSWER=$(python -m web_ui.cli cta \
-    --prompt "The system is ready to look for possible misalignment." \
-    --label  "Collect evidence of possible misalignment" \
-    --value  "repair-round")
-NEXT=$(printf %s "$ANSWER" | python -c "import json,sys;print(json.load(sys.stdin)['value'])")
-```
-
-Then call the `Skill` tool with `skill="$NEXT"` (i.e. `repair-round`).
-Do not finish the turn without either posting the CTA or handing off
-via the Skill tool. Do not describe which files were authored.
+Nothing is needed from the user here, so do not post a button. Right
+after the status message, call the `Skill` tool with
+`skill="repair-round"` in the same turn. Do not finish the turn without
+handing off via the Skill tool. Do not describe which files were
+authored.

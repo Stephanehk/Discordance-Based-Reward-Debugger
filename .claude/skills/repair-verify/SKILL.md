@@ -156,7 +156,7 @@ Read `value` from the returned JSON.
 
 - **Look for new disagreements** → run `/repair-preferences` (follow
   its full contract — comparisons with `--why` lines, closing
-  four-option question — all posted to the web UI).
+  three-option question — all posted to the web UI).
 - **Collect more evidence first** → run `/repair-round`, which itself
   auto-continues into the `/repair-preferences` deliverable.
 - **End session** → follow "End session"

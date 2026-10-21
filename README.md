@@ -145,8 +145,8 @@ Note that some steps can take quite a while, i.e., up to an hour or longer! The 
 First, **how you want to specify the reward**. Either describe in plain
 language what the agent should achieve, what it should avoid, and how to
 trade those off — Claude writes the code and shows it to you for
-approval — or say you'll write it yourself and fill in the stub it
-leaves you.
+approval — or say you'll write it yourself and fill in a stub in a
+Python text box on the page (or in the file it names).
 
 After that, each step ends with a **Continue** button. Click it and the
 next step starts. You never have to remember a command: the buttons walk
@@ -174,8 +174,7 @@ Below the comparisons, the page asks you to pick one:
 
 | Option | What happens |
 |---|---|
-| **Edit the reward function** | You change the code yourself, or you tell Claude in plain language what to change — including pinning it to an outcome, e.g. "increase this penalty until the alternative run wins discordance 2" — and Claude applies it. |
-| **Add a trajectory characteristic** | The comparisons aren't showing you something you need in order to judge them. Name it, and it gets measured and added to every comparison's list of how the runs differ. It does not change the reward function. |
+| **Edit the reward function** | You change the code yourself in a text box on the page (or in the file it names), or you tell Claude in plain language what to change — including pinning it to an outcome, e.g. "increase this penalty until the alternative run wins discordance 2" — and Claude applies it. |
 | **Propose more discordances** | Surface more pairs and lotteries from the behavior already collected. Click it twice in a row and the system goes and collects fresh behavior instead. |
 | **End session** | Keeps the current reward function and closes the tool. |
 

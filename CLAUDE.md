@@ -282,9 +282,8 @@ the channel. The expected chain is:
 - `/repair-init` → post that the user should run `/repair-round`.
 - `/repair-round` → after surfacing disagreements on the website, **ask**
   the user via `web_ui.cli ask` whether they want to (1) **Edit the
-  reward function**, (2) **Add a trajectory characteristic** to the
-  list of how the trajectories differ, (3) **Propose more discordances**
-  from the trajectories already collected, or (4) **End session**.
+  reward function**, (2) **Propose more discordances** from the
+  trajectories already collected, or (3) **End session**.
   (The "Edit the reward function" option
   then asks whether the user or Claude makes the edit; the Claude path
   posts the reward-edit tip box to the web UI.)

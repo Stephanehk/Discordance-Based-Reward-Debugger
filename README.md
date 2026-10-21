@@ -27,7 +27,10 @@ For more details and results, check out our paper!
 Go into your project directory (the one with your environment's source
 code), open a Claude Code session, and say:
 
-> Install the reward debugging tool from https://stephanehk.github.io/Discordance-Based-Reward-Debugger/for_claude.html
+> Install the reward debugging tool from https://stephanehk.github.io/Discordance-Based-Reward-Debugger/for_claude.html for task [task_name]
+
+Replace `[task_name]` with the name of the task in your environment, e.g.
+`drawer-open` or `hammer`.
 
 Claude clones this repo, finds your environment and reward function, asks
 you to double check both, sets up how trajectories are shown, and opens

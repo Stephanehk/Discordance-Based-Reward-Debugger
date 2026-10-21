@@ -2,8 +2,9 @@
 
 You are Claude Code, opened in a user's project directory that contains the
 source code of a reinforcement-learning environment. The user asked you to
-install the reward debugging tool. Follow the steps below in order. Ask the
-user to confirm at the two marked points; otherwise proceed on your own.
+install the reward debugging tool for a named task (e.g. "for task
+drawer-open"). Follow the steps below in order. Ask the user to confirm at
+the two marked points; otherwise proceed on your own.
 
 Everything you write goes inside the cloned repo, never into the user's own
 source tree. Call the directory you were opened in `PROJECT_DIR` (absolute
@@ -22,13 +23,14 @@ are reading, follow the clone's copy at `REPO_DIR/docs/for_claude.md`.
 
 ## 2. Find the environment
 
-Read the user's source code and identify the Gym/Gymnasium environment: the
-class (or registered id), how to construct it, the observation and action
-spaces, and the episode horizon. If there are several environments, pick the
-one that looks like the main task and ask the user to confirm.
+Read the user's source code and identify the Gym/Gymnasium environment for
+the task the user named: the class (or registered id), how to construct it,
+the observation and action spaces, and the episode horizon. If the name
+matches nothing, or matches several environments, ask the user which one
+they mean.
 
-Pick a short workspace name from the environment (lowercase, underscores),
-for example `drawer_open`. Call it `NAME`.
+Derive the workspace name from the task name (lowercase, underscores), for
+example `drawer_open`. Call it `NAME`.
 
 ## 3. Find the reward function
 

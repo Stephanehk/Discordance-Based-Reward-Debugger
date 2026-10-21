@@ -156,13 +156,15 @@ collecting behavior, to the disagreements.
 ### What you get back
 
 Once enough behavior has been collected, the page fills with
-**comparisons**:
+**discordances**: comparisons on which the tool hypothesizes your
+preference differs from the ranking your reward function induces.
 
 - **Pairs** (up to five). Two videos on top: on the left, the run *your
-  reward function preferred*; on the right, the alternative. Underneath,
-  a one-line "why they disagree", then a short list of how the preferred
-  run differed ordered so the most telling difference comes first.
-  The first pair is expanded, the rest are collapsed.
+  reward function preferred*; on the right, the alternative, each with
+  its return under your reward function. Underneath, a one-line "why
+  they disagree", then two dropdowns: how the two runs differ in more
+  detail (the most telling difference comes first), and how the return
+  is computed. The first pair is expanded, the rest are collapsed.
 - **Lotteries** (up to two). A gamble: "would you rather have this
   certain run C, or a probability distribution between run A and run B?"
 
@@ -172,10 +174,10 @@ Below the comparisons, the page asks you to pick one:
 
 | Option | What happens |
 |---|---|
-| **Edit the reward function** | You change the code yourself, or you tell Claude in plain language what to change — including pinning it to an outcome, e.g. "increase this penalty until the alternative run wins pair 2" — and Claude applies it. |
-| **Add another characteristic** | The comparisons aren't showing you something you need in order to judge them. Name it, and it gets measured and folded into every comparison. |
-| **View more comparisons** | Surface more pairs and lotteries from the behavior already collected. Click it twice in a row and the system goes and collects fresh behavior instead. |
-| **Finish and submit** | Locks the current reward in as your final answer and ends the session. Not reversible — pick it only when you're done. |
+| **Edit the reward function** | You change the code yourself, or you tell Claude in plain language what to change — including pinning it to an outcome, e.g. "increase this penalty until the alternative run wins discordance 2" — and Claude applies it. |
+| **Add a trajectory characteristic** | The comparisons aren't showing you something you need in order to judge them. Name it, and it gets measured and added to every comparison's list of how the runs differ. It does not change the reward function. |
+| **Propose more discordances** | Surface more pairs and lotteries from the behavior already collected. Click it twice in a row and the system goes and collects fresh behavior instead. |
+| **End session** | Keeps the current reward function and closes the tool. |
 
 After you edit the reward you have two ways forward, both offered as
 buttons. **`/repair-verify`** re-scores the exact comparisons you were

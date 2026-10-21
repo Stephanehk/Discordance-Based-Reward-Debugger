@@ -285,6 +285,23 @@ body {
   line-height: 1.55;
 }
 .cmp-why strong { color: #1a1d29; }
+/* Return under the designed reward, shown under each trajectory's caption. */
+.viz-return {
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #2a2540;
+}
+/* Nested dropdowns inside a comparison card. */
+.cmp-more, .cmp-return { margin-top: 12px; }
+.cmp-more > summary, .cmp-return > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4f46e5;
+}
+.cmp-return > p { margin: 8px 0 0; font-size: 13px; }
+.cmp-return .code-block { max-height: 420px; overflow: auto; margin-bottom: 0; }
 
 /* ===== Standalone image/video ===== */
 .msg-img img, .msg-vid video {

@@ -118,7 +118,7 @@ For each unresolved pair / lottery:
 ```bash
 # Pair (still disagrees): A is the reward-preferred side; post the render's sentences.
 python -m web_ui.cli post --type comparison \
-    --label "PAIR k/N still disagrees" \
+    --label "DISCORDANCE k/N remains" \
     --content-file <path to the still-disagreeing pair's sentences from the script's output> \
     --viz '[{"src":"/workspace/<WORKSPACE>/viz/round{i}/pair{j}/A.mp4","caption":"Designed reward function preferred trajectory"},
             {"src":"/workspace/<WORKSPACE>/viz/round{i}/pair{j}/B.mp4","caption":"The alternative trajectory"}]' \
@@ -126,7 +126,7 @@ python -m web_ui.cli post --type comparison \
 
 # Lottery (still disagrees): you author --content; use --layout lottery with role + probability.
 python -m web_ui.cli post --type comparison \
-    --label "LOTTERY k/M still disagrees" \
+    --label "DISCORDANCE k/N remains (lottery)" \
     --layout lottery \
     --content "<2–3 sentences on how Trajectory A (good branch), Trajectory B (bad branch), and certain Trajectory C differ. Be QUANTITATIVE: state the actual characteristic values (with units) from the table, not qualitative interpretations like 'safe', 'smooth', or 'aggressive'. Don't mention perspectives or metrics.>" \
     --viz '[{"src":"/workspace/<WORKSPACE>/viz/round{i}/lottery{j}/A.mp4","caption":"Trajectory A","role":"A","probability":<p>},
@@ -146,7 +146,7 @@ python -m web_ui.cli ask --prompt "Where to next?" \
     --options '[
       {"label":"Look for new disagreements","description":"Re-analyse existing trajectories under the current reward, surfacing up to 5 pairs plus up to 2 lotteries (and a new snapshot)."},
       {"label":"Collect more evidence first","description":"Roll out a fresh round of policies before re-analysing — useful when existing trajectories feel exhausted or your edits warrant new adversarial policies."},
-      {"label":"Finish and submit (not reversible)","description":"Lock in the current reward as the final answer. This ends the session."}
+      {"label":"End session","description":"Keep the current reward function and close the tool."}
     ]'
 ```
 
@@ -159,8 +159,8 @@ Read `value` from the returned JSON.
   four-option question — all posted to the web UI).
 - **Collect more evidence first** → run `/repair-round`, which itself
   auto-continues into the `/repair-preferences` deliverable.
-- **Finish and submit (not reversible)** → follow "Finish and submit"
+- **End session** → follow "End session"
   in `CLAUDE.md`: write the submission record, post a confirmation to
-  the web UI (`post --type markdown --content "The reward function is
-  submitted. Session complete."` and `set status=done`), and stop.
+  the web UI (`post --type markdown --content "Session ended. The
+  current reward function is kept."` and `set status=done`), and stop.
 - "Other" / decline → just stop.

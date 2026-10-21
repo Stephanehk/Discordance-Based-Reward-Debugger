@@ -21,7 +21,7 @@ Examples
   python -m web_ui.cli set workspace=pandemic status=running
   python -m web_ui.cli post --type markdown --content "Hello, world."
   python -m web_ui.cli post --type code --language python --file reward.py
-  python -m web_ui.cli post --type comparison --label "PAIR 1/2" \\
+  python -m web_ui.cli post --type comparison --label "DISCORDANCE 1/2" \\
                             --content-file render.txt \\
                             --viz '[{"src": "/workspace/pandemic/viz/round1/pair1/A.png", "caption": "Trajectory A"}]'
   python -m web_ui.cli ask --prompt "How do you want to specify the reward?" \\

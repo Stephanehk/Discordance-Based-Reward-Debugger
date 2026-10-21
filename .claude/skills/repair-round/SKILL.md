@@ -318,10 +318,10 @@ Follow `repair-preferences/SKILL.md` precisely, but in summary:
    ```bash
    python -m web_ui.cli ask --prompt "What would you like to do next?" \
        --options '[
-         {"label":"Edit the reward function","description":"Modify the reward to reflect what you actually want, based on the disagreements above."},
-         {"label":"Add another characteristic","description":"Add a new characteristic to the trajectory summary so the comparisons show more detail."},
-         {"label":"View more comparisons","description":"Surface additional pairs or lotteries from the evidence already collected."},
-         {"label":"Finish and submit (not reversible)","description":"Lock in the current reward function as the final answer. This ends the session."}
+         {"label":"Edit the reward function","description":"Modify the reward to reflect what you actually want, based on the discordances above."},
+         {"label":"Add a trajectory characteristic","description":"Name a characteristic of the trajectories to add to each comparison's list of how they differ. This does not change the reward function."},
+         {"label":"Propose more discordances","description":"Propose more pairs or lotteries from the trajectories already collected."},
+         {"label":"End session","description":"Keep the current reward function and close the tool."}
        ]'
    ```
    Act on the answer per `repair-preferences/SKILL.md` Step 4.
@@ -347,6 +347,6 @@ Do not say "running /repair-preferences" or list internal commands.
 ## After the closing question
 
 The user's answer drives the next action per `repair-preferences/SKILL.md`
-Step 4 (edit the reward / add a feature / view more comparisons / finish
-and submit). Don't append a separate summary of which files exist or how
+Step 4 (edit the reward / add a characteristic / propose more discordances /
+end session). Don't append a separate summary of which files exist or how
 to re-run individual skills.

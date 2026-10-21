@@ -165,8 +165,8 @@ their browser.
 |---|---|---|
 | Plain narrative paragraphs | `markdown` | headers, bold, lists, tables, inline code |
 | `designed_reward_fn.py` source | `code --language python --caption "designed_reward_fn.py" --content-file <path>` | code is shown in a dark monospace block |
-| A trajectory pair block | `comparison --label "PAIR 1/5" --content-file render.txt --viz '[{"src":"/workspace/<env>/viz/round{i}/pair{j}/A.mp4","caption":"Designed reward function preferred trajectory"}, {"src":"/workspace/<env>/viz/round{i}/pair{j}/B.mp4","caption":"The alternative trajectory"}]' --why "…"` | videos on top, the `Why they disagree:` line (`--why`) underneath, then one sentence per characteristic from `--content-file`; the first pair is expanded and the rest collapsed |
-| A lottery comparison block | `comparison --label "LOTTERY 1/2" --layout lottery --content "<plain-English summary of how A, B, C differ>" --viz '[{…"role":"A","probability":0.5}, {…"role":"B","probability":0.5}, {…"role":"C"}]' --why "…"` | `--layout lottery` puts A and B side-by-side on the top row (with their probability badges) and the role-C item below; the lottery's `--content` is an authored **quantitative** summary of how A, B, C differ — actual characteristic values, not qualitative words (the renderer leaves it empty) |
+| A trajectory pair block | `comparison --label "DISCORDANCE 1/7" --content-file render.txt --viz '[{"src":"/workspace/<env>/viz/round{i}/pair{j}/A.mp4","caption":"Designed reward function preferred trajectory"}, {"src":"/workspace/<env>/viz/round{i}/pair{j}/B.mp4","caption":"The alternative trajectory"}]' --why "…"` | videos on top, the `Why they disagree:` line (`--why`) underneath, then one sentence per characteristic from `--content-file`; the first pair is expanded and the rest collapsed |
+| A lottery comparison block | `comparison --label "DISCORDANCE 6/7 (lottery)" --layout lottery --content "<plain-English summary of how A, B, C differ>" --viz '[{…"role":"A","probability":0.5}, {…"role":"B","probability":0.5}, {…"role":"C"}]' --why "…"` | `--layout lottery` puts A and B side-by-side on the top row (with their probability badges) and the role-C item below; the lottery's `--content` is an authored **quantitative** summary of how A, B, C differ — actual characteristic values, not qualitative words (the renderer leaves it empty) |
 | Light status update | `status` | e.g. "Collecting trajectories…" |
 | Visual separator | `divider` | thin dashed line |
 
@@ -282,26 +282,25 @@ the channel. The expected chain is:
 - `/repair-init` → post that the user should run `/repair-round`.
 - `/repair-round` → after surfacing disagreements on the website, **ask**
   the user via `web_ui.cli ask` whether they want to (1) **Edit the
-  reward function**, (2) **Add another characteristic** to the set
-  that encodes each trajectory, (3) **View more comparisons (pairs or
-  lotteries)** from the evidence already collected, or (4) **Finish and
-  submit (not reversible)**. (The "Edit the reward function" option
+  reward function**, (2) **Add a trajectory characteristic** to the
+  list of how the trajectories differ, (3) **Propose more discordances**
+  from the trajectories already collected, or (4) **End session**.
+  (The "Edit the reward function" option
   then asks whether the user or Claude makes the edit; the Claude path
   posts the reward-edit tip box to the web UI.)
 - `/repair-preferences` → same closing question as `/repair-round`,
   asked via `web_ui.cli ask`.
 - `/repair-verify` → ask via `web_ui.cli ask` whether to look for new
-  disagreements, collect more evidence first, or **Finish and submit
-  (not reversible)**.
+  disagreements, collect more evidence first, or **End session**.
 
-### Finish and submit (not reversible)
+### End session
 
-When the user picks **Finish and submit**, treat the current
+When the user picks **End session**, treat the current
 `designed_reward_fn.py` as the final answer: write
 `workspaces/<name>/.repair_history/SUBMISSION.md` containing a UTC
 timestamp and the full current reward source, post a confirmation to
-the web UI (`python -m web_ui.cli post --type markdown --content "The
-reward function is submitted. Session complete."` and
+the web UI (`python -m web_ui.cli post --type markdown --content "Session
+ended. The current reward function is kept."` and
 `python -m web_ui.cli set status=done`), and stop — do not offer
 further steps, run more rounds, or edit the reward afterward. Because
 it is irreversible, only do this when the user explicitly selects it.
@@ -314,8 +313,8 @@ web UI before requesting or applying the edit:
 
 ```bash
 python -m web_ui.cli post --type markdown --content "💡 **Tips for guiding a reward edit**
-- Be concrete: name the term to change, and — if you can — which trajectory should come out ahead for each shown pair (e.g. \"for pair 2, the alternative trajectory should become the preferred one\").
-- You can pin an edit to an outcome: e.g. \"increase this penalty until the preference for pair 2 flips,\" and Claude will solve for the smallest change that produces it."
+- Be concrete: name the term to change, and — if you can — which discordances you agree with (e.g. \"I agree with discordances 1, 2, and 4\").
+- You can pin an edit to an outcome: e.g. \"increase this penalty until the ranking in discordance 2 flips,\" and Claude will solve for the smallest change that produces it."
 ```
 
 These rules apply to every skill in `.claude/skills/`. If a skill's own

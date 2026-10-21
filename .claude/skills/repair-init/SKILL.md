@@ -15,7 +15,7 @@ misspecification.
 Treat the user as someone who will never read the codebase. Don't
 mention internal file names, directory structure, or boilerplate scripts
 in anything posted to the website. Talk in terms of outcomes —
-"set up the trajectory summary", "identify other perspectives" — not
+"set up the trajectory characteristics", "identify other perspectives" — not
 file paths. Do not use the word "stakeholder" in messages posted to
 the user; say "other perspectives" or describe the specific
 perspective.
@@ -73,13 +73,13 @@ check whether it is present:
 - `<WORKSPACE_DIR>/candidate_performance_metrics/performance_metrics.py`
 
 If **either** exists, do not silently overwrite. Ask the user via the
-web UI, in plain language — "you already have a trajectory summary set
+web UI, in plain language — "you already have trajectory characteristics set
 up" / "you already have other perspectives set up" — not by
 filename. Example:
 
 ```bash
-python -m web_ui.cli ask --prompt "A trajectory summary is already set up for this workspace. Keep it, or replace it with a freshly authored one?" \
-    --options '[{"label":"Keep the existing one"},{"label":"Replace it"}]'
+python -m web_ui.cli ask --prompt "Trajectory characteristics are already set up for this workspace. Keep them, or replace them with freshly authored ones?" \
+    --options '[{"label":"Keep the existing ones"},{"label":"Replace them"}]'
 ```
 
 - **Keep** → skip authoring that file; leave it untouched (and skip its
@@ -160,11 +160,11 @@ trajectory.
 ## Step 7: confirm to the user via the web UI
 
 Post a short status update naming what was set up — talk in terms of
-outcomes (trajectory summary, other perspectives), never file
+outcomes (trajectory characteristics, other perspectives), never file
 names:
 
 ```bash
-python -m web_ui.cli post --type status --content "The trajectory summary and other perspectives are in place."
+python -m web_ui.cli post --type status --content "The trajectory characteristics and other perspectives are in place."
 ```
 
 ## Exit — Continue button that chains to /repair-round

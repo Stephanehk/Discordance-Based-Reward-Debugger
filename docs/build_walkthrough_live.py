@@ -27,26 +27,32 @@ def inline(s):
     s = esc(s)
     return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', s)
 
-NPAIRS = len(SNAP['pairs']); NLOTS = len(SNAP_L['lotteries'])
+NPAIRS = len(SNAP['pairs']); NLOTS = len(SNAP_L['lotteries']); NALL = NPAIRS + NLOTS
 def pair_card(n, open_):
     p = SNAP['pairs'][n-1]
     head = "Designed reward function's preferred trajectory has a"
     bullets_ = bullets(feats(p['traj_a_path']), feats(p['traj_b_path']))
+    rets = {'A': p['snapshot_reward_a'], 'B': p['snapshot_reward_b']}
     vids = ''.join(f'''
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair{n}-{r}.mp4"></video>
             <figcaption>{cap}</figcaption>
+            <div class="viz-return">Return: {rets[r]:.2f}</div>
           </figure>''' for r, cap in (('A',"Designed reward function's preferred trajectory"),('B','The alternative trajectory')))
     lis = ''.join(f'\n          <li>{inline(b)}</li>' for b in bullets_)
     return f'''
       <article class="msg msg-cmp">
         <details class="cmp-details"{" open" if open_ else ""}>
-          <summary class="msg-head"><span class="label">PAIR {n}/{NPAIRS}</span></summary>
+          <summary class="msg-head"><span class="label">DISCORDANCE {n}/{NALL}</span></summary>
           <div class="cmp-viz">{vids}
           </div>
-          <div class="cmp-chars-head">{inline(head)}</div>
-          <ul class="cmp-chars">{lis}
-          </ul>
+          <details class="cmp-more">
+            <summary>How the two trajectories differ in more detail</summary>
+            <div class="cmp-chars-head">{inline(head)}</div>
+            <ul class="cmp-chars">{lis}
+            </ul>
+          </details>
+          {RETURN_DETAILS}
         </details>
       </article>'''
 
@@ -54,12 +60,20 @@ def lottery_card(n, open_):
     l = SNAP_L['lotteries'][n-1]
     pa = round(l['p']*100); pb = 100-pa
     prefC = bool(l['snapshot_reward_prefers_c'])
+    # Per-trajectory returns: C's is stored in the snapshot; A's and B's are
+    # quoted in the selection justification as "T### (return)".
+    _quoted = dict(re.findall(r'T(\d+) \(([\d.]+)\)', l.get('justification', '')))
+    _ids = [k for k in _quoted]  # order: C, A, B
+    rets = {'C': float(l['snapshot_reward_c'])}
+    if len(_ids) >= 3:
+        rets['A'] = float(_quoted[_ids[1]]); rets['B'] = float(_quoted[_ids[2]])
     def fig(role, cap, prob=None):
         p = f'\n            <div class="viz-prob">{prob}% chance</div>' if prob is not None else ''
+        r = f'\n            <div class="viz-return">Return: {rets[role]:.2f}</div>' if role in rets else ''
         return f'''
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery{n}-{role}.mp4"></video>
-            <figcaption>{cap}</figcaption>{p}
+            <figcaption>{cap}</figcaption>{p}{r}
           </figure>'''
     badge = '<div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this certain trajectory</div>' if prefC else '<div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this lottery</div>'
     ab_row = f'<div class="lot-row lot-ab">{fig("A","Trajectory A",pa)}{fig("B","Trajectory B",pb)}\n          </div>'
@@ -68,14 +82,20 @@ def lottery_card(n, open_):
     return f'''
       <article class="msg msg-cmp msg-lottery">
         <details class="cmp-details"{" open" if open_ else ""}>
-          <summary class="msg-head"><span class="label">LOTTERY {n}/{NLOTS}</span></summary>
+          <summary class="msg-head"><span class="label">DISCORDANCE {NPAIRS+n}/{NALL} (lottery)</span></summary>
           <div class="lot-viz">
           {body}
           </div>
+          {RETURN_DETAILS}
         </details>
       </article>'''
 
 code = (RUN/'designed_reward_fn.py').read_text()
+RETURN_DETAILS = f'''<details class="cmp-return">
+            <summary>How the return is computed</summary>
+            <p class="muted">The return is the sum of this reward function's per-step rewards over the trajectory.</p>
+            <pre class="code-block"><code class="py">{esc(code)}</code></pre>
+          </details>'''
 
 SETUP_FEED = '''
       <article class="msg msg-status"><div class="msg-body">The environment is set up.</div></article>
@@ -126,10 +146,10 @@ QUESTION7 = '''
         <div class="q-prompt">What would you like to do next?</div>
         <div class="q-body">
           <div class="q-options">
-            <button type="button" class="q-option" data-value="edit"><span class="opt-label">Edit the reward function</span><span class="opt-desc">Modify the reward to reflect what you actually want, based on the disagreements above.</span></button>
-            <button type="button" class="q-option" data-value="char"><span class="opt-label">Add another characteristic</span><span class="opt-desc">Add a new characteristic to the trajectory summary so the comparisons show more detail.</span></button>
-            <button type="button" class="q-option" data-value="more"><span class="opt-label">View more comparisons</span><span class="opt-desc">Surface additional pairs or lotteries from the evidence already collected.</span></button>
-            <button type="button" class="q-option" data-value="finish"><span class="opt-label">Finish and submit (not reversible)</span><span class="opt-desc">Lock in the current reward function as the final answer. This ends the session.</span></button>
+            <button type="button" class="q-option" data-value="edit"><span class="opt-label">Edit the reward function</span><span class="opt-desc">Modify the reward to reflect what you actually want, based on the discordances above.</span></button>
+            <button type="button" class="q-option" data-value="char"><span class="opt-label">Add a trajectory characteristic</span><span class="opt-desc">Name a characteristic of the trajectories to add to each comparison’s list of how they differ. This does not change the reward function.</span></button>
+            <button type="button" class="q-option" data-value="more"><span class="opt-label">Propose more discordances</span><span class="opt-desc">Propose more pairs or lotteries from the trajectories already collected.</span></button>
+            <button type="button" class="q-option" data-value="finish"><span class="opt-label">End session</span><span class="opt-desc">Keep the current reward function and close the tool.</span></button>
           </div>
           <div class="q-actions"><button type="button" class="btn">Submit</button></div>
         </div>
@@ -202,6 +222,7 @@ JS = r"""<script>
     }
     return out.join("");
   }
+  document.querySelectorAll(".app code.py").forEach(function(c){c.innerHTML=hl(c.textContent)});
   document.querySelectorAll(".editor code.py").forEach(function(c){
     var lines=hl(c.textContent).split("\n");
     c.innerHTML=lines.map(function(l,k){return '<span class="ln">'+(k+1)+'</span>'+l}).join("\n");
@@ -214,9 +235,9 @@ JS = r"""<script>
     describe:'With this choice you fill in three short text boxes, and Claude will implement a reward function in Python for you. This tour follows the other path. <a href="#s2">Continue to step 2 &darr;</a>',
     myself:'Claude leaves a stub <code>designed_reward_fn.py</code> for you to fill in. <a href="#s2">Continue to step 2 &darr;</a>',
     edit:'Claude asks whether you want to edit the file yourself or describe the change in plain language. Either way, the comparisons are re-scored against the new reward.',
-    char:'You name the characteristic; Claude writes a small measurement for it, and every comparison gains a new “higher / lower / same” line.',
-    more:'More pairs and lotteries appear from the evidence already collected. No new rollouts are needed.',
-    finish:'The current reward function is locked in as your final answer and the session ends.'
+    char:'You name the characteristic; Claude writes a small measurement for it, and every comparison gains a new “higher / lower / same” line. The reward function is unchanged.',
+    more:'More discordances appear from the trajectories already collected. No new rollouts are needed.',
+    finish:'The session ends and the current reward function is kept.'
   };
   document.querySelectorAll(".app .msg-q").forEach(function(card){
     var sel=null,opts=card.querySelectorAll(".q-option"),submit=card.querySelector(".q-actions .btn"),note=card.querySelector(".q-note"),st=card.querySelector(".qstatus");
@@ -480,6 +501,14 @@ page = f'''<!doctype html>
   .app .cmp-viz figcaption,.app .lot-row figcaption{{font-size:12.5px;color:#6b7080;margin-top:4px}}
   .app .viz-preferred{{margin-top:4px;font-size:12px;font-weight:600;color:#1d6fc5;background:#e6f4ff;padding:4px 8px;border-radius:6px;display:inline-block}}
   .app .viz-prob{{margin-top:4px;font-size:12.5px;font-weight:600;color:#4f46e5;background:#eef0ff;padding:3px 8px;border-radius:6px;display:inline-block}}
+  .app .viz-return{{margin-top:4px;font-size:12.5px;font-weight:600;color:#2a2540}}
+  .app .cmp-more,.app .cmp-return{{margin-top:12px}}
+  .app .cmp-more>summary,.app .cmp-return>summary{{cursor:pointer;font-size:13px;font-weight:600;color:#4f46e5}}
+  .app .cmp-return>p{{margin:8px 0 0;font-size:13px}}
+  .app .code-block{{margin:6px 0 0;padding:14px 16px;background:#0f1424;color:#d9def0;border-radius:10px;max-height:420px;overflow:auto;font:13px/1.55 var(--mono)}}
+  .app .code-block code{{display:block;background:none;padding:0;font-size:inherit;color:inherit;white-space:pre}}
+  .app .tok-keyword{{color:#c678dd;font-weight:600}} .app .tok-builtin{{color:#56b6c2}} .app .tok-string{{color:#98c379}}
+  .app .tok-comment{{color:#7c8095;font-style:italic}} .app .tok-number{{color:#d19a66}} .app .tok-function{{color:#61afef}} .app .tok-decorator{{color:#d19a66}}
   .app .lot-viz{{display:flex;flex-direction:column;gap:12px;margin-top:12px}}
   .app .lot-row{{display:flex;flex-wrap:wrap;gap:12px}}
   .app .lot-row figure{{margin:0;flex:1 1 280px;min-width:220px}}
@@ -536,27 +565,27 @@ page = f'''<!doctype html>
 
     <li id="s5"><div>
       <div class="note">
-        <h3>Review the trajectory pairs</h3>
-        <p>We will show you hypothesized reward misspecifications in the form of trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Underneath each pair is a one-line “why they disagree”.</p>
-        <p>The hypothesized misspecifications may not always be actual misspecifications! Expand the other trajectory pairs the system identified to see more.</p>
+        <h3>Review the discordances</h3>
+        <p>We will show you hypothesized reward misspecifications as <b>discordances</b>: comparisons on which our system hypothesizes your preference differs from the ranking your reward function induces. Most are trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Each trajectory shows its return under your reward function, and underneath each pair is a one-line “why they disagree”. Two dropdowns show how the two trajectories differ in more detail and how the return is computed.</p>
+        <p>The hypothesized misspecifications may not always be actual misspecifications! Expand the other discordances the system identified to see more.</p>
       </div>{with_buddy(frame(''.join(pair_card(i, i==1) for i in range(1,NPAIRS+1)), status='awaiting'), PAIR_NOTE)}
     </div></li>
 
     <li id="s6"><div>
       <div class="note">
         <h3>Review the lotteries</h3>
-        <p>Some hypotheses are shown as lotteries instead. A lottery asks: would you rather have the certain trajectory <b>C</b>, or a gamble that gives you trajectory <b>A</b> with one probability and trajectory <b>B</b> with the other? A badge marks which side your reward function assigns higher return to.</p>
+        <p>Some discordances are lotteries instead. A lottery asks: would you rather have the certain trajectory <b>C</b>, or a gamble that gives you trajectory <b>A</b> with one probability and trajectory <b>B</b> with the other? A badge marks which side your reward function assigns higher return to.</p>
       </div>{with_buddy(frame(''.join(lottery_card(i, i==1) for i in range(1,NLOTS+1)), status='awaiting'), LOT_NOTE)}
     </div></li>
 
     <li id="s7"><div>
       <div class="note">
         <h3>Decide what to do next</h3>
-        <p>Below the comparisons, the page asks you to pick one:</p>
+        <p>Below the discordances, the page asks you to pick one:</p>
       </div>{frame(QUESTION7)}
       <div class="note">
         <div class="aside">
-          <b>Didn't find a flaw?</b> If none of the pairs identified a flaw in your reward function, you can run another round of this process. In our experience, after two more rounds (three rounds total) the system has covered many different hypothesized flaws.
+          <b>Didn't find a flaw?</b> If none of the discordances identified a flaw in your reward function, you can run another round of this process. In our experience, after two more rounds (three rounds total) the system has covered many different hypothesized flaws.
         </div>
       </div>
     </div></li>

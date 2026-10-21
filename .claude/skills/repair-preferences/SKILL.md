@@ -19,7 +19,7 @@ its `--why` line. Do **not** post a feature key, overall summary,
 pattern paragraph, or misalignment orientation.
 
 Finally, **always** close with the four-option `ask` (edit / add a
-feature / view more / finish and submit). The skill has not delivered
+feature / propose more / end session). The skill has not delivered
 its core output until that question is on the website.
 
 ## Tone for messages to the user
@@ -313,10 +313,10 @@ wording very close to them):
 ```bash
 python -m web_ui.cli ask --prompt "What would you like to do next?" \
     --options '[
-      {"label":"Edit the reward function","description":"Modify the reward to reflect what you actually want, based on the disagreements above."},
-      {"label":"Add another characteristic","description":"Add a new characteristic to the trajectory summary so the comparisons show more detail."},
-      {"label":"View more comparisons","description":"Surface additional pairs or lotteries from the evidence already collected."},
-      {"label":"Finish and submit (not reversible)","description":"Lock in the current reward function as the final answer. This ends the session."}
+      {"label":"Edit the reward function","description":"Modify the reward to reflect what you actually want, based on the discordances above."},
+      {"label":"Add a trajectory characteristic","description":"Name a characteristic of the trajectories to add to each comparison's list of how they differ. This does not change the reward function."},
+      {"label":"Propose more discordances","description":"Propose more pairs or lotteries from the trajectories already collected."},
+      {"label":"End session","description":"Keep the current reward function and close the tool."}
     ]'
 ```
 
@@ -344,15 +344,15 @@ Read `value` from the returned JSON.
     to re-check the previously-surfaced pairs, **or** `/repair-round`
     to gather fresh evidence under the new reward.
 
-- **Add another characteristic** → ask the user, via a long-text
+- **Add a trajectory characteristic** → ask the user, via a long-text
   question, what feature they want. Edit
   `gather_evidence/trajectory_features.py`, re-run
   `runtime.compute_features` over every existing round so all
   trajectories carry the new feature, then re-present the evidence
   (Steps 1–3) with the feature visible.
 
-- **View more comparisons (pairs or lotteries)** → behaviour depends on
-  whether this is the *first* "View more" click in a row or the
+- **Propose more discordances** → behaviour depends on
+  whether this is the *first* "Propose more" click in a row or the
   *second* consecutive one (since the last reward edit, feature add,
   or fresh /repair-round).
 
@@ -371,8 +371,8 @@ Read `value` from the returned JSON.
   **First click → re-select within existing evidence (this step's
   default).** Re-run Step 1, but with one crucial extra constraint:
   **treat every previously-shown trajectory as one whose designed-
-  reward ranking the user has now agreed with**. By pressing "view
-  more comparisons", the user has implicitly confirmed that the
+  reward ranking the user has now agreed with**. By pressing "Propose
+  more discordances", the user has implicitly confirmed that the
   designed reward got it right on everything you've shown so far —
   re-showing those same rankings (or ones that depend on them)
   wastes their time.
@@ -399,17 +399,17 @@ Read `value` from the returned JSON.
 
   Then present the new selection per Steps 2–3.
 
-- **Finish and submit (not reversible)** → follow "Finish and submit"
+- **End session** → follow "End session"
   in `CLAUDE.md`: write the submission record, post a confirmation to
-  the web UI (`post --type markdown --content "The reward function is
-  submitted. Session complete."`) plus `set status=done`, and stop.
+  the web UI (`post --type markdown --content "Session ended. The
+  current reward function is kept."`) plus `set status=done`, and stop.
 
 #### Reward-edit tip box (post when Claude is about to edit the reward)
 
 ```bash
 python -m web_ui.cli post --type markdown --content "💡 **Tips for guiding a reward edit**
-- Be concrete: name the term to change, and — if you can — which trajectory should come out ahead for each shown pair (e.g. \"for pair 2, the alternative trajectory should become the preferred one\").
-- You can pin an edit to an outcome: e.g. \"increase this penalty until the preference for pair 2 flips,\" and Claude will solve for the smallest change that produces it."
+- Be concrete: name the term to change, and — if you can — which discordances you agree with (e.g. \"I agree with discordances 1, 2, and 4\").
+- You can pin an edit to an outcome: e.g. \"increase this penalty until the ranking in discordance 2 flips,\" and Claude will solve for the smallest change that produces it."
 ```
 
 ## When the user edits the reward and asks you to recheck

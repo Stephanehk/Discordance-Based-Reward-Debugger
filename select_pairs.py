@@ -401,6 +401,8 @@ def _do_render(records, metrics, selection_path: str, workspace_dir: str) -> int
     # Collected per-card payloads (content text + round-specific viz list) that
     # get written to UI_PAYLOAD_DIR for the skill to post verbatim.
     cards: list[dict] = []
+    # Pairs and lotteries are numbered together as one list of discordances.
+    n_all = len(selected_pairs) + len(selected_lotteries)
 
     if selected_pairs:
         print(f"\nTop {len(selected_pairs)} preference-label disagreements "
@@ -416,7 +418,16 @@ def _do_render(records, metrics, selection_path: str, workspace_dir: str) -> int
                 fip._print_pair_preference_labels,
                 rank, total, rec_a, rec_b, cand.disagreements, 0.0, order,
             )
-            viz_items: list[dict] = []
+            # A is always the reward-preferred side (render orients it so),
+            # so it is captioned as the designed reward's preferred trajectory.
+            # Each item carries the trajectory's return under the designed
+            # reward so the UI can show it; `src` is added when a visual exists.
+            viz_items: list[dict] = [
+                {"caption": "Designed reward function's preferred trajectory",
+                 "return": round(float(rec_a.designed_reward), 2)},
+                {"caption": "The alternative trajectory",
+                 "return": round(float(rec_b.designed_reward), 2)},
+            ]
             if viz_mod is not None:
                 ext = viz_mod.VIZ_EXT
                 pair_dir = f"{viz_root}/pair{rank}"
@@ -431,16 +442,13 @@ def _do_render(records, metrics, selection_path: str, workspace_dir: str) -> int
                         print(f"    Trajectory A: {_ws_display_path(workspace_dir, a_saved)}")
                     if b_saved:
                         print(f"    Trajectory B: {_ws_display_path(workspace_dir, b_saved)}")
-                # A is always the reward-preferred side (render orients it so),
-                # so it is captioned as the designed reward's preferred trajectory.
                 if a_saved:
-                    viz_items.append({"src": _viz_url(ws_name, a_saved),
-                                      "caption": "Designed reward function's preferred trajectory"})
+                    viz_items[0]["src"] = _viz_url(ws_name, a_saved)
                 if b_saved:
-                    viz_items.append({"src": _viz_url(ws_name, b_saved),
-                                      "caption": "The alternative trajectory"})
+                    viz_items[1]["src"] = _viz_url(ws_name, b_saved)
             cards.append({
-                "kind": "pair", "rank": rank, "label": f"PAIR {rank}/{total}",
+                "kind": "pair", "rank": rank,
+                "label": f"DISCORDANCE {rank}/{n_all}",
                 "layout": None, "content": content, "viz": viz_items,
             })
 
@@ -455,7 +463,29 @@ def _do_render(records, metrics, selection_path: str, workspace_dir: str) -> int
                 lot["reward_prefers_c"], lot["r_c"], lot["r_lottery"],
                 lot["disagreements"], lot.get("justification"),
             )
-            viz_items = []
+            p = lot["p"]
+            # Which side the designed reward assigns higher return to: the
+            # certain trajectory C, or the lottery (the gamble over A and B).
+            # Carried on each viz item so the UI can flag the preferred side,
+            # mirroring the preference shown on trajectory pairs. Each item
+            # also carries its trajectory's return under the designed reward;
+            # `src` is added when a visual exists.
+            prefers_c = bool(lot["reward_prefers_c"])
+            # Render order matches the lottery layout: A, B (top row with
+            # probabilities), then C below.
+            viz_items = [
+                {"caption": "Trajectory A", "role": "A",
+                 "probability": round(p, 6),
+                 "reward_preferred": not prefers_c,
+                 "return": round(float(lot["rec_a"].designed_reward), 2)},
+                {"caption": "Trajectory B", "role": "B",
+                 "probability": round(1.0 - p, 6),
+                 "reward_preferred": not prefers_c,
+                 "return": round(float(lot["rec_b"].designed_reward), 2)},
+                {"caption": "Certain (C)", "role": "C",
+                 "reward_preferred": prefers_c,
+                 "return": round(float(lot["rec_c"].designed_reward), 2)},
+            ]
             if viz_mod is not None:
                 ext = viz_mod.VIZ_EXT
                 lot_dir = f"{viz_root}/lottery{rank}"
@@ -474,32 +504,16 @@ def _do_render(records, metrics, selection_path: str, workspace_dir: str) -> int
                         print(f"    Branch A:    {_ws_display_path(workspace_dir, a_saved)}")
                     if b_saved:
                         print(f"    Branch B:    {_ws_display_path(workspace_dir, b_saved)}")
-                p = lot["p"]
-                # Which side the designed reward assigns higher return to: the
-                # certain trajectory C, or the lottery (the gamble over A and B).
-                # Carried on each viz item so the UI can flag the preferred side,
-                # mirroring the preference shown on trajectory pairs.
-                prefers_c = bool(lot["reward_prefers_c"])
-                # Render order matches the lottery layout: A, B (top row with
-                # probabilities), then C below.
                 if a_saved:
-                    viz_items.append({"src": _viz_url(ws_name, a_saved),
-                                      "caption": "Trajectory A", "role": "A",
-                                      "probability": round(p, 6),
-                                      "reward_preferred": not prefers_c})
+                    viz_items[0]["src"] = _viz_url(ws_name, a_saved)
                 if b_saved:
-                    viz_items.append({"src": _viz_url(ws_name, b_saved),
-                                      "caption": "Trajectory B", "role": "B",
-                                      "probability": round(1.0 - p, 6),
-                                      "reward_preferred": not prefers_c})
+                    viz_items[1]["src"] = _viz_url(ws_name, b_saved)
                 if c_saved:
-                    viz_items.append({"src": _viz_url(ws_name, c_saved),
-                                      "caption": "Certain (C)", "role": "C",
-                                      "reward_preferred": prefers_c})
+                    viz_items[2]["src"] = _viz_url(ws_name, c_saved)
             cards.append({
                 "kind": "lottery", "rank": rank,
-                "label": f"LOTTERY {rank}/{total}", "layout": "lottery",
-                "content": content, "viz": viz_items,
+                "label": f"DISCORDANCE {len(selected_pairs) + rank}/{n_all} (lottery)",
+                "layout": "lottery", "content": content, "viz": viz_items,
             })
 
     snap_path = _save_claude_snapshot(

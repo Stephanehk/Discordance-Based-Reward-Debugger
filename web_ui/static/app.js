@@ -304,20 +304,30 @@
 
   function _makeVizFigure(v) {
     const fig = document.createElement("figure");
-    let media;
-    if ((v.src || "").toLowerCase().endsWith(".mp4")) {
-      media = document.createElement("video");
-      media.controls = true;
-      media.preload = "metadata";
-    } else {
-      media = document.createElement("img");
+    // Items without a `src` (text-only workspaces) still show their caption
+    // and return.
+    if (v.src) {
+      let media;
+      if (v.src.toLowerCase().endsWith(".mp4")) {
+        media = document.createElement("video");
+        media.controls = true;
+        media.preload = "metadata";
+      } else {
+        media = document.createElement("img");
+      }
+      media.src = v.src;
+      fig.appendChild(media);
     }
-    media.src = v.src || "";
-    fig.appendChild(media);
     if (v.caption) {
       const cap = document.createElement("figcaption");
       cap.textContent = v.caption;
       fig.appendChild(cap);
+    }
+    if (v.return !== undefined && v.return !== null) {
+      const ret = document.createElement("div");
+      ret.className = "viz-return";
+      ret.textContent = `Return: ${v.return}`;
+      fig.appendChild(ret);
     }
     if (v.probability !== undefined && v.probability !== null) {
       const prob = document.createElement("div");
@@ -333,6 +343,36 @@
       fig.appendChild(pref);
     }
     return fig;
+  }
+
+  // The "How the return is computed" dropdown shows the workspace's
+  // designed_reward_fn.py, fetched once per page and only when first opened.
+  let rewardSrcPromise = null;
+  function fetchRewardSource() {
+    if (!rewardSrcPromise) {
+      const ws = (workspaceEl.textContent || "").trim();
+      rewardSrcPromise = fetch(`/workspace/${encodeURIComponent(ws)}/designed_reward_fn.py`)
+        .then(r => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+        .catch(() => { rewardSrcPromise = null; return null; });
+    }
+    return rewardSrcPromise;
+  }
+  function wireReturnSource(el) {
+    const det = el.querySelector(".cmp-return");
+    if (!det) return;
+    const code = det.querySelector("code");
+    det.addEventListener("toggle", () => {
+      if (!det.open || code.dataset.loaded) return;
+      code.textContent = "Loading…";
+      fetchRewardSource().then(src => {
+        if (src == null) {
+          code.textContent = "The reward function file could not be loaded.";
+          return;
+        }
+        code.innerHTML = highlightPython(src);
+        code.dataset.loaded = "1";
+      });
+    });
   }
 
   function renderComparison(m) {
@@ -362,7 +402,10 @@
         li.innerHTML = inline(line);   // renders **higher**/**lower**/**same** as bold
         chars.appendChild(li);
       });
+    } else {
+      el.querySelector(".cmp-more").remove();
     }
+    wireReturnSource(el);
     // Only the first pair is expanded; later pairs start collapsed.
     pairCount++;
     if (pairCount === 1) el.querySelector(".cmp-details").open = true;
@@ -437,6 +480,7 @@
     // Drop the (styled) description box entirely when there's no text, so an
     // empty card doesn't render as a blank purple bar.
     if (!blockLines.length) block.remove();
+    wireReturnSource(el);
     // Lotteries always start collapsed.
     return el;
   }

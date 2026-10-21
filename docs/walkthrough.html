@@ -214,6 +214,14 @@
   .app .cmp-viz figcaption,.app .lot-row figcaption{font-size:12.5px;color:#6b7080;margin-top:4px}
   .app .viz-preferred{margin-top:4px;font-size:12px;font-weight:600;color:#1d6fc5;background:#e6f4ff;padding:4px 8px;border-radius:6px;display:inline-block}
   .app .viz-prob{margin-top:4px;font-size:12.5px;font-weight:600;color:#4f46e5;background:#eef0ff;padding:3px 8px;border-radius:6px;display:inline-block}
+  .app .viz-return{margin-top:4px;font-size:12.5px;font-weight:600;color:#2a2540}
+  .app .cmp-more,.app .cmp-return{margin-top:12px}
+  .app .cmp-more>summary,.app .cmp-return>summary{cursor:pointer;font-size:13px;font-weight:600;color:#4f46e5}
+  .app .cmp-return>p{margin:8px 0 0;font-size:13px}
+  .app .code-block{margin:6px 0 0;padding:14px 16px;background:#0f1424;color:#d9def0;border-radius:10px;max-height:420px;overflow:auto;font:13px/1.55 var(--mono)}
+  .app .code-block code{display:block;background:none;padding:0;font-size:inherit;color:inherit;white-space:pre}
+  .app .tok-keyword{color:#c678dd;font-weight:600} .app .tok-builtin{color:#56b6c2} .app .tok-string{color:#98c379}
+  .app .tok-comment{color:#7c8095;font-style:italic} .app .tok-number{color:#d19a66} .app .tok-function{color:#61afef} .app .tok-decorator{color:#d19a66}
   .app .lot-viz{display:flex;flex-direction:column;gap:12px;margin-top:12px}
   .app .lot-row{display:flex;flex-wrap:wrap;gap:12px}
   .app .lot-row figure{margin:0;flex:1 1 280px;min-width:220px}
@@ -415,9 +423,9 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
 
     <li id="s5"><div>
       <div class="note">
-        <h3>Review the trajectory pairs</h3>
-        <p>We will show you hypothesized reward misspecifications in the form of trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Underneath each pair is a one-line “why they disagree”.</p>
-        <p>The hypothesized misspecifications may not always be actual misspecifications! Expand the other trajectory pairs the system identified to see more.</p>
+        <h3>Review the discordances</h3>
+        <p>We will show you hypothesized reward misspecifications as <b>discordances</b>: comparisons on which our system hypothesizes your preference differs from the ranking your reward function induces. Most are trajectory pairs. <b>The left trajectory is always the one your reward function assigns higher return to.</b> The right trajectory is the one our system hypothesizes you might prefer instead. Each trajectory shows its return under your reward function, and underneath each pair is a one-line “why they disagree”. Two dropdowns show how the two trajectories differ in more detail and how the return is computed.</p>
+        <p>The hypothesized misspecifications may not always be actual misspecifications! Expand the other discordances the system identified to see more.</p>
       </div>
     <div class="frame-wrap">
     <div class="frame">
@@ -430,19 +438,23 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         <div class="feed">
       <article class="msg msg-cmp">
         <details class="cmp-details" open>
-          <summary class="msg-head"><span class="label">PAIR 1/5</span></summary>
+          <summary class="msg-head"><span class="label">DISCORDANCE 1/7</span></summary>
           <div class="cmp-viz">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair1-A.mp4"></video>
             <figcaption>Designed reward function's preferred trajectory</figcaption>
+            <div class="viz-return">Return: 745.17</div>
           </figure>
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair1-B.mp4"></video>
             <figcaption>The alternative trajectory</figcaption>
+            <div class="viz-return">Return: 398.06</div>
           </figure>
           </div>
-          <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
-          <ul class="cmp-chars">
+          <details class="cmp-more">
+            <summary>How the two trajectories differ in more detail</summary>
+            <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
+            <ul class="cmp-chars">
           <li><strong>lower</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0 vs. 0.88)</li>
           <li><strong>lower</strong> the furthest the drawer was opened at any point in the attempt (0 vs. 0.88)</li>
           <li><strong>lower</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (0 vs. 1)</li>
@@ -457,24 +469,106 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           <li><strong>lower</strong> average size of the commanded movement each step (0-1) (0.32 vs. 0.38)</li>
           <li><strong>lower</strong> average step-to-step change in the command — how jerky the motion is (0.01 vs. 0.02)</li>
           <li><strong>lower</strong> total distance the hand travelled over the attempt (m) (0.30 vs. 0.52)</li>
-          </ul>
+            </ul>
+          </details>
+          <details class="cmp-return">
+            <summary>How the return is computed</summary>
+            <p class="muted">The return is the sum of this reward function's per-step rewards over the trajectory.</p>
+            <pre class="code-block"><code class="py">"""Designed reward for the Meta-World `drawer-open-v3` task.
+
+This is the environment's own dense reward (`SawyerDrawerOpenEnvV3.compute_reward`
+with the default `reward_function_version="v2"`), reproduced here so it can be
+evaluated from a `(obs, act, next_obs)` transition alone. It is the sum of a
+*caging* term (bring the gripper to the handle) and an *opening* term (bring the
+handle to the fully-open target), each shaped with dm_control's `tolerance`,
+scaled by 5. It is computed on `next_obs`, matching the env, which evaluates the
+post-step observation. The action is unused.
+
+Observation — Box(shape=(45,), float64):
+  [0:3]   hand (end-effector) position (x, y, z), meters
+  [3]     gripper aperture (open &gt; 0)
+  [4:7]   drawer handle position (x, y, z), meters
+  [7:11]  drawer handle orientation quaternion (w, x, y, z)
+  [11:14] second tracked object position (unused by this task), meters
+  [14:18] second tracked object orientation quaternion
+  [18:36] previous timestep's copy of indices [0:18]
+  [36:39] task goal position (x, y, z), meters
+  [39:42] target handle position when the drawer is fully open (x, y, z), meters
+  [42:45] hand position at the start of the episode (x, y, z), meters
+
+Action — Box(low=-1, high=1, shape=(4,), float32):
+  [0] delta x of the end-effector
+  [1] delta y of the end-effector
+  [2] delta z of the end-effector
+  [3] gripper command (&gt; 0 closes the fingers, &lt; 0 opens them)
+"""
+
+import numpy as np
+
+MAX_DIST = 0.2  # meters the handle travels from closed to fully open
+VALUE_AT_MARGIN = 0.1  # tolerance() output once the error reaches `margin`
+XY_SCALE = np.array([3.0, 3.0, 1.0])  # emphasize XY hand-to-handle error over Z
+REWARD_SCALE = 5.0  # env multiplies the summed terms by this
+
+
+def _long_tail(x: float) -&gt; float:
+    """dm_control 'long_tail' sigmoid: 1 at x=0, VALUE_AT_MARGIN at x=1."""
+    scale = np.sqrt(1.0 / VALUE_AT_MARGIN - 1.0)
+    return float(1.0 / ((x * scale) ** 2 + 1.0))
+
+
+def _tolerance(x: float, upper_bound: float, margin: float) -&gt; float:
+    """1 while `x` &lt;= `upper_bound`, decaying to ~0 as `x` grows past it (x &gt;= 0)."""
+    if x &lt;= upper_bound:
+        return 1.0
+    return _long_tail((x - upper_bound) / margin)
+
+
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+    next_obs = np.asarray(next_obs, dtype=np.float64)
+
+    gripper = next_obs[0:3]  # hand position, meters
+    handle = next_obs[4:7]  # drawer-handle position, meters
+    target_pos = next_obs[39:42]  # handle position when fully open, meters
+    init_tcp = next_obs[42:45]  # hand position at episode start, meters
+
+    # Opening: how far the handle still is from the fully-open pose, meters.
+    handle_error = float(np.linalg.norm(handle - target_pos))
+    reward_for_opening = _tolerance(handle_error, upper_bound=0.02, margin=MAX_DIST)
+
+    # Caging: XY-emphasized hand-to-handle error, normalized by the same error at
+    # episode start (hand at its initial pose, drawer closed).
+    handle_pos_init = target_pos + np.array([0.0, MAX_DIST, 0.0])
+    gripper_error = float(np.linalg.norm((handle - gripper) * XY_SCALE))
+    gripper_error_init = float(np.linalg.norm((handle_pos_init - init_tcp) * XY_SCALE))
+    reward_for_caging = _tolerance(
+        gripper_error, upper_bound=0.01, margin=gripper_error_init
+    )
+
+    return REWARD_SCALE * (reward_for_caging + reward_for_opening)
+</code></pre>
+          </details>
         </details>
       </article>
       <article class="msg msg-cmp">
         <details class="cmp-details">
-          <summary class="msg-head"><span class="label">PAIR 2/5</span></summary>
+          <summary class="msg-head"><span class="label">DISCORDANCE 2/7</span></summary>
           <div class="cmp-viz">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair2-A.mp4"></video>
             <figcaption>Designed reward function's preferred trajectory</figcaption>
+            <div class="viz-return">Return: 949.32</div>
           </figure>
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair2-B.mp4"></video>
             <figcaption>The alternative trajectory</figcaption>
+            <div class="viz-return">Return: 796.76</div>
           </figure>
           </div>
-          <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
-          <ul class="cmp-chars">
+          <details class="cmp-more">
+            <summary>How the two trajectories differ in more detail</summary>
+            <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
+            <ul class="cmp-chars">
           <li><strong>lower</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0 vs. 0.88)</li>
           <li><strong>higher</strong> the furthest the drawer was opened at any point in the attempt (0.88 vs. 0.88)</li>
           <li><strong>lower</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (0 vs. 1)</li>
@@ -489,24 +583,106 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           <li><strong>higher</strong> average size of the commanded movement each step (0-1) (0.45 vs. 0.34)</li>
           <li><strong>higher</strong> average step-to-step change in the command — how jerky the motion is (0.03 vs. 0.01)</li>
           <li><strong>higher</strong> total distance the hand travelled over the attempt (m) (0.73 vs. 0.44)</li>
-          </ul>
+            </ul>
+          </details>
+          <details class="cmp-return">
+            <summary>How the return is computed</summary>
+            <p class="muted">The return is the sum of this reward function's per-step rewards over the trajectory.</p>
+            <pre class="code-block"><code class="py">"""Designed reward for the Meta-World `drawer-open-v3` task.
+
+This is the environment's own dense reward (`SawyerDrawerOpenEnvV3.compute_reward`
+with the default `reward_function_version="v2"`), reproduced here so it can be
+evaluated from a `(obs, act, next_obs)` transition alone. It is the sum of a
+*caging* term (bring the gripper to the handle) and an *opening* term (bring the
+handle to the fully-open target), each shaped with dm_control's `tolerance`,
+scaled by 5. It is computed on `next_obs`, matching the env, which evaluates the
+post-step observation. The action is unused.
+
+Observation — Box(shape=(45,), float64):
+  [0:3]   hand (end-effector) position (x, y, z), meters
+  [3]     gripper aperture (open &gt; 0)
+  [4:7]   drawer handle position (x, y, z), meters
+  [7:11]  drawer handle orientation quaternion (w, x, y, z)
+  [11:14] second tracked object position (unused by this task), meters
+  [14:18] second tracked object orientation quaternion
+  [18:36] previous timestep's copy of indices [0:18]
+  [36:39] task goal position (x, y, z), meters
+  [39:42] target handle position when the drawer is fully open (x, y, z), meters
+  [42:45] hand position at the start of the episode (x, y, z), meters
+
+Action — Box(low=-1, high=1, shape=(4,), float32):
+  [0] delta x of the end-effector
+  [1] delta y of the end-effector
+  [2] delta z of the end-effector
+  [3] gripper command (&gt; 0 closes the fingers, &lt; 0 opens them)
+"""
+
+import numpy as np
+
+MAX_DIST = 0.2  # meters the handle travels from closed to fully open
+VALUE_AT_MARGIN = 0.1  # tolerance() output once the error reaches `margin`
+XY_SCALE = np.array([3.0, 3.0, 1.0])  # emphasize XY hand-to-handle error over Z
+REWARD_SCALE = 5.0  # env multiplies the summed terms by this
+
+
+def _long_tail(x: float) -&gt; float:
+    """dm_control 'long_tail' sigmoid: 1 at x=0, VALUE_AT_MARGIN at x=1."""
+    scale = np.sqrt(1.0 / VALUE_AT_MARGIN - 1.0)
+    return float(1.0 / ((x * scale) ** 2 + 1.0))
+
+
+def _tolerance(x: float, upper_bound: float, margin: float) -&gt; float:
+    """1 while `x` &lt;= `upper_bound`, decaying to ~0 as `x` grows past it (x &gt;= 0)."""
+    if x &lt;= upper_bound:
+        return 1.0
+    return _long_tail((x - upper_bound) / margin)
+
+
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+    next_obs = np.asarray(next_obs, dtype=np.float64)
+
+    gripper = next_obs[0:3]  # hand position, meters
+    handle = next_obs[4:7]  # drawer-handle position, meters
+    target_pos = next_obs[39:42]  # handle position when fully open, meters
+    init_tcp = next_obs[42:45]  # hand position at episode start, meters
+
+    # Opening: how far the handle still is from the fully-open pose, meters.
+    handle_error = float(np.linalg.norm(handle - target_pos))
+    reward_for_opening = _tolerance(handle_error, upper_bound=0.02, margin=MAX_DIST)
+
+    # Caging: XY-emphasized hand-to-handle error, normalized by the same error at
+    # episode start (hand at its initial pose, drawer closed).
+    handle_pos_init = target_pos + np.array([0.0, MAX_DIST, 0.0])
+    gripper_error = float(np.linalg.norm((handle - gripper) * XY_SCALE))
+    gripper_error_init = float(np.linalg.norm((handle_pos_init - init_tcp) * XY_SCALE))
+    reward_for_caging = _tolerance(
+        gripper_error, upper_bound=0.01, margin=gripper_error_init
+    )
+
+    return REWARD_SCALE * (reward_for_caging + reward_for_opening)
+</code></pre>
+          </details>
         </details>
       </article>
       <article class="msg msg-cmp">
         <details class="cmp-details">
-          <summary class="msg-head"><span class="label">PAIR 3/5</span></summary>
+          <summary class="msg-head"><span class="label">DISCORDANCE 3/7</span></summary>
           <div class="cmp-viz">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair3-A.mp4"></video>
             <figcaption>Designed reward function's preferred trajectory</figcaption>
+            <div class="viz-return">Return: 1033.28</div>
           </figure>
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair3-B.mp4"></video>
             <figcaption>The alternative trajectory</figcaption>
+            <div class="viz-return">Return: 857.74</div>
           </figure>
           </div>
-          <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
-          <ul class="cmp-chars">
+          <details class="cmp-more">
+            <summary>How the two trajectories differ in more detail</summary>
+            <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
+            <ul class="cmp-chars">
           <li><strong>lower</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0.94 vs. 0.99)</li>
           <li><strong>higher</strong> the furthest the drawer was opened at any point in the attempt (1.00 vs. 0.99)</li>
           <li><strong>same</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (1 vs. 1)</li>
@@ -521,24 +697,106 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           <li><strong>higher</strong> average size of the commanded movement each step (0-1) (0.58 vs. 0.36)</li>
           <li><strong>higher</strong> average step-to-step change in the command — how jerky the motion is (0.36 vs. 0.01)</li>
           <li><strong>higher</strong> total distance the hand travelled over the attempt (m) (0.61 vs. 0.46)</li>
-          </ul>
+            </ul>
+          </details>
+          <details class="cmp-return">
+            <summary>How the return is computed</summary>
+            <p class="muted">The return is the sum of this reward function's per-step rewards over the trajectory.</p>
+            <pre class="code-block"><code class="py">"""Designed reward for the Meta-World `drawer-open-v3` task.
+
+This is the environment's own dense reward (`SawyerDrawerOpenEnvV3.compute_reward`
+with the default `reward_function_version="v2"`), reproduced here so it can be
+evaluated from a `(obs, act, next_obs)` transition alone. It is the sum of a
+*caging* term (bring the gripper to the handle) and an *opening* term (bring the
+handle to the fully-open target), each shaped with dm_control's `tolerance`,
+scaled by 5. It is computed on `next_obs`, matching the env, which evaluates the
+post-step observation. The action is unused.
+
+Observation — Box(shape=(45,), float64):
+  [0:3]   hand (end-effector) position (x, y, z), meters
+  [3]     gripper aperture (open &gt; 0)
+  [4:7]   drawer handle position (x, y, z), meters
+  [7:11]  drawer handle orientation quaternion (w, x, y, z)
+  [11:14] second tracked object position (unused by this task), meters
+  [14:18] second tracked object orientation quaternion
+  [18:36] previous timestep's copy of indices [0:18]
+  [36:39] task goal position (x, y, z), meters
+  [39:42] target handle position when the drawer is fully open (x, y, z), meters
+  [42:45] hand position at the start of the episode (x, y, z), meters
+
+Action — Box(low=-1, high=1, shape=(4,), float32):
+  [0] delta x of the end-effector
+  [1] delta y of the end-effector
+  [2] delta z of the end-effector
+  [3] gripper command (&gt; 0 closes the fingers, &lt; 0 opens them)
+"""
+
+import numpy as np
+
+MAX_DIST = 0.2  # meters the handle travels from closed to fully open
+VALUE_AT_MARGIN = 0.1  # tolerance() output once the error reaches `margin`
+XY_SCALE = np.array([3.0, 3.0, 1.0])  # emphasize XY hand-to-handle error over Z
+REWARD_SCALE = 5.0  # env multiplies the summed terms by this
+
+
+def _long_tail(x: float) -&gt; float:
+    """dm_control 'long_tail' sigmoid: 1 at x=0, VALUE_AT_MARGIN at x=1."""
+    scale = np.sqrt(1.0 / VALUE_AT_MARGIN - 1.0)
+    return float(1.0 / ((x * scale) ** 2 + 1.0))
+
+
+def _tolerance(x: float, upper_bound: float, margin: float) -&gt; float:
+    """1 while `x` &lt;= `upper_bound`, decaying to ~0 as `x` grows past it (x &gt;= 0)."""
+    if x &lt;= upper_bound:
+        return 1.0
+    return _long_tail((x - upper_bound) / margin)
+
+
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+    next_obs = np.asarray(next_obs, dtype=np.float64)
+
+    gripper = next_obs[0:3]  # hand position, meters
+    handle = next_obs[4:7]  # drawer-handle position, meters
+    target_pos = next_obs[39:42]  # handle position when fully open, meters
+    init_tcp = next_obs[42:45]  # hand position at episode start, meters
+
+    # Opening: how far the handle still is from the fully-open pose, meters.
+    handle_error = float(np.linalg.norm(handle - target_pos))
+    reward_for_opening = _tolerance(handle_error, upper_bound=0.02, margin=MAX_DIST)
+
+    # Caging: XY-emphasized hand-to-handle error, normalized by the same error at
+    # episode start (hand at its initial pose, drawer closed).
+    handle_pos_init = target_pos + np.array([0.0, MAX_DIST, 0.0])
+    gripper_error = float(np.linalg.norm((handle - gripper) * XY_SCALE))
+    gripper_error_init = float(np.linalg.norm((handle_pos_init - init_tcp) * XY_SCALE))
+    reward_for_caging = _tolerance(
+        gripper_error, upper_bound=0.01, margin=gripper_error_init
+    )
+
+    return REWARD_SCALE * (reward_for_caging + reward_for_opening)
+</code></pre>
+          </details>
         </details>
       </article>
       <article class="msg msg-cmp">
         <details class="cmp-details">
-          <summary class="msg-head"><span class="label">PAIR 4/5</span></summary>
+          <summary class="msg-head"><span class="label">DISCORDANCE 4/7</span></summary>
           <div class="cmp-viz">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair4-A.mp4"></video>
             <figcaption>Designed reward function's preferred trajectory</figcaption>
+            <div class="viz-return">Return: 1064.32</div>
           </figure>
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair4-B.mp4"></video>
             <figcaption>The alternative trajectory</figcaption>
+            <div class="viz-return">Return: 785.07</div>
           </figure>
           </div>
-          <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
-          <ul class="cmp-chars">
+          <details class="cmp-more">
+            <summary>How the two trajectories differ in more detail</summary>
+            <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
+            <ul class="cmp-chars">
           <li><strong>higher</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0.85 vs. 0.85)</li>
           <li><strong>higher</strong> the furthest the drawer was opened at any point in the attempt (0.89 vs. 0.86)</li>
           <li><strong>same</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (1 vs. 1)</li>
@@ -553,24 +811,106 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           <li><strong>higher</strong> average size of the commanded movement each step (0-1) (0.42 vs. 0.37)</li>
           <li><strong>higher</strong> average step-to-step change in the command — how jerky the motion is (0.03 vs. 0.01)</li>
           <li><strong>higher</strong> total distance the hand travelled over the attempt (m) (0.57 vs. 0.53)</li>
-          </ul>
+            </ul>
+          </details>
+          <details class="cmp-return">
+            <summary>How the return is computed</summary>
+            <p class="muted">The return is the sum of this reward function's per-step rewards over the trajectory.</p>
+            <pre class="code-block"><code class="py">"""Designed reward for the Meta-World `drawer-open-v3` task.
+
+This is the environment's own dense reward (`SawyerDrawerOpenEnvV3.compute_reward`
+with the default `reward_function_version="v2"`), reproduced here so it can be
+evaluated from a `(obs, act, next_obs)` transition alone. It is the sum of a
+*caging* term (bring the gripper to the handle) and an *opening* term (bring the
+handle to the fully-open target), each shaped with dm_control's `tolerance`,
+scaled by 5. It is computed on `next_obs`, matching the env, which evaluates the
+post-step observation. The action is unused.
+
+Observation — Box(shape=(45,), float64):
+  [0:3]   hand (end-effector) position (x, y, z), meters
+  [3]     gripper aperture (open &gt; 0)
+  [4:7]   drawer handle position (x, y, z), meters
+  [7:11]  drawer handle orientation quaternion (w, x, y, z)
+  [11:14] second tracked object position (unused by this task), meters
+  [14:18] second tracked object orientation quaternion
+  [18:36] previous timestep's copy of indices [0:18]
+  [36:39] task goal position (x, y, z), meters
+  [39:42] target handle position when the drawer is fully open (x, y, z), meters
+  [42:45] hand position at the start of the episode (x, y, z), meters
+
+Action — Box(low=-1, high=1, shape=(4,), float32):
+  [0] delta x of the end-effector
+  [1] delta y of the end-effector
+  [2] delta z of the end-effector
+  [3] gripper command (&gt; 0 closes the fingers, &lt; 0 opens them)
+"""
+
+import numpy as np
+
+MAX_DIST = 0.2  # meters the handle travels from closed to fully open
+VALUE_AT_MARGIN = 0.1  # tolerance() output once the error reaches `margin`
+XY_SCALE = np.array([3.0, 3.0, 1.0])  # emphasize XY hand-to-handle error over Z
+REWARD_SCALE = 5.0  # env multiplies the summed terms by this
+
+
+def _long_tail(x: float) -&gt; float:
+    """dm_control 'long_tail' sigmoid: 1 at x=0, VALUE_AT_MARGIN at x=1."""
+    scale = np.sqrt(1.0 / VALUE_AT_MARGIN - 1.0)
+    return float(1.0 / ((x * scale) ** 2 + 1.0))
+
+
+def _tolerance(x: float, upper_bound: float, margin: float) -&gt; float:
+    """1 while `x` &lt;= `upper_bound`, decaying to ~0 as `x` grows past it (x &gt;= 0)."""
+    if x &lt;= upper_bound:
+        return 1.0
+    return _long_tail((x - upper_bound) / margin)
+
+
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+    next_obs = np.asarray(next_obs, dtype=np.float64)
+
+    gripper = next_obs[0:3]  # hand position, meters
+    handle = next_obs[4:7]  # drawer-handle position, meters
+    target_pos = next_obs[39:42]  # handle position when fully open, meters
+    init_tcp = next_obs[42:45]  # hand position at episode start, meters
+
+    # Opening: how far the handle still is from the fully-open pose, meters.
+    handle_error = float(np.linalg.norm(handle - target_pos))
+    reward_for_opening = _tolerance(handle_error, upper_bound=0.02, margin=MAX_DIST)
+
+    # Caging: XY-emphasized hand-to-handle error, normalized by the same error at
+    # episode start (hand at its initial pose, drawer closed).
+    handle_pos_init = target_pos + np.array([0.0, MAX_DIST, 0.0])
+    gripper_error = float(np.linalg.norm((handle - gripper) * XY_SCALE))
+    gripper_error_init = float(np.linalg.norm((handle_pos_init - init_tcp) * XY_SCALE))
+    reward_for_caging = _tolerance(
+        gripper_error, upper_bound=0.01, margin=gripper_error_init
+    )
+
+    return REWARD_SCALE * (reward_for_caging + reward_for_opening)
+</code></pre>
+          </details>
         </details>
       </article>
       <article class="msg msg-cmp">
         <details class="cmp-details">
-          <summary class="msg-head"><span class="label">PAIR 5/5</span></summary>
+          <summary class="msg-head"><span class="label">DISCORDANCE 5/7</span></summary>
           <div class="cmp-viz">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair5-A.mp4"></video>
             <figcaption>Designed reward function's preferred trajectory</figcaption>
+            <div class="viz-return">Return: 1064.32</div>
           </figure>
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/pair5-B.mp4"></video>
             <figcaption>The alternative trajectory</figcaption>
+            <div class="viz-return">Return: 857.74</div>
           </figure>
           </div>
-          <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
-          <ul class="cmp-chars">
+          <details class="cmp-more">
+            <summary>How the two trajectories differ in more detail</summary>
+            <div class="cmp-chars-head">Designed reward function's preferred trajectory has a</div>
+            <ul class="cmp-chars">
           <li><strong>lower</strong> how far open the drawer is at the end (0 = shut, 1 = fully open) (0.85 vs. 0.99)</li>
           <li><strong>lower</strong> the furthest the drawer was opened at any point in the attempt (0.89 vs. 0.99)</li>
           <li><strong>same</strong> 1 if the drawer is open to within the task's tolerance at the end, else 0 (1 vs. 1)</li>
@@ -585,7 +925,85 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
           <li><strong>higher</strong> average size of the commanded movement each step (0-1) (0.42 vs. 0.36)</li>
           <li><strong>higher</strong> average step-to-step change in the command — how jerky the motion is (0.03 vs. 0.01)</li>
           <li><strong>higher</strong> total distance the hand travelled over the attempt (m) (0.57 vs. 0.46)</li>
-          </ul>
+            </ul>
+          </details>
+          <details class="cmp-return">
+            <summary>How the return is computed</summary>
+            <p class="muted">The return is the sum of this reward function's per-step rewards over the trajectory.</p>
+            <pre class="code-block"><code class="py">"""Designed reward for the Meta-World `drawer-open-v3` task.
+
+This is the environment's own dense reward (`SawyerDrawerOpenEnvV3.compute_reward`
+with the default `reward_function_version="v2"`), reproduced here so it can be
+evaluated from a `(obs, act, next_obs)` transition alone. It is the sum of a
+*caging* term (bring the gripper to the handle) and an *opening* term (bring the
+handle to the fully-open target), each shaped with dm_control's `tolerance`,
+scaled by 5. It is computed on `next_obs`, matching the env, which evaluates the
+post-step observation. The action is unused.
+
+Observation — Box(shape=(45,), float64):
+  [0:3]   hand (end-effector) position (x, y, z), meters
+  [3]     gripper aperture (open &gt; 0)
+  [4:7]   drawer handle position (x, y, z), meters
+  [7:11]  drawer handle orientation quaternion (w, x, y, z)
+  [11:14] second tracked object position (unused by this task), meters
+  [14:18] second tracked object orientation quaternion
+  [18:36] previous timestep's copy of indices [0:18]
+  [36:39] task goal position (x, y, z), meters
+  [39:42] target handle position when the drawer is fully open (x, y, z), meters
+  [42:45] hand position at the start of the episode (x, y, z), meters
+
+Action — Box(low=-1, high=1, shape=(4,), float32):
+  [0] delta x of the end-effector
+  [1] delta y of the end-effector
+  [2] delta z of the end-effector
+  [3] gripper command (&gt; 0 closes the fingers, &lt; 0 opens them)
+"""
+
+import numpy as np
+
+MAX_DIST = 0.2  # meters the handle travels from closed to fully open
+VALUE_AT_MARGIN = 0.1  # tolerance() output once the error reaches `margin`
+XY_SCALE = np.array([3.0, 3.0, 1.0])  # emphasize XY hand-to-handle error over Z
+REWARD_SCALE = 5.0  # env multiplies the summed terms by this
+
+
+def _long_tail(x: float) -&gt; float:
+    """dm_control 'long_tail' sigmoid: 1 at x=0, VALUE_AT_MARGIN at x=1."""
+    scale = np.sqrt(1.0 / VALUE_AT_MARGIN - 1.0)
+    return float(1.0 / ((x * scale) ** 2 + 1.0))
+
+
+def _tolerance(x: float, upper_bound: float, margin: float) -&gt; float:
+    """1 while `x` &lt;= `upper_bound`, decaying to ~0 as `x` grows past it (x &gt;= 0)."""
+    if x &lt;= upper_bound:
+        return 1.0
+    return _long_tail((x - upper_bound) / margin)
+
+
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+    next_obs = np.asarray(next_obs, dtype=np.float64)
+
+    gripper = next_obs[0:3]  # hand position, meters
+    handle = next_obs[4:7]  # drawer-handle position, meters
+    target_pos = next_obs[39:42]  # handle position when fully open, meters
+    init_tcp = next_obs[42:45]  # hand position at episode start, meters
+
+    # Opening: how far the handle still is from the fully-open pose, meters.
+    handle_error = float(np.linalg.norm(handle - target_pos))
+    reward_for_opening = _tolerance(handle_error, upper_bound=0.02, margin=MAX_DIST)
+
+    # Caging: XY-emphasized hand-to-handle error, normalized by the same error at
+    # episode start (hand at its initial pose, drawer closed).
+    handle_pos_init = target_pos + np.array([0.0, MAX_DIST, 0.0])
+    gripper_error = float(np.linalg.norm((handle - gripper) * XY_SCALE))
+    gripper_error_init = float(np.linalg.norm((handle_pos_init - init_tcp) * XY_SCALE))
+    reward_for_caging = _tolerance(
+        gripper_error, upper_bound=0.01, margin=gripper_error_init
+    )
+
+    return REWARD_SCALE * (reward_for_caging + reward_for_opening)
+</code></pre>
+          </details>
         </details>
       </article>
         </div>
@@ -624,7 +1042,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
     <li id="s6"><div>
       <div class="note">
         <h3>Review the lotteries</h3>
-        <p>Some hypotheses are shown as lotteries instead. A lottery asks: would you rather have the certain trajectory <b>C</b>, or a gamble that gives you trajectory <b>A</b> with one probability and trajectory <b>B</b> with the other? A badge marks which side your reward function assigns higher return to.</p>
+        <p>Some discordances are lotteries instead. A lottery asks: would you rather have the certain trajectory <b>C</b>, or a gamble that gives you trajectory <b>A</b> with one probability and trajectory <b>B</b> with the other? A badge marks which side your reward function assigns higher return to.</p>
       </div>
     <div class="frame-wrap">
     <div class="frame">
@@ -637,7 +1055,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         <div class="feed">
       <article class="msg msg-cmp msg-lottery">
         <details class="cmp-details" open>
-          <summary class="msg-head"><span class="label">LOTTERY 1/2</span></summary>
+          <summary class="msg-head"><span class="label">DISCORDANCE 6/7 (lottery)</span></summary>
           <div class="lot-viz">
           <div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this lottery</div>
           <div class="lot-row lot-ab">
@@ -645,25 +1063,105 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery1-A.mp4"></video>
             <figcaption>Trajectory A</figcaption>
             <div class="viz-prob">69% chance</div>
+            <div class="viz-return">Return: 1064.32</div>
           </figure>
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery1-B.mp4"></video>
             <figcaption>Trajectory B</figcaption>
             <div class="viz-prob">31% chance</div>
+            <div class="viz-return">Return: 329.63</div>
           </figure>
           </div>
           <div class="lot-row lot-c">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery1-C.mp4"></video>
             <figcaption>Certain (C)</figcaption>
+            <div class="viz-return">Return: 824.32</div>
           </figure>
           </div>
           </div>
+          <details class="cmp-return">
+            <summary>How the return is computed</summary>
+            <p class="muted">The return is the sum of this reward function's per-step rewards over the trajectory.</p>
+            <pre class="code-block"><code class="py">"""Designed reward for the Meta-World `drawer-open-v3` task.
+
+This is the environment's own dense reward (`SawyerDrawerOpenEnvV3.compute_reward`
+with the default `reward_function_version="v2"`), reproduced here so it can be
+evaluated from a `(obs, act, next_obs)` transition alone. It is the sum of a
+*caging* term (bring the gripper to the handle) and an *opening* term (bring the
+handle to the fully-open target), each shaped with dm_control's `tolerance`,
+scaled by 5. It is computed on `next_obs`, matching the env, which evaluates the
+post-step observation. The action is unused.
+
+Observation — Box(shape=(45,), float64):
+  [0:3]   hand (end-effector) position (x, y, z), meters
+  [3]     gripper aperture (open &gt; 0)
+  [4:7]   drawer handle position (x, y, z), meters
+  [7:11]  drawer handle orientation quaternion (w, x, y, z)
+  [11:14] second tracked object position (unused by this task), meters
+  [14:18] second tracked object orientation quaternion
+  [18:36] previous timestep's copy of indices [0:18]
+  [36:39] task goal position (x, y, z), meters
+  [39:42] target handle position when the drawer is fully open (x, y, z), meters
+  [42:45] hand position at the start of the episode (x, y, z), meters
+
+Action — Box(low=-1, high=1, shape=(4,), float32):
+  [0] delta x of the end-effector
+  [1] delta y of the end-effector
+  [2] delta z of the end-effector
+  [3] gripper command (&gt; 0 closes the fingers, &lt; 0 opens them)
+"""
+
+import numpy as np
+
+MAX_DIST = 0.2  # meters the handle travels from closed to fully open
+VALUE_AT_MARGIN = 0.1  # tolerance() output once the error reaches `margin`
+XY_SCALE = np.array([3.0, 3.0, 1.0])  # emphasize XY hand-to-handle error over Z
+REWARD_SCALE = 5.0  # env multiplies the summed terms by this
+
+
+def _long_tail(x: float) -&gt; float:
+    """dm_control 'long_tail' sigmoid: 1 at x=0, VALUE_AT_MARGIN at x=1."""
+    scale = np.sqrt(1.0 / VALUE_AT_MARGIN - 1.0)
+    return float(1.0 / ((x * scale) ** 2 + 1.0))
+
+
+def _tolerance(x: float, upper_bound: float, margin: float) -&gt; float:
+    """1 while `x` &lt;= `upper_bound`, decaying to ~0 as `x` grows past it (x &gt;= 0)."""
+    if x &lt;= upper_bound:
+        return 1.0
+    return _long_tail((x - upper_bound) / margin)
+
+
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+    next_obs = np.asarray(next_obs, dtype=np.float64)
+
+    gripper = next_obs[0:3]  # hand position, meters
+    handle = next_obs[4:7]  # drawer-handle position, meters
+    target_pos = next_obs[39:42]  # handle position when fully open, meters
+    init_tcp = next_obs[42:45]  # hand position at episode start, meters
+
+    # Opening: how far the handle still is from the fully-open pose, meters.
+    handle_error = float(np.linalg.norm(handle - target_pos))
+    reward_for_opening = _tolerance(handle_error, upper_bound=0.02, margin=MAX_DIST)
+
+    # Caging: XY-emphasized hand-to-handle error, normalized by the same error at
+    # episode start (hand at its initial pose, drawer closed).
+    handle_pos_init = target_pos + np.array([0.0, MAX_DIST, 0.0])
+    gripper_error = float(np.linalg.norm((handle - gripper) * XY_SCALE))
+    gripper_error_init = float(np.linalg.norm((handle_pos_init - init_tcp) * XY_SCALE))
+    reward_for_caging = _tolerance(
+        gripper_error, upper_bound=0.01, margin=gripper_error_init
+    )
+
+    return REWARD_SCALE * (reward_for_caging + reward_for_opening)
+</code></pre>
+          </details>
         </details>
       </article>
       <article class="msg msg-cmp msg-lottery">
         <details class="cmp-details">
-          <summary class="msg-head"><span class="label">LOTTERY 2/2</span></summary>
+          <summary class="msg-head"><span class="label">DISCORDANCE 7/7 (lottery)</span></summary>
           <div class="lot-viz">
           <div class="viz-preferred lot-preferred">Designed reward function assigns higher return to this lottery</div>
           <div class="lot-row lot-ab">
@@ -671,20 +1169,100 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery2-A.mp4"></video>
             <figcaption>Trajectory A</figcaption>
             <div class="viz-prob">5% chance</div>
+            <div class="viz-return">Return: 1064.31</div>
           </figure>
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery2-B.mp4"></video>
             <figcaption>Trajectory B</figcaption>
             <div class="viz-prob">95% chance</div>
+            <div class="viz-return">Return: 936.20</div>
           </figure>
           </div>
           <div class="lot-row lot-c">
           <figure>
             <video controls muted loop playsinline preload="metadata" src="walkthrough/media/lottery2-C.mp4"></video>
             <figcaption>Certain (C)</figcaption>
+            <div class="viz-return">Return: 810.81</div>
           </figure>
           </div>
           </div>
+          <details class="cmp-return">
+            <summary>How the return is computed</summary>
+            <p class="muted">The return is the sum of this reward function's per-step rewards over the trajectory.</p>
+            <pre class="code-block"><code class="py">"""Designed reward for the Meta-World `drawer-open-v3` task.
+
+This is the environment's own dense reward (`SawyerDrawerOpenEnvV3.compute_reward`
+with the default `reward_function_version="v2"`), reproduced here so it can be
+evaluated from a `(obs, act, next_obs)` transition alone. It is the sum of a
+*caging* term (bring the gripper to the handle) and an *opening* term (bring the
+handle to the fully-open target), each shaped with dm_control's `tolerance`,
+scaled by 5. It is computed on `next_obs`, matching the env, which evaluates the
+post-step observation. The action is unused.
+
+Observation — Box(shape=(45,), float64):
+  [0:3]   hand (end-effector) position (x, y, z), meters
+  [3]     gripper aperture (open &gt; 0)
+  [4:7]   drawer handle position (x, y, z), meters
+  [7:11]  drawer handle orientation quaternion (w, x, y, z)
+  [11:14] second tracked object position (unused by this task), meters
+  [14:18] second tracked object orientation quaternion
+  [18:36] previous timestep's copy of indices [0:18]
+  [36:39] task goal position (x, y, z), meters
+  [39:42] target handle position when the drawer is fully open (x, y, z), meters
+  [42:45] hand position at the start of the episode (x, y, z), meters
+
+Action — Box(low=-1, high=1, shape=(4,), float32):
+  [0] delta x of the end-effector
+  [1] delta y of the end-effector
+  [2] delta z of the end-effector
+  [3] gripper command (&gt; 0 closes the fingers, &lt; 0 opens them)
+"""
+
+import numpy as np
+
+MAX_DIST = 0.2  # meters the handle travels from closed to fully open
+VALUE_AT_MARGIN = 0.1  # tolerance() output once the error reaches `margin`
+XY_SCALE = np.array([3.0, 3.0, 1.0])  # emphasize XY hand-to-handle error over Z
+REWARD_SCALE = 5.0  # env multiplies the summed terms by this
+
+
+def _long_tail(x: float) -&gt; float:
+    """dm_control 'long_tail' sigmoid: 1 at x=0, VALUE_AT_MARGIN at x=1."""
+    scale = np.sqrt(1.0 / VALUE_AT_MARGIN - 1.0)
+    return float(1.0 / ((x * scale) ** 2 + 1.0))
+
+
+def _tolerance(x: float, upper_bound: float, margin: float) -&gt; float:
+    """1 while `x` &lt;= `upper_bound`, decaying to ~0 as `x` grows past it (x &gt;= 0)."""
+    if x &lt;= upper_bound:
+        return 1.0
+    return _long_tail((x - upper_bound) / margin)
+
+
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+    next_obs = np.asarray(next_obs, dtype=np.float64)
+
+    gripper = next_obs[0:3]  # hand position, meters
+    handle = next_obs[4:7]  # drawer-handle position, meters
+    target_pos = next_obs[39:42]  # handle position when fully open, meters
+    init_tcp = next_obs[42:45]  # hand position at episode start, meters
+
+    # Opening: how far the handle still is from the fully-open pose, meters.
+    handle_error = float(np.linalg.norm(handle - target_pos))
+    reward_for_opening = _tolerance(handle_error, upper_bound=0.02, margin=MAX_DIST)
+
+    # Caging: XY-emphasized hand-to-handle error, normalized by the same error at
+    # episode start (hand at its initial pose, drawer closed).
+    handle_pos_init = target_pos + np.array([0.0, MAX_DIST, 0.0])
+    gripper_error = float(np.linalg.norm((handle - gripper) * XY_SCALE))
+    gripper_error_init = float(np.linalg.norm((handle_pos_init - init_tcp) * XY_SCALE))
+    reward_for_caging = _tolerance(
+        gripper_error, upper_bound=0.01, margin=gripper_error_init
+    )
+
+    return REWARD_SCALE * (reward_for_caging + reward_for_opening)
+</code></pre>
+          </details>
         </details>
       </article>
         </div>
@@ -723,7 +1301,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
     <li id="s7"><div>
       <div class="note">
         <h3>Decide what to do next</h3>
-        <p>Below the comparisons, the page asks you to pick one:</p>
+        <p>Below the discordances, the page asks you to pick one:</p>
       </div>
     <div class="frame">
       <div class="frame-bar"><span class="fdots"><i></i><i></i><i></i></span><span class="furl">127.0.0.1:8000</span></div>
@@ -738,10 +1316,10 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
         <div class="q-prompt">What would you like to do next?</div>
         <div class="q-body">
           <div class="q-options">
-            <button type="button" class="q-option" data-value="edit"><span class="opt-label">Edit the reward function</span><span class="opt-desc">Modify the reward to reflect what you actually want, based on the disagreements above.</span></button>
-            <button type="button" class="q-option" data-value="char"><span class="opt-label">Add another characteristic</span><span class="opt-desc">Add a new characteristic to the trajectory summary so the comparisons show more detail.</span></button>
-            <button type="button" class="q-option" data-value="more"><span class="opt-label">View more comparisons</span><span class="opt-desc">Surface additional pairs or lotteries from the evidence already collected.</span></button>
-            <button type="button" class="q-option" data-value="finish"><span class="opt-label">Finish and submit (not reversible)</span><span class="opt-desc">Lock in the current reward function as the final answer. This ends the session.</span></button>
+            <button type="button" class="q-option" data-value="edit"><span class="opt-label">Edit the reward function</span><span class="opt-desc">Modify the reward to reflect what you actually want, based on the discordances above.</span></button>
+            <button type="button" class="q-option" data-value="char"><span class="opt-label">Add a trajectory characteristic</span><span class="opt-desc">Name a characteristic of the trajectories to add to each comparison’s list of how they differ. This does not change the reward function.</span></button>
+            <button type="button" class="q-option" data-value="more"><span class="opt-label">Propose more discordances</span><span class="opt-desc">Propose more pairs or lotteries from the trajectories already collected.</span></button>
+            <button type="button" class="q-option" data-value="finish"><span class="opt-label">End session</span><span class="opt-desc">Keep the current reward function and close the tool.</span></button>
           </div>
           <div class="q-actions"><button type="button" class="btn">Submit</button></div>
         </div>
@@ -752,7 +1330,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
     </div>
       <div class="note">
         <div class="aside">
-          <b>Didn't find a flaw?</b> If none of the pairs identified a flaw in your reward function, you can run another round of this process. In our experience, after two more rounds (three rounds total) the system has covered many different hypothesized flaws.
+          <b>Didn't find a flaw?</b> If none of the discordances identified a flaw in your reward function, you can run another round of this process. In our experience, after two more rounds (three rounds total) the system has covered many different hypothesized flaws.
         </div>
       </div>
     </div></li>
@@ -798,6 +1376,7 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
     }
     return out.join("");
   }
+  document.querySelectorAll(".app code.py").forEach(function(c){c.innerHTML=hl(c.textContent)});
   document.querySelectorAll(".editor code.py").forEach(function(c){
     var lines=hl(c.textContent).split("\n");
     c.innerHTML=lines.map(function(l,k){return '<span class="ln">'+(k+1)+'</span>'+l}).join("\n");
@@ -810,9 +1389,9 @@ def designed_reward_fn(obs, act, next_obs) -&gt; float:
     describe:'With this choice you fill in three short text boxes, and Claude will implement a reward function in Python for you. This tour follows the other path. <a href="#s2">Continue to step 2 &darr;</a>',
     myself:'Claude leaves a stub <code>designed_reward_fn.py</code> for you to fill in. <a href="#s2">Continue to step 2 &darr;</a>',
     edit:'Claude asks whether you want to edit the file yourself or describe the change in plain language. Either way, the comparisons are re-scored against the new reward.',
-    char:'You name the characteristic; Claude writes a small measurement for it, and every comparison gains a new “higher / lower / same” line.',
-    more:'More pairs and lotteries appear from the evidence already collected. No new rollouts are needed.',
-    finish:'The current reward function is locked in as your final answer and the session ends.'
+    char:'You name the characteristic; Claude writes a small measurement for it, and every comparison gains a new “higher / lower / same” line. The reward function is unchanged.',
+    more:'More discordances appear from the trajectories already collected. No new rollouts are needed.',
+    finish:'The session ends and the current reward function is kept.'
   };
   document.querySelectorAll(".app .msg-q").forEach(function(card){
     var sel=null,opts=card.querySelectorAll(".q-option"),submit=card.querySelector(".q-actions .btn"),note=card.querySelector(".q-note"),st=card.querySelector(".qstatus");

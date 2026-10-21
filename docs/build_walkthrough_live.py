@@ -531,7 +531,7 @@ page = f'''<!doctype html>
 <header class="site">
   <div class="text">
     <p class="crumb"><a href="./">Discordance-Based Reward Debugger</a> &nbsp;/&nbsp; Walkthrough</p>
-    <p>Once you have run <code>/repair-setup &lt;env_name&gt;</code> and opened <b>http://127.0.0.1:8000</b>, everything below happens on that page. The panels on this page are the real interface, so click around.</p>
+    <p>Once you have run <code>/repair-setup &lt;env_name&gt;</code> and opened <b>http://127.0.0.1:8000</b>, everything below happens on that page.</p>
     <nav>
       <a href="#tour">Start the tour &darr;</a>
       <a href="./#setup">Set up</a>

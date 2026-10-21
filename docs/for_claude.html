@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Install with Claude Code</title>
+<meta name="description" content="Step-by-step installation instructions for Claude Code to follow.">
+<style>
+  :root{
+    --bg:#fbfaf7; --fg:#1c1b19; --muted:#66625b; --rule:#e4e0d8;
+    --accent:#1f6f5f; --accent-bg:#eef5f2; --accent-fg:#ffffff;
+    --code-bg:#f1efe9; --code-fg:#1c1b19;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Charter,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
+      --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
+      --code-bg:#1f2023; --code-fg:#ebe8e1;
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
+    --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
+    --code-bg:#1f2023; --code-fg:#ebe8e1;
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+  a:hover{border-bottom-color:currentColor}
+  code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:.1em .35em;border-radius:4px}
+  pre{margin:14px 0 0;padding:14px 16px;background:var(--code-bg);color:var(--code-fg);border-radius:8px;
+      overflow-x:auto;font:14.5px/1.55 var(--mono)}
+  pre code{background:none;padding:0;font-size:inherit}
+  h1,h2,h3{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;margin:0}
+  h1{font-size:clamp(34px,5.4vw,46px);line-height:1.12}
+  h2{font-size:28px;line-height:1.2;margin-bottom:22px}
+  h3{font-size:21px;line-height:1.3;margin-bottom:8px}
+  p{margin:0 0 14px}
+  p:last-child{margin-bottom:0}
+  .muted{color:var(--muted)}
+
+  .page{max-width:1040px;margin:0 auto;padding:0 20px}
+  .text{max-width:660px}
+
+  /* masthead */
+  header{padding:calc(56px + env(safe-area-inset-top,0px)) 0 44px;border-bottom:1px solid var(--rule)}
+  header .lede{font-family:var(--serif);font-size:24px;line-height:1.4;margin:22px 0 18px}
+  header nav{display:flex;gap:22px;flex-wrap:wrap;margin-top:24px;font-size:15.5px}
+  header nav a{font-weight:600}
+
+  section{padding:48px 0;border-bottom:1px solid var(--rule)}
+  section:last-of-type{border-bottom:0}
+
+  .aside{margin-top:24px;padding:16px 18px;border-left:3px solid var(--accent);background:var(--accent-bg);border-radius:0 8px 8px 0;font-size:16px}
+
+  /* definition-ish lists */
+  ul.plain{list-style:none;margin:0;padding:0}
+  ul.plain li{padding:12px 0;border-top:1px solid var(--rule)}
+  ul.plain li:last-child{border-bottom:1px solid var(--rule)}
+  ul.plain b{font-weight:600}
+
+  /* steps: hanging numerals on wide screens */
+  ol.steps{list-style:none;margin:0;padding:0;counter-reset:step}
+  ol.steps>li{counter-increment:step;display:grid;grid-template-columns:72px 1fr;gap:0 18px;padding:28px 0;border-top:1px solid var(--rule)}
+  ol.steps>li::before{content:counter(step);font-family:var(--serif);font-size:40px;line-height:1;color:var(--accent);padding-top:2px}
+  ol.steps>li>div{max-width:660px}
+  @media (max-width:640px){
+    ol.steps>li{grid-template-columns:1fr;gap:6px}
+    ol.steps>li::before{font-size:26px}
+  }
+
+  table{border-collapse:collapse;width:100%;margin-top:14px;font-size:15.5px}
+  th,td{text-align:left;vertical-align:top;padding:9px 12px 9px 0;border-bottom:1px solid var(--rule)}
+  th{font-weight:600;color:var(--muted);font-size:13px;letter-spacing:.02em}
+  td:first-child{white-space:nowrap}
+
+  ol.options{margin:10px 0 0;padding-left:22px}
+  ol.options li{margin-bottom:8px}
+
+  details{margin-top:16px;border:1px solid var(--rule);border-radius:8px}
+  summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";font-family:var(--mono);color:var(--muted)}
+  details[open] summary::after{content:"–"}
+  details .inner{padding:0 16px 16px}
+  details pre{white-space:pre-wrap;margin-top:0}
+  .copy{font:13px var(--sans);font-weight:600;color:var(--accent);background:none;border:1px solid var(--rule);border-radius:6px;padding:5px 10px;cursor:pointer;margin:10px 0 0}
+  .copy:hover{border-color:var(--accent)}
+
+  .callout{margin-top:16px;padding:14px 16px;border:1px solid var(--rule);border-radius:8px;font-size:15.5px}
+  .callout b{font-weight:600}
+
+  .cta{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:14px 24px;border-radius:10px;
+       background:var(--accent);color:var(--accent-fg);font-weight:600;font-size:17px;border-bottom:0;
+       box-shadow:0 6px 18px rgba(31,111,95,.22);transition:transform .12s ease,box-shadow .12s ease}
+  .cta:hover{border-bottom:0;transform:translateY(-1px);box-shadow:0 10px 24px rgba(31,111,95,.3)}
+  .cta-wrap{margin-top:28px;padding-top:28px;border-top:1px solid var(--rule)}
+  .cta-wrap p{margin-bottom:0}
+
+  dl{margin:0}
+  dl dt{font-weight:600;margin-top:14px}
+  dl dd{margin:2px 0 0;color:var(--muted)}
+
+  footer{padding:36px 0 calc(48px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:15px;border-top:1px solid var(--rule)}
+  footer .links{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:12px}
+  header.site .crumb{font-size:14px;color:var(--muted);margin:0 0 14px}
+  header.site .crumb a{color:var(--muted)}
+  .cta.secondary{background:none;color:var(--accent);border:1px solid var(--accent);box-shadow:none}
+  .cta.secondary:hover{background:var(--accent-bg)}
+  .ctas{display:flex;gap:14px;flex-wrap:wrap}
+  pre#prompt{white-space:pre-wrap;word-break:break-word}
+</style>
+<style>
+  pre.doc{white-space:pre-wrap;font-size:14.5px;line-height:1.55;margin-top:0}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site">
+  <div class="text">
+    <p class="crumb"><a href="./">Discordance-Based Reward Debugger</a> &nbsp;/&nbsp; Install with Claude Code</p>
+    <p>This page is written for Claude Code to follow. In your project directory, open Claude Code and say:</p>
+<pre id="prompt">Install the reward debugging tool from https://stephanehk.github.io/Discordance-Based-Reward-Debugger/for_claude.html</pre>
+    <p class="muted" style="margin-top:14px">Prefer to do it by hand? See the <a href="manual_setup.html">manual setup</a>.</p>
+  </div>
+</header>
+
+<section>
+<pre class="doc"># Installing the Discordance-Based Reward Debugger (instructions for Claude Code)
+
+You are Claude Code, opened in a user&#x27;s project directory that contains the
+source code of a reinforcement-learning environment. The user asked you to
+install the reward debugging tool. Follow the steps below in order. Ask the
+user to confirm at the two marked points; otherwise proceed on your own.
+
+Everything you write goes inside the cloned repo, never into the user&#x27;s own
+source tree. Call the directory you were opened in `PROJECT_DIR` (absolute
+path) and the clone `REPO_DIR` = `PROJECT_DIR/Discordance-Based-Reward-Debugger`.
+
+## 1. Clone and install
+
+```bash
+git clone https://github.com/Stephanehk/Discordance-Based-Reward-Debugger.git
+pip install -r Discordance-Based-Reward-Debugger/requirements.txt
+```
+
+Skip the clone if `REPO_DIR` already exists. Use the same Python that runs
+the user&#x27;s environment. If this file is newer in the clone than the copy you
+are reading, follow the clone&#x27;s copy at `REPO_DIR/docs/for_claude.md`.
+
+## 2. Find the environment
+
+Read the user&#x27;s source code and identify the Gym/Gymnasium environment: the
+class (or registered id), how to construct it, the observation and action
+spaces, and the episode horizon. If there are several environments, pick the
+one that looks like the main task and ask the user to confirm.
+
+Pick a short workspace name from the environment (lowercase, underscores),
+for example `drawer_open`. Call it `NAME`.
+
+## 3. Find the reward function
+
+Find where the environment computes its per-step reward (usually inside
+`step`). Rewrite it as a pure function of a single transition:
+
+```python
+def designed_reward_fn(obs, act, next_obs) -&gt; float:
+```
+
+It may use only `obs`, `act`, `next_obs`, and constants. If the original
+reward reads simulator state that is not in the observation, make
+`make_env()` (step 5) wrap the environment and append those quantities to
+the end of the observation, then read them from `next_obs` here. Document
+any appended dimensions in `OBS_DESCRIPTION`.
+
+**Ask the user to confirm (1 of 2).** Show them the reward function you
+wrote and where in their code it came from, and ask whether this is the
+reward they want debugged. Apply any corrections they give.
+
+## 4. Decide how to visualize trajectories
+
+Pick one, in this order of preference, and **ask the user to confirm
+(2 of 2)**:
+
+1. **Video of the real environment**, if the environment can render RGB
+   frames (`render_mode=&quot;rgb_array&quot;`). Set `CAPTURE_FRAMES = True` in
+   `env_config.py` and make `make_env` accept a `render_mode` keyword. The
+   `viz.py` then just copies the recorded video:
+
+   ```python
+   import os, shutil
+   from runtime.trajectory_io import video_path_for
+
+   VIZ_EXT = &quot;.mp4&quot;
+
+   def visualize_trajectory(trajectory, metadata, out_path, source_path=None, **_):
+       sidecar = video_path_for(source_path)
+       os.makedirs(os.path.dirname(out_path), exist_ok=True)
+       shutil.copyfile(sidecar, out_path)
+   ```
+
+2. **Plots**, if there is no renderer: `viz.py` draws the trajectory
+   itself (for example, time series of the most meaningful observation
+   dimensions) and saves a PNG. `VIZ_EXT = &quot;.png&quot;`.
+
+3. **Text only**: omit `viz.py`. Each comparison then shows only the list
+   of how the two trajectories differ.
+
+## 5. Write the workspace
+
+Create `REPO_DIR/workspaces/NAME/` with:
+
+- `env_config.py` exposing
+  - `make_env(render_mode=None)` returning the environment (add
+    `sys.path.insert(0, &quot;PROJECT_DIR&quot;)` at the top so the user&#x27;s code
+    imports; use the absolute path),
+  - `OBS_DESCRIPTION: str`, a plain-English meaning for every observation
+    dimension,
+  - `ACTION_DESCRIPTION: str`, a plain-English description of the action
+    space,
+  - `MAX_EPISODE_STEPS: int`, the horizon,
+  - `CAPTURE_FRAMES = True` if you chose video.
+- `designed_reward_fn.py` from step 3.
+- `viz.py` from step 4 (unless text only).
+
+Then write the workspace name to `REPO_DIR/.current_workspace` (just
+`NAME`, no newline needed).
+
+Smoke-test from `REPO_DIR`:
+
+```bash
+python -c &quot;import sys; sys.path.insert(0, &#x27;workspaces/NAME&#x27;); \
+from env_config import make_env, MAX_EPISODE_STEPS; from designed_reward_fn import designed_reward_fn; \
+e = make_env(); r = e.reset(); obs = r[0] if isinstance(r, tuple) else r; \
+a = e.action_space.sample(); s = e.step(a); \
+print(&#x27;reward sample:&#x27;, designed_reward_fn(obs, a, s[0]), &#x27;horizon:&#x27;, MAX_EPISODE_STEPS)&quot;
+```
+
+If you chose video, also check that `make_env(render_mode=&quot;rgb_array&quot;).render()`
+returns an image array after `reset()`. Fix anything that fails.
+
+## 6. Start the tool
+
+From `REPO_DIR`:
+
+```bash
+python -m web_ui.cli launch
+python -m web_ui.cli set workspace=NAME status=awaiting
+python -m web_ui.cli post --type markdown --content &quot;The environment and reward function for **NAME** are set up.&quot;
+```
+
+Then tell the user, in the terminal:
+
+1. The tool&#x27;s page is at **http://127.0.0.1:8000**.
+2. To run it, open a new Claude Code session in `REPO_DIR` and type
+   `/repair-init`. From there, everything happens on the page.
+
+Do not run `/repair-setup`; this installation replaced it.
+</pre>
+</section>
+
+<footer>
+  <div class="links">
+    <a href="./">Home</a>
+    <a href="manual_setup.html">Manual setup</a>
+    <a href="walkthrough.html">Walkthrough</a>
+    <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger">GitHub</a>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

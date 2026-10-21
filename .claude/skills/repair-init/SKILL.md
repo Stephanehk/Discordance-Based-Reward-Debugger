@@ -126,7 +126,7 @@ lives in `prompts/trajectory_features_prompt.md` — follow it there.
 Smoke-test after writing (run from the repo root):
 
 ```bash
-source /next/u/stephhk/miniconda3/etc/profile.d/conda.sh && conda activate $(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null||echo llm) && \
+ENV=$(cat workspaces/<WORKSPACE>/.conda_env 2>/dev/null); if [ -n "$ENV" ]; then source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate "$ENV"; fi; \
 python -c "import sys; sys.path.insert(0, 'workspaces/<WORKSPACE>'); \
 from gather_evidence.trajectory_features import Trajectory2Features; \
 from env_config import make_env; e = make_env(); \

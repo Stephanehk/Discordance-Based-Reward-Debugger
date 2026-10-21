@@ -33,8 +33,8 @@ Replace `[task_name]` with the name of the task in your environment, e.g.
 `drawer-open` or `hammer`.
 
 Claude clones this repo, finds your environment and reward function, asks
-you to double check both, sets up how trajectories are shown, and opens
-the tool's page. The instructions it follows are in
+you to double check both, sets up how trajectories are shown, opens the
+tool's page, and runs the tool from the same session. The instructions it follows are in
 [`docs/for_claude.md`](docs/for_claude.md). The rest of this README is the
 manual version.
 

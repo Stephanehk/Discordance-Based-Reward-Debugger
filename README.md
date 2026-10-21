@@ -22,6 +22,21 @@ For more details and results, check out our paper!
 
 ---
 
+## Quickest start: let Claude Code install it
+
+Go into your project directory (the one with your environment's source
+code), open a Claude Code session, and say:
+
+> Install the reward debugging tool from https://stephanehk.github.io/Discordance-Based-Reward-Debugger/for_claude.html
+
+Claude clones this repo, finds your environment and reward function, asks
+you to double check both, sets up how trajectories are shown, and opens
+the tool's page. The instructions it follows are in
+[`docs/for_claude.md`](docs/for_claude.md). The rest of this README is the
+manual version.
+
+---
+
 ## What you need
 
 1. **Claude Code** Every command below is run from this repo's root

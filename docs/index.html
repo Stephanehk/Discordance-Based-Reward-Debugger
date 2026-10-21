@@ -110,6 +110,12 @@
 
   footer{padding:36px 0 calc(48px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:15px;border-top:1px solid var(--rule)}
   footer .links{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:12px}
+  header.site .crumb{font-size:14px;color:var(--muted);margin:0 0 14px}
+  header.site .crumb a{color:var(--muted)}
+  .cta.secondary{background:none;color:var(--accent);border:1px solid var(--accent);box-shadow:none}
+  .cta.secondary:hover{background:var(--accent-bg)}
+  .ctas{display:flex;gap:14px;flex-wrap:wrap}
+  pre#prompt{white-space:pre-wrap;word-break:break-word}
 </style>
 </head>
 <body>
@@ -125,99 +131,32 @@
     <p class="muted"><b>Our results:</b> In popular RL environments such as Meta-World, our discordance-based reward debugger uncovers previously documented and novel reward misspecifications. In ExploitGym, it uncovers a reward misspecification that was later exploited in practice, when a collective of AI agents attacked OpenAI and Hugging Face infrastructure while being evaluated on similar tasks.</p>
     <p>In this codebase, we provide our proposed Scaffolded Reward Debugger.</p>
     <nav>
-      <a href="#setup">Set up &darr;</a>
+      <a href="#install">Install &darr;</a>
       <a href="walkthrough.html">See walkthrough</a>
       <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger">GitHub</a>
     </nav>
   </div>
 </header>
 
-<section>
+<section id="install">
   <div class="text">
-    <h2>What you need</h2>
-    <ul class="plain">
-      <li><b>Claude Code.</b> Every command below is run from the repo's root directory.</li>
-      <li><b>Python 3.10+</b> with <code>numpy</code> and <code>gymnasium</code>.</li>
-      <li><b>A Gym/Gymnasium environment</b> that contains your environment source code. It can be installable (<code>gym.make("Hopper-v4")</code>) or your own Python implementation.</li>
-      <li><b>A reward function implemented in Python</b> for your environment.</li>
-    </ul>
+    <h2>Install</h2>
+    <p>Go into your project directory (the one with your environment's source code), open a Claude Code session, and say:</p>
+<pre id="prompt">Install the reward debugging tool from https://stephanehk.github.io/Discordance-Based-Reward-Debugger/for_claude.html</pre>
+    <button class="copy" type="button" data-copy="prompt" style="margin-top:10px">Copy</button>
+    <p style="margin-top:18px">Claude clones the tool, finds your environment and reward function, asks you to double check both, sets up how trajectories are shown, and opens the tool's page.</p>
+    <div class="ctas">
+      <a class="cta secondary" href="manual_setup.html">See manual installation/setup instructions</a>
+      <a class="cta" href="walkthrough.html">See walkthrough of using the tool &rarr;</a>
+    </div>
   </div>
 </section>
-
-<section id="setup">
-  <h2>Set up</h2>
-  <ol class="steps">
-
-    <li><div>
-      <h3>Install Claude Code</h3>
-      <p>Install <a href="https://claude.com/claude-code">Claude Code</a>. The quality of the comparisons depends on the model doing the reasoning.</p>
-    </div></li>
-
-    <li><div>
-      <h3>Clone and install</h3>
-<pre><code>git clone https://github.com/Stephanehk/Discordance-Based-Reward-Debugger.git
-cd Discordance-Based-Reward-Debugger
-pip install -r requirements.txt</code></pre>
-    </div></li>
-
-    <li><div>
-      <h3>Decide how your trajectories should be visualized</h3>
-      <p>Decide this first — you specify it in <code>env_config.py</code> in the next step. You have three choices:</p>
-      <ol class="options">
-        <li><b>A video of the real environment</b> — best when your env has a renderer. Set <code>CAPTURE_FRAMES = True</code> in <code>env_config.py</code>; rollouts record one frame per step into an mp4.</li>
-        <li><b>Rendered plots or images</b> — best for observation-rich envs with no natural picture. A small <code>viz.py</code> draws the trajectory itself.</li>
-        <li><b>Text only</b> — omit <code>viz.py</code>, and each comparison still shows a plain-English list of how the two trajectories differ.</li>
-      </ol>
-    </div></li>
-
-    <li><div>
-      <h3>Describe your environment</h3>
-      <p>The only thing the tool needs from you to begin is a description of your environment, written as a single file: <code>workspaces/&lt;name&gt;/env_config.py</code>. Everything else is derived from it. The file exposes four things:</p>
-      <table>
-        <tr><th>Name</th><th>What it is</th></tr>
-        <tr><td><code>make_env()</code></td><td>returns a Gym/Gymnasium-compatible env; wraps <code>gym.make(...)</code> or your own class</td></tr>
-        <tr><td><code>OBS_DESCRIPTION</code></td><td>plain-English description of what every observation dimension means</td></tr>
-        <tr><td><code>ACTION_DESCRIPTION</code></td><td>plain-English description of the action space</td></tr>
-        <tr><td><code>MAX_EPISODE_STEPS</code></td><td>the episode horizon</td></tr>
-      </table>
-      <p style="margin-top:16px">You don't have to write it by hand. Point Claude Code at your environment's source and ask it to generate the file. Worked examples are in the repo under <code>workspaces/</code> — <code>pandemic</code> and <code>metaworld_drawer_open</code>.</p>
-      <details>
-        <summary>A prompt that works well</summary>
-        <div class="inner">
-<pre id="prompt">I'm setting up the Discordance-Based Reward Debugger on a new environment. Read my environment's source code (below / at &lt;path&gt;) and write workspaces/&lt;name&gt;/env_config.py conforming to the tool's contract:
-
-- make_env() returning a Gym/Gymnasium-compatible env. If the env can render RGB frames, make make_env accept a render_mode kwarg and set CAPTURE_FRAMES = True at module level so rollouts record a video per episode.
-- OBS_DESCRIPTION: str describing what each observation dimension means, in plain English.
-- ACTION_DESCRIPTION: str describing the action space.
-- MAX_EPISODE_STEPS: int (the horizon).
-
-Also write the companion workspaces/&lt;name&gt;/viz.py (see below for how I want trajectories visualized). Follow the contracts in CLAUDE.md exactly, and model both files on the committed examples in workspaces/metaworld_drawer_open/ (video) and workspaces/pandemic/ (plots).
-
-My environment: &lt;paste the source, or give the import path / gym id&gt;</pre>
-          <button class="copy" type="button" data-copy="prompt">Copy prompt</button>
-        </div>
-      </details>
-    </div></li>
-
-    <li><div>
-      <h3>Run it</h3>
-      <p>Open Claude Code in the repo's root directory and run:</p>
-<pre><code>/repair-setup &lt;env_name&gt;</code></pre>
-      <p style="margin-top:14px"><code>&lt;env_name&gt;</code> is any short name you pick for this piece of work. That command prints one thing to your terminal: a link to <b>http://127.0.0.1:8000</b>. Open it.</p>
-      <p>From then on, everything happens on that page — Claude posts its explanations, code, videos, and questions there, and you answer there.</p>
-      <div class="callout"><b>Some steps can take a while — up to an hour or longer.</b> The speed of the tool depends on the speed of your environment, because it rolls out policies in that environment. Check in on its progress while you do something else.</div>
-    </div></li>
-
-  </ol>
-  <div class="cta-wrap text">
-    <p>To understand how to use the tool, see a walkthrough.</p>
-    <a class="cta" href="walkthrough.html">See walkthrough &rarr;</a>
-  </div>
-</section>
-
 
 <footer>
   <div class="links">
+    <a href="./">Home</a>
+    <a href="for_claude.html">Install with Claude Code</a>
+    <a href="manual_setup.html">Manual setup</a>
     <a href="walkthrough.html">Walkthrough</a>
     <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger">GitHub</a>
   </div>

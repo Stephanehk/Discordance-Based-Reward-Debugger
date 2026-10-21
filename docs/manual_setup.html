@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manual setup</title>
+<meta name="description" content="How to set up the Discordance-Based Reward Debugger by hand.">
+<style>
+  :root{
+    --bg:#fbfaf7; --fg:#1c1b19; --muted:#66625b; --rule:#e4e0d8;
+    --accent:#1f6f5f; --accent-bg:#eef5f2; --accent-fg:#ffffff;
+    --code-bg:#f1efe9; --code-fg:#1c1b19;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Charter,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
+      --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
+      --code-bg:#1f2023; --code-fg:#ebe8e1;
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17181a; --fg:#ebe8e1; --muted:#a39e94; --rule:#2e2f33;
+    --accent:#7fc7b3; --accent-bg:#1d2b27; --accent-fg:#101513;
+    --code-bg:#1f2023; --code-fg:#ebe8e1;
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+  a:hover{border-bottom-color:currentColor}
+  code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:.1em .35em;border-radius:4px}
+  pre{margin:14px 0 0;padding:14px 16px;background:var(--code-bg);color:var(--code-fg);border-radius:8px;
+      overflow-x:auto;font:14.5px/1.55 var(--mono)}
+  pre code{background:none;padding:0;font-size:inherit}
+  h1,h2,h3{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;margin:0}
+  h1{font-size:clamp(34px,5.4vw,46px);line-height:1.12}
+  h2{font-size:28px;line-height:1.2;margin-bottom:22px}
+  h3{font-size:21px;line-height:1.3;margin-bottom:8px}
+  p{margin:0 0 14px}
+  p:last-child{margin-bottom:0}
+  .muted{color:var(--muted)}
+
+  .page{max-width:1040px;margin:0 auto;padding:0 20px}
+  .text{max-width:660px}
+
+  /* masthead */
+  header{padding:calc(56px + env(safe-area-inset-top,0px)) 0 44px;border-bottom:1px solid var(--rule)}
+  header .lede{font-family:var(--serif);font-size:24px;line-height:1.4;margin:22px 0 18px}
+  header nav{display:flex;gap:22px;flex-wrap:wrap;margin-top:24px;font-size:15.5px}
+  header nav a{font-weight:600}
+
+  section{padding:48px 0;border-bottom:1px solid var(--rule)}
+  section:last-of-type{border-bottom:0}
+
+  .aside{margin-top:24px;padding:16px 18px;border-left:3px solid var(--accent);background:var(--accent-bg);border-radius:0 8px 8px 0;font-size:16px}
+
+  /* definition-ish lists */
+  ul.plain{list-style:none;margin:0;padding:0}
+  ul.plain li{padding:12px 0;border-top:1px solid var(--rule)}
+  ul.plain li:last-child{border-bottom:1px solid var(--rule)}
+  ul.plain b{font-weight:600}
+
+  /* steps: hanging numerals on wide screens */
+  ol.steps{list-style:none;margin:0;padding:0;counter-reset:step}
+  ol.steps>li{counter-increment:step;display:grid;grid-template-columns:72px 1fr;gap:0 18px;padding:28px 0;border-top:1px solid var(--rule)}
+  ol.steps>li::before{content:counter(step);font-family:var(--serif);font-size:40px;line-height:1;color:var(--accent);padding-top:2px}
+  ol.steps>li>div{max-width:660px}
+  @media (max-width:640px){
+    ol.steps>li{grid-template-columns:1fr;gap:6px}
+    ol.steps>li::before{font-size:26px}
+  }
+
+  table{border-collapse:collapse;width:100%;margin-top:14px;font-size:15.5px}
+  th,td{text-align:left;vertical-align:top;padding:9px 12px 9px 0;border-bottom:1px solid var(--rule)}
+  th{font-weight:600;color:var(--muted);font-size:13px;letter-spacing:.02em}
+  td:first-child{white-space:nowrap}
+
+  ol.options{margin:10px 0 0;padding-left:22px}
+  ol.options li{margin-bottom:8px}
+
+  details{margin-top:16px;border:1px solid var(--rule);border-radius:8px}
+  summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";font-family:var(--mono);color:var(--muted)}
+  details[open] summary::after{content:"–"}
+  details .inner{padding:0 16px 16px}
+  details pre{white-space:pre-wrap;margin-top:0}
+  .copy{font:13px var(--sans);font-weight:600;color:var(--accent);background:none;border:1px solid var(--rule);border-radius:6px;padding:5px 10px;cursor:pointer;margin:10px 0 0}
+  .copy:hover{border-color:var(--accent)}
+
+  .callout{margin-top:16px;padding:14px 16px;border:1px solid var(--rule);border-radius:8px;font-size:15.5px}
+  .callout b{font-weight:600}
+
+  .cta{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:14px 24px;border-radius:10px;
+       background:var(--accent);color:var(--accent-fg);font-weight:600;font-size:17px;border-bottom:0;
+       box-shadow:0 6px 18px rgba(31,111,95,.22);transition:transform .12s ease,box-shadow .12s ease}
+  .cta:hover{border-bottom:0;transform:translateY(-1px);box-shadow:0 10px 24px rgba(31,111,95,.3)}
+  .cta-wrap{margin-top:28px;padding-top:28px;border-top:1px solid var(--rule)}
+  .cta-wrap p{margin-bottom:0}
+
+  dl{margin:0}
+  dl dt{font-weight:600;margin-top:14px}
+  dl dd{margin:2px 0 0;color:var(--muted)}
+
+  footer{padding:36px 0 calc(48px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:15px;border-top:1px solid var(--rule)}
+  footer .links{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:12px}
+  header.site .crumb{font-size:14px;color:var(--muted);margin:0 0 14px}
+  header.site .crumb a{color:var(--muted)}
+  .cta.secondary{background:none;color:var(--accent);border:1px solid var(--accent);box-shadow:none}
+  .cta.secondary:hover{background:var(--accent-bg)}
+  .ctas{display:flex;gap:14px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site">
+  <div class="text">
+    <p class="crumb"><a href="./">Discordance-Based Reward Debugger</a> &nbsp;/&nbsp; Manual setup</p>
+    <h1>Manual setup</h1>
+    <p class="lede">Set the tool up by hand. Or <a href="for_claude.html">let Claude Code install it</a>.</p>
+  </div>
+</header>
+
+<section>
+  <div class="text">
+    <h2>What you need</h2>
+    <ul class="plain">
+      <li><b>Claude Code.</b> Every command below is run from the repo's root directory.</li>
+      <li><b>Python 3.10+</b> with <code>numpy</code> and <code>gymnasium</code>.</li>
+      <li><b>A Gym/Gymnasium environment</b> that contains your environment source code. It can be installable (<code>gym.make("Hopper-v4")</code>) or your own Python implementation.</li>
+      <li><b>A reward function implemented in Python</b> for your environment.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="setup">
+  <h2>Set up</h2>
+  <ol class="steps">
+
+    <li><div>
+      <h3>Install Claude Code</h3>
+      <p>Install <a href="https://claude.com/claude-code">Claude Code</a>. The quality of the comparisons depends on the model doing the reasoning.</p>
+    </div></li>
+
+    <li><div>
+      <h3>Clone and install</h3>
+<pre><code>git clone https://github.com/Stephanehk/Discordance-Based-Reward-Debugger.git
+cd Discordance-Based-Reward-Debugger
+pip install -r requirements.txt</code></pre>
+    </div></li>
+
+    <li><div>
+      <h3>Decide how your trajectories should be visualized</h3>
+      <p>Decide this first — you specify it in <code>env_config.py</code> in the next step. You have three choices:</p>
+      <ol class="options">
+        <li><b>A video of the real environment</b> — best when your env has a renderer. Set <code>CAPTURE_FRAMES = True</code> in <code>env_config.py</code>; rollouts record one frame per step into an mp4.</li>
+        <li><b>Rendered plots or images</b> — best for observation-rich envs with no natural picture. A small <code>viz.py</code> draws the trajectory itself.</li>
+        <li><b>Text only</b> — omit <code>viz.py</code>, and each comparison still shows a plain-English list of how the two trajectories differ.</li>
+      </ol>
+    </div></li>
+
+    <li><div>
+      <h3>Describe your environment</h3>
+      <p>The only thing the tool needs from you to begin is a description of your environment, written as a single file: <code>workspaces/&lt;name&gt;/env_config.py</code>. Everything else is derived from it. The file exposes four things:</p>
+      <table>
+        <tr><th>Name</th><th>What it is</th></tr>
+        <tr><td><code>make_env()</code></td><td>returns a Gym/Gymnasium-compatible env; wraps <code>gym.make(...)</code> or your own class</td></tr>
+        <tr><td><code>OBS_DESCRIPTION</code></td><td>plain-English description of what every observation dimension means</td></tr>
+        <tr><td><code>ACTION_DESCRIPTION</code></td><td>plain-English description of the action space</td></tr>
+        <tr><td><code>MAX_EPISODE_STEPS</code></td><td>the episode horizon</td></tr>
+      </table>
+      <p style="margin-top:16px">You don't have to write it by hand. Point Claude Code at your environment's source and ask it to generate the file. Worked examples are in the repo under <code>workspaces/</code> — <code>pandemic</code> and <code>metaworld_drawer_open</code>.</p>
+      <details>
+        <summary>A prompt that works well</summary>
+        <div class="inner">
+<pre id="prompt">I'm setting up the Discordance-Based Reward Debugger on a new environment. Read my environment's source code (below / at &lt;path&gt;) and write workspaces/&lt;name&gt;/env_config.py conforming to the tool's contract:
+
+- make_env() returning a Gym/Gymnasium-compatible env. If the env can render RGB frames, make make_env accept a render_mode kwarg and set CAPTURE_FRAMES = True at module level so rollouts record a video per episode.
+- OBS_DESCRIPTION: str describing what each observation dimension means, in plain English.
+- ACTION_DESCRIPTION: str describing the action space.
+- MAX_EPISODE_STEPS: int (the horizon).
+
+Also write the companion workspaces/&lt;name&gt;/viz.py (see below for how I want trajectories visualized). Follow the contracts in CLAUDE.md exactly, and model both files on the committed examples in workspaces/metaworld_drawer_open/ (video) and workspaces/pandemic/ (plots).
+
+My environment: &lt;paste the source, or give the import path / gym id&gt;</pre>
+          <button class="copy" type="button" data-copy="prompt">Copy prompt</button>
+        </div>
+      </details>
+    </div></li>
+
+    <li><div>
+      <h3>Run it</h3>
+      <p>Open Claude Code in the repo's root directory and run:</p>
+<pre><code>/repair-setup &lt;env_name&gt;</code></pre>
+      <p style="margin-top:14px"><code>&lt;env_name&gt;</code> is any short name you pick for this piece of work. That command prints one thing to your terminal: a link to <b>http://127.0.0.1:8000</b>. Open it.</p>
+      <p>From then on, everything happens on that page — Claude posts its explanations, code, videos, and questions there, and you answer there.</p>
+      <div class="callout"><b>Some steps can take a while — up to an hour or longer.</b> The speed of the tool depends on the speed of your environment, because it rolls out policies in that environment. Check in on its progress while you do something else.</div>
+    </div></li>
+
+  </ol>
+  <div class="cta-wrap text">
+    <p>To understand how to use the tool, see a walkthrough.</p>
+    <a class="cta" href="walkthrough.html">See walkthrough &rarr;</a>
+  </div>
+</section>
+
+
+<footer>
+  <div class="links">
+    <a href="./">Home</a>
+    <a href="for_claude.html">Install with Claude Code</a>
+    <a href="manual_setup.html">Manual setup</a>
+    <a href="walkthrough.html">Walkthrough</a>
+    <a href="https://github.com/Stephanehk/Discordance-Based-Reward-Debugger">GitHub</a>
+  </div>
+</footer>
+
+</div>
+<script>
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var el = document.getElementById(btn.dataset.copy);
+      var text = el ? el.innerText : '';
+      var done = function(label){ var old = btn.textContent; btn.textContent = label; setTimeout(function(){ btn.textContent = old; }, 1600); };
+      try {
+        navigator.clipboard.writeText(text).then(function(){ done('Copied'); }, function(){ done('Select and copy'); });
+      } catch (e) { done('Select and copy'); }
+    });
+  });
+</script>
+</body>
+</html>

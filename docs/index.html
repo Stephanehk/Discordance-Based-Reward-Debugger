@@ -181,7 +181,7 @@ pip install -r requirements.txt</code></pre>
         <tr><td><code>ACTION_DESCRIPTION</code></td><td>plain-English description of the action space</td></tr>
         <tr><td><code>MAX_EPISODE_STEPS</code></td><td>the episode horizon</td></tr>
       </table>
-      <p style="margin-top:16px">You don't have to write it by hand. Point Claude Code at your environment's source and ask it to generate the file. Worked examples are in the repo under <code>workspaces/</code> — <code>pandemic</code>, <code>merge</code>, <code>metaworld_drawer_open</code>, and others.</p>
+      <p style="margin-top:16px">You don't have to write it by hand. Point Claude Code at your environment's source and ask it to generate the file. Worked examples are in the repo under <code>workspaces/</code> — <code>pandemic</code> and <code>metaworld_drawer_open</code>.</p>
       <details>
         <summary>A prompt that works well</summary>
         <div class="inner">
@@ -192,7 +192,7 @@ pip install -r requirements.txt</code></pre>
 - ACTION_DESCRIPTION: str describing the action space.
 - MAX_EPISODE_STEPS: int (the horizon).
 
-Also write the companion workspaces/&lt;name&gt;/viz.py (see below for how I want trajectories visualized). Follow the contracts in CLAUDE.md exactly, and model both files on the committed examples in workspaces/merge/ (video) and workspaces/pandemic/ (plots).
+Also write the companion workspaces/&lt;name&gt;/viz.py (see below for how I want trajectories visualized). Follow the contracts in CLAUDE.md exactly, and model both files on the committed examples in workspaces/metaworld_drawer_open/ (video) and workspaces/pandemic/ (plots).
 
 My environment: &lt;paste the source, or give the import path / gym id&gt;</pre>
           <button class="copy" type="button" data-copy="prompt">Copy prompt</button>

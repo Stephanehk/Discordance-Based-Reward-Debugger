@@ -502,10 +502,7 @@ workspace**, activate that workspace's env instead of `llm`:
 
 | Workspace | conda env |
 |---|---|
-| `rocket_landing` | `llm` (PyFlyt installed here) |
-| `robopianist` | `robopianist` (dm_control; needs `MUJOCO_GL=egl`) |
-| `metaworld_drawer_open`, `metaworld_hammer`, `drawer-open-v3` | `metaworld` |
-| `pointmaze_umaze` | `llm_rd` |
+| `metaworld_drawer_open` | `metaworld` |
 | everything else | `llm` |
 
 The authoritative per-workspace value is the one-line

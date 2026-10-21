@@ -75,20 +75,17 @@ works well:
 > Also write the companion `workspaces/<name>/viz.py` (see below for how I
 > want trajectories visualized). Follow the contracts in `CLAUDE.md`
 > exactly, and model both files on the committed examples in
-> `workspaces/merge/` (video) and `workspaces/pandemic/` (plots).
+> `workspaces/metaworld_drawer_open/` (video) and `workspaces/pandemic/` (plots).
 >
 > My environment: `<paste the source, or give the import path / gym id>`
 
-Several worked examples are committed in this repo, which you can use as templates:
+Two worked examples are committed in this repo, which you can use as templates:
 
 - `workspaces/pandemic/env_config.py` — a custom simulator class with a
   rich, per-field `OBS_DESCRIPTION`.
-- `workspaces/merge/env_config.py`, `workspaces/highway_two_way/env_config.py`
-  — `highway-env` tasks.
-- `workspaces/metaworld_drawer_open/`, `workspaces/metaworld_hammer/`,
-  `workspaces/wipe/`, `workspaces/pointmaze_umaze/`,
-  `workspaces/rocket_landing/`, `workspaces/robopianist/` — MuJoCo /
-  Meta-World / robosuite tasks, several with `CAPTURE_FRAMES = True`.
+- `workspaces/metaworld_drawer_open/` — a Meta-World task with
+  `CAPTURE_FRAMES = True`, plus the authored characteristics, policies,
+  and perspectives the tool produced for it.
 
 ### Decide how your trajectories should be visualized
 
@@ -98,7 +95,7 @@ You have three choices, and they are set up alongside `env_config.py`:
    renderer. Set `CAPTURE_FRAMES = True` in `env_config.py` and make
    `make_env` accept `render_mode="rgb_array"`; rollouts then record one
    frame per step into an mp4, and a tiny `viz.py` just surfaces it.
-   Examples: `workspaces/merge/viz.py`, `workspaces/metaworld_drawer_open/viz.py`.
+   Example: `workspaces/metaworld_drawer_open/viz.py`.
 2. **Rendered plots or images** — best for observation-rich envs with no
    natural picture. `viz.py` draws the trajectory itself (e.g. per-feature
    time series). Example: `workspaces/pandemic/viz.py` produces a stacked

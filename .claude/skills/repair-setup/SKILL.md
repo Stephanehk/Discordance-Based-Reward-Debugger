@@ -138,11 +138,10 @@ def designed_reward_fn(obs, act, next_obs) -> float:
     raise NotImplementedError("Fill in designed_reward_fn before running /repair-init.")
 ```
 
-Post the obs/action summary, then tell the user where to write the
-reward (this is the one place a file path is named):
+Tell the user where to write the reward (this is the one place a file
+path is named):
 
 ```bash
-python -m web_ui.cli post --type markdown --content "<plain-English obs + action summary>"
 python -m web_ui.cli post --type markdown --content "A stub reward function is in place. Fill in its body in \`workspaces/<WORKSPACE>/designed_reward_fn.py\`, then press the button below."
 ```
 

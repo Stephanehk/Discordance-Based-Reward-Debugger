@@ -92,10 +92,6 @@ code = (RUN/'designed_reward_fn.py').read_text()
 
 SETUP_FEED = '''
       <article class="msg msg-status"><div class="msg-body">The environment is set up.</div></article>
-      <article class="msg msg-md"><div class="msg-body md">
-        <p><strong>What the agent perceives.</strong> The agent controls a Sawyer robot arm. It senses where its own hand is in space, how far the gripper is open or closed, and where the drawer handle is (both its position and the way it is oriented). It also knows where the handle needs to end up for the drawer to count as fully open, where its hand started at the beginning of the attempt, and the overall goal location. All positions are measured in meters.</p>
-        <p><strong>What the agent can do.</strong> On each step the agent nudges its hand a small amount along three directions — left/right, forward/back, and up/down — and sends a command to open or close the gripper. Repeating these small moves is how it reaches the handle and pulls the drawer open.</p>
-      </div></article>
       <article class="msg msg-md"><div class="msg-body md"><p>A stub reward function is in place. Fill in its body in <code>workspaces/metaworld_drawer_open/designed_reward_fn.py</code>, then press the button below.</p></div></article>
       <article class="msg msg-cta" data-cta="{mode}">
         <div class="cta-prompt muted">The environment is set up. Press when your reward function is written.</div>

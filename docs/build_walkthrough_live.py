@@ -166,53 +166,39 @@ QUESTION7 = '''
         <div class="q-note" hidden></div>
       </article>'''
 
-ROBOT_SVG = '''<svg viewBox="0 0 160 120" width="160" height="120" aria-hidden="true">
-  <g class="body">
-    <!-- tail flukes (rear, pointing back) -->
-    <path d="M126 92 C 138 86, 150 84, 156 78 C 152 92, 145 101, 130 99 Z" fill="#938d84" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
-    <!-- blubbery body, side profile -->
-    <path d="M62 40 C 80 26, 120 24, 140 44 C 154 58, 150 86, 128 94 C 112 99, 92 100, 78 96 C 66 92, 58 84, 56 72 C 55 60, 56 48, 62 40 Z" fill="#aba59c" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
-    <!-- belly shading -->
-    <path d="M78 95 C 98 100, 120 98, 132 90 C 122 97, 98 101, 80 97 Z" fill="#cfc9bf"/>
-    <!-- fore-flipper -->
-    <path class="flip flip-l" d="M86 86 C 80 98, 84 110, 96 107 C 91 100, 91 92, 92 86 Z" fill="#938d84" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
-    <!-- head, turned ~45 deg toward the viewer -->
-    <path d="M50 28 C 29 30, 20 52, 25 73 C 29 90, 45 98, 62 93 C 76 89, 82 73, 79 56 C 76 40, 68 28, 50 28 Z" fill="#aba59c" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
-    <!-- lighter muzzle -->
-    <ellipse cx="46" cy="74" rx="21" ry="17" fill="#cfc9bf"/>
-    <!-- cheeks -->
-    <circle cx="29" cy="63" r="5" fill="#f3a39a" fill-opacity=".5"/>
-    <circle cx="68" cy="57" r="4" fill="#f3a39a" fill-opacity=".45"/>
-    <!-- brows (soft, friendly) -->
-    <path d="M31 40 Q38 36 45 39" fill="none" stroke="#3a2e2a" stroke-width="2.3" stroke-linecap="round"/>
-    <path d="M56 37 Q61 34 67 37" fill="none" stroke="#3a2e2a" stroke-width="2.1" stroke-linecap="round"/>
-    <!-- eyes (near one bigger/lower, far one smaller/higher) -->
-    <g class="eyes">
-      <ellipse cx="38" cy="49" rx="7" ry="8" fill="#fff"/>
-      <circle cx="37.5" cy="50.5" r="4.6" fill="#2b2a33"/>
-      <circle cx="35.6" cy="48" r="1.8" fill="#fff"/>
-      <ellipse cx="61" cy="46" rx="6" ry="7" fill="#fff"/>
-      <circle cx="61" cy="47.5" r="4" fill="#2b2a33"/>
-      <circle cx="59.3" cy="45" r="1.5" fill="#fff"/>
-    </g>
-    <!-- mouth, mostly overhung by the nose -->
-    <path d="M35 86 Q46 92 56 85" fill="none" stroke="#3a2e2a" stroke-width="2.4" stroke-linecap="round"/>
-    <!-- whiskers on both sides -->
-    <g stroke="#3a2e2a" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".5">
-      <path d="M31 75 q-10 0 -15 2"/>
-      <path d="M32 80 q-10 2 -14 6"/>
-      <path d="M33 85 q-9 3 -12 8"/>
-      <path d="M60 73 q9 -1 14 0"/>
-      <path d="M60 78 q9 1 13 4"/>
-    </g>
-    <!-- droopy proboscis / nose, hangs below the eyes (swings) -->
-    <g class="nose">
-      <path d="M48 57 C 41 57, 35 63, 34 73 C 33 82, 39 91, 49 90 C 58 89, 60 79, 58 70 C 56 62, 53 57, 48 57 Z" fill="#9a948b" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
-      <ellipse cx="40" cy="69" rx="2.6" ry="5.5" fill="#cfc8bd" fill-opacity=".55"/>
-      <ellipse cx="43" cy="84" rx="2.5" ry="3.2" fill="#3a2e2a"/>
-      <ellipse cx="51" cy="85" rx="2.5" ry="3.2" fill="#3a2e2a"/>
-    </g>
+ROBOT_SVG = '''<svg viewBox="0 0 120 110" width="120" height="110" aria-hidden="true">
+  <defs><clipPath id="beebodywt"><ellipse cx="60" cy="66" rx="34" ry="28"/></clipPath></defs>
+  <g class="lucky-bee-wing lucky-bee-wing--left" style="transform-origin: 52px 50px">
+    <ellipse cx="50" cy="34" rx="12" ry="17" fill="rgba(255,255,255,0.86)" stroke="#9ec5e8" stroke-width="2" transform="rotate(-22 50 34)"/>
   </g>
+  <g class="lucky-bee-wing lucky-bee-wing--right" style="transform-origin: 70px 50px">
+    <ellipse cx="73" cy="32" rx="13" ry="18" fill="rgba(255,255,255,0.86)" stroke="#9ec5e8" stroke-width="2" transform="rotate(16 73 32)"/>
+  </g>
+  <path d="M46 41 C42 32 38 26 33 21" stroke="#4a3626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M58 39 C58 30 57 24 56 18" stroke="#4a3626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <circle cx="32" cy="20" r="3.2" fill="#4a3626"/>
+  <circle cx="56" cy="17" r="3.2" fill="#4a3626"/>
+  <path d="M92 64 L106 70 L92 76 Z" fill="#4a3626"/>
+  <ellipse cx="60" cy="66" rx="34" ry="28" fill="#f7cf5a"/>
+  <g clip-path="url(#beebodywt)">
+    <rect x="70" y="30" width="9" height="72" fill="#4a3626"/>
+    <rect x="85" y="30" width="8" height="72" fill="#4a3626"/>
+  </g>
+  <ellipse cx="42" cy="61" rx="4.2" ry="4.8" fill="#2b1d14"/>
+  <ellipse cx="58" cy="59" rx="4.2" ry="4.8" fill="#2b1d14"/>
+  <circle cx="40.6" cy="59.2" r="1.5" fill="#fff"/>
+  <circle cx="56.6" cy="57.2" r="1.5" fill="#fff"/>
+  <ellipse cx="37" cy="70" rx="4.2" ry="2.4" fill="#f3a1a1" opacity="0.75"/>
+  <ellipse cx="63" cy="68" rx="4.2" ry="2.4" fill="#f3a1a1" opacity="0.75"/>
+  <path d="M45 69 Q50 74.5 55 69" stroke="#2b1d14" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <g class="lucky-bee-arm lucky-bee-arm--wave" style="transform-origin: 38px 80px">
+    <path d="M38 80 L27 67" stroke="#4a3626" stroke-width="4.5" stroke-linecap="round"/>
+    <circle cx="26" cy="66" r="3.6" fill="#4a3626"/>
+  </g>
+  <path d="M70 88 L78 97" stroke="#4a3626" stroke-width="4.5" stroke-linecap="round"/>
+  <circle cx="79" cy="98" r="3.6" fill="#4a3626"/>
+  <path d="M48 93 L45 104" stroke="#4a3626" stroke-width="4" stroke-linecap="round"/>
+  <path d="M62 94 L64 105" stroke="#4a3626" stroke-width="4" stroke-linecap="round"/>
 </svg>'''
 
 def with_buddy(frame_html, text):
@@ -415,34 +401,30 @@ page = f'''<!doctype html>
   .buddy .bubble::before,.buddy .bubble::after{{content:"";position:absolute;left:50%;margin-left:-8px;bottom:-10px;border:8px solid transparent;border-top-color:#2f3340;border-bottom:0}}
   .buddy .bubble::after{{bottom:-7px;border-top-color:#fff}}
   .buddy .bot{{flex:none;opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}}
-  .buddy .bot svg{{display:block;overflow:visible;width:150px;height:113px;filter:drop-shadow(0 8px 12px rgba(58,46,42,.18))}}
-  .buddy .nose{{transform-box:view-box;transform-origin:48px 57px}}
-  .buddy .flip{{transform-box:view-box}}
-  .buddy .flip-l{{transform-origin:90px 88px}} .buddy .flip-r{{transform-origin:102px 97px}}
-  .buddy .eyes{{transform-box:fill-box;transform-origin:50% 50%}}
+  .buddy .bot svg{{display:block;overflow:visible;width:128px;height:117px;filter:drop-shadow(0 8px 12px rgba(58,46,42,.18))}}
+  .buddy .lucky-bee-wing{{transform-box:view-box}}
+  .buddy .lucky-bee-arm--wave{{transform-box:view-box}}
   .buddy.on .bot{{animation:flyin 1.3s cubic-bezier(.22,.9,.3,1) forwards}}
   .buddy.on .bot svg{{animation:hover 2.6s ease-in-out 1.3s infinite}}
-  .buddy.on .nose{{animation:noseswing 2.3s ease-in-out 1.3s infinite}}
-  .buddy.on .flip-l{{animation:flipL 2.6s ease-in-out 1.3s infinite}}
-  .buddy.on .eyes{{animation:blink 4.5s ease-in-out 2s infinite}}
+  .buddy.on .lucky-bee-wing{{animation:beeflap .2s ease-in-out infinite alternate}}
+  .buddy.on .lucky-bee-arm--wave{{animation:beewave 1.8s ease-in-out 1.3s infinite}}
 
   .buddy.on .bubble{{animation:pop .5s cubic-bezier(.3,1.4,.5,1) 1.15s forwards}}
   @keyframes flyin{{0%{{opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}}15%{{opacity:1}}60%{{transform:translateX(-10px) translateY(6px) rotate(-5deg)}}100%{{opacity:1;transform:translateX(0) translateY(0) rotate(0)}}}}
   @keyframes hover{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-6px)}}}}
-  @keyframes noseswing{{0%,100%{{transform:rotate(-8deg)}}50%{{transform:rotate(8deg)}}}}
-  @keyframes flipL{{0%,100%{{transform:rotate(0)}}50%{{transform:rotate(-12deg)}}}}
-  @keyframes blink{{0%,92%,100%{{transform:scaleY(1)}}95%{{transform:scaleY(.1)}}}}
+  @keyframes beeflap{{from{{transform:scaleY(1)}}to{{transform:scaleY(.72)}}}}
+  @keyframes beewave{{0%,100%{{transform:rotate(0)}}40%{{transform:rotate(-34deg)}}70%{{transform:rotate(12deg)}}}}
   @keyframes pulse{{0%,100%{{opacity:1}}50%{{opacity:.55}}}}
 
   @keyframes pop{{from{{opacity:0;transform:scale(.7) translateY(8px)}}to{{opacity:1;transform:scale(1) translateY(0)}}}}
   @media (prefers-color-scheme: dark){{:root:not([data-theme="light"]) .buddy .bubble{{background:#23242a;color:#ebe8e1;border-color:#a39e94}} :root:not([data-theme="light"]) .buddy .bubble::after{{border-top-color:#23242a}} :root:not([data-theme="light"]) .buddy .bubble::before{{border-top-color:#a39e94}}}}
   :root[data-theme="dark"] .buddy .bubble{{background:#23242a;color:#ebe8e1;border-color:#a39e94}} :root[data-theme="dark"] .buddy .bubble::after{{border-top-color:#23242a}} :root[data-theme="dark"] .buddy .bubble::before{{border-top-color:#a39e94}}
-  @media (prefers-reduced-motion: reduce){{.buddy .bot,.buddy .bubble{{opacity:1;transform:none;animation:none!important}} .buddy .nose,.buddy .flip,.buddy .bot svg,.buddy .eyes{{animation:none!important}}}}
+  @media (prefers-reduced-motion: reduce){{.buddy .bot,.buddy .bubble{{opacity:1;transform:none;animation:none!important}} .buddy .lucky-bee-wing,.buddy .lucky-bee-arm--wave,.buddy .bot svg{{animation:none!important}}}}
   @media (max-width:760px){{
     .frame-wrap{{grid-template-columns:1fr}}
     .buddy{{position:static;order:-1;flex-direction:row;align-items:flex-end;justify-content:flex-end;margin:22px 0 -6px;padding:0 4px}}
     .buddy .bubble{{width:auto;max-width:520px;transform-origin:100% 80%}}
-    .buddy .bot svg{{width:132px;height:99px}}
+    .buddy .bot svg{{width:112px;height:103px}}
     .buddy .bubble::before,.buddy .bubble::after{{left:auto;margin-left:0;right:-10px;bottom:22px;border:8px solid transparent;border-left-color:#2f3340;border-right:0;border-top-color:transparent}}
     .buddy .bubble::after{{right:-7px;border-left-color:#fff;border-top-color:transparent}}
   }}

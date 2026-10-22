@@ -191,10 +191,6 @@ ROBOT_SVG = '''<svg viewBox="0 0 120 110" width="120" height="110" aria-hidden="
   <ellipse cx="37" cy="70" rx="4.2" ry="2.4" fill="#f3a1a1" opacity="0.75"/>
   <ellipse cx="63" cy="68" rx="4.2" ry="2.4" fill="#f3a1a1" opacity="0.75"/>
   <path d="M45 69 Q50 74.5 55 69" stroke="#2b1d14" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-  <g class="lucky-bee-arm lucky-bee-arm--wave" style="transform-origin: 38px 80px">
-    <path d="M38 80 L27 67" stroke="#4a3626" stroke-width="4.5" stroke-linecap="round"/>
-    <circle cx="26" cy="66" r="3.6" fill="#4a3626"/>
-  </g>
   <path d="M70 88 L78 97" stroke="#4a3626" stroke-width="4.5" stroke-linecap="round"/>
   <circle cx="79" cy="98" r="3.6" fill="#4a3626"/>
   <path d="M48 93 L45 104" stroke="#4a3626" stroke-width="4" stroke-linecap="round"/>
@@ -403,23 +399,20 @@ page = f'''<!doctype html>
   .buddy .bot{{flex:none;opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}}
   .buddy .bot svg{{display:block;overflow:visible;width:128px;height:117px;filter:drop-shadow(0 8px 12px rgba(58,46,42,.18))}}
   .buddy .lucky-bee-wing{{transform-box:view-box}}
-  .buddy .lucky-bee-arm--wave{{transform-box:view-box}}
   .buddy.on .bot{{animation:flyin 1.3s cubic-bezier(.22,.9,.3,1) forwards}}
   .buddy.on .bot svg{{animation:hover 2.6s ease-in-out 1.3s infinite}}
   .buddy.on .lucky-bee-wing{{animation:beeflap .2s ease-in-out infinite alternate}}
-  .buddy.on .lucky-bee-arm--wave{{animation:beewave 1.8s ease-in-out 1.3s infinite}}
 
   .buddy.on .bubble{{animation:pop .5s cubic-bezier(.3,1.4,.5,1) 1.15s forwards}}
   @keyframes flyin{{0%{{opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}}15%{{opacity:1}}60%{{transform:translateX(-10px) translateY(6px) rotate(-5deg)}}100%{{opacity:1;transform:translateX(0) translateY(0) rotate(0)}}}}
   @keyframes hover{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-6px)}}}}
   @keyframes beeflap{{from{{transform:scaleY(1)}}to{{transform:scaleY(.72)}}}}
-  @keyframes beewave{{0%,100%{{transform:rotate(0)}}40%{{transform:rotate(-34deg)}}70%{{transform:rotate(12deg)}}}}
   @keyframes pulse{{0%,100%{{opacity:1}}50%{{opacity:.55}}}}
 
   @keyframes pop{{from{{opacity:0;transform:scale(.7) translateY(8px)}}to{{opacity:1;transform:scale(1) translateY(0)}}}}
   @media (prefers-color-scheme: dark){{:root:not([data-theme="light"]) .buddy .bubble{{background:#23242a;color:#ebe8e1;border-color:#a39e94}} :root:not([data-theme="light"]) .buddy .bubble::after{{border-top-color:#23242a}} :root:not([data-theme="light"]) .buddy .bubble::before{{border-top-color:#a39e94}}}}
   :root[data-theme="dark"] .buddy .bubble{{background:#23242a;color:#ebe8e1;border-color:#a39e94}} :root[data-theme="dark"] .buddy .bubble::after{{border-top-color:#23242a}} :root[data-theme="dark"] .buddy .bubble::before{{border-top-color:#a39e94}}
-  @media (prefers-reduced-motion: reduce){{.buddy .bot,.buddy .bubble{{opacity:1;transform:none;animation:none!important}} .buddy .lucky-bee-wing,.buddy .lucky-bee-arm--wave,.buddy .bot svg{{animation:none!important}}}}
+  @media (prefers-reduced-motion: reduce){{.buddy .bot,.buddy .bubble{{opacity:1;transform:none;animation:none!important}} .buddy .lucky-bee-wing,.buddy .bot svg{{animation:none!important}}}}
   @media (max-width:760px){{
     .frame-wrap{{grid-template-columns:1fr}}
     .buddy{{position:static;order:-1;flex-direction:row;align-items:flex-end;justify-content:flex-end;margin:22px 0 -6px;padding:0 4px}}

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elephant Seal Design Options</title>
+<style>
+  :root{
+    --bg:#fbfaf7; --fg:#1c1b19; --muted:#66625b; --rule:#e4e0d8; --card:#ffffff;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Charter,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#17181a;--fg:#ebe8e1;--muted:#a39e94;--rule:#2e2f33;--card:#202123;color-scheme:dark}}
+  :root[data-theme="dark"]{--bg:#17181a;--fg:#ebe8e1;--muted:#a39e94;--rule:#2e2f33;--card:#202123;color-scheme:dark}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+  .page{max-width:1100px;margin:0 auto;padding:40px 20px 64px}
+  h1{font-family:var(--serif);font-weight:500;font-size:32px;margin:0 0 6px}
+  .lede{color:var(--muted);margin:0 0 32px;max-width:640px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+  .card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:20px 18px 18px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .card .stage{width:100%;display:flex;align-items:center;justify-content:center;min-height:160px}
+  .card svg{display:block;overflow:visible;width:200px;height:auto;filter:drop-shadow(0 8px 14px rgba(40,34,28,.14))}
+  .tag{align-self:flex-start;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:#8a6d3b;background:#f6edda;border-radius:999px;padding:3px 10px}
+  :root[data-theme="dark"] .tag,:root:not([data-theme="light"]) .tag{color:#d8c08a;background:#2c2820}
+  .card h3{font-family:var(--serif);font-weight:500;font-size:19px;margin:4px 0 0;align-self:flex-start}
+  .card p{font-size:13.5px;color:var(--muted);margin:0;align-self:flex-start}
+  .note{margin-top:28px;font-size:13.5px;color:var(--muted)}
+  /* gentle nose swing on every design */
+  .nose{transform-box:view-box}
+  .n1{transform-origin:48px 57px}.n2{transform-origin:48px 57px}.n3{transform-origin:58px 54px}.n0{transform-origin:48px 57px}
+  .nose{animation:noseswing 2.6s ease-in-out infinite}
+  @keyframes noseswing{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+  @media (prefers-reduced-motion: reduce){.nose{animation:none}}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Elephant seal — design options</h1>
+  <p class="lede">All side profile with the head turned ~45&deg; toward you, and a proboscis that swings. Option&nbsp;0 is the one currently on the site; options&nbsp;1&ndash;3 step up in realism.</p>
+
+  <div class="grid">
+
+    <!-- ============ 0: CURRENT ============ -->
+    <div class="card">
+      <span class="tag">In use</span>
+      <div class="stage">
+        <svg viewBox="0 0 160 120" aria-label="current seal">
+          <g>
+            <path d="M126 92 C 138 86, 150 84, 156 78 C 152 92, 145 101, 130 99 Z" fill="#938d84" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M62 40 C 80 26, 120 24, 140 44 C 154 58, 150 86, 128 94 C 112 99, 92 100, 78 96 C 66 92, 58 84, 56 72 C 55 60, 56 48, 62 40 Z" fill="#aba59c" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M78 95 C 98 100, 120 98, 132 90 C 122 97, 98 101, 80 97 Z" fill="#cfc9bf"/>
+            <path d="M86 86 C 80 98, 84 110, 96 107 C 91 100, 91 92, 92 86 Z" fill="#938d84" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M50 28 C 29 30, 20 52, 25 73 C 29 90, 45 98, 62 93 C 76 89, 82 73, 79 56 C 76 40, 68 28, 50 28 Z" fill="#aba59c" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
+            <ellipse cx="46" cy="74" rx="21" ry="17" fill="#cfc9bf"/>
+            <circle cx="29" cy="63" r="5" fill="#f3a39a" fill-opacity=".5"/><circle cx="68" cy="57" r="4" fill="#f3a39a" fill-opacity=".45"/>
+            <path d="M31 40 Q38 36 45 39" fill="none" stroke="#3a2e2a" stroke-width="2.3" stroke-linecap="round"/>
+            <path d="M56 37 Q61 34 67 37" fill="none" stroke="#3a2e2a" stroke-width="2.1" stroke-linecap="round"/>
+            <g>
+              <ellipse cx="38" cy="49" rx="7" ry="8" fill="#fff"/><circle cx="37.5" cy="50.5" r="4.6" fill="#2b2a33"/><circle cx="35.6" cy="48" r="1.8" fill="#fff"/>
+              <ellipse cx="61" cy="46" rx="6" ry="7" fill="#fff"/><circle cx="61" cy="47.5" r="4" fill="#2b2a33"/><circle cx="59.3" cy="45" r="1.5" fill="#fff"/>
+            </g>
+            <path d="M35 86 Q46 92 56 85" fill="none" stroke="#3a2e2a" stroke-width="2.4" stroke-linecap="round"/>
+            <g stroke="#3a2e2a" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".5">
+              <path d="M31 75 q-10 0 -15 2"/><path d="M32 80 q-10 2 -14 6"/><path d="M33 85 q-9 3 -12 8"/><path d="M60 73 q9 -1 14 0"/><path d="M60 78 q9 1 13 4"/>
+            </g>
+            <g class="nose n0">
+              <path d="M48 57 C 41 57, 35 63, 34 73 C 33 82, 39 91, 49 90 C 58 89, 60 79, 58 70 C 56 62, 53 57, 48 57 Z" fill="#9a948b" stroke="#3a2e2a" stroke-width="3" stroke-linejoin="round"/>
+              <ellipse cx="40" cy="69" rx="2.6" ry="5.5" fill="#cfc8bd" fill-opacity=".55"/>
+              <ellipse cx="43" cy="84" rx="2.5" ry="3.2" fill="#3a2e2a"/><ellipse cx="51" cy="85" rx="2.5" ry="3.2" fill="#3a2e2a"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <h3>Option 0 — current</h3>
+      <p>The flat cartoon already on the landing page and walkthrough.</p>
+    </div>
+
+    <!-- ============ 1: SIMPLE / FLAT ============ -->
+    <div class="card">
+      <span class="tag">Realism 1</span>
+      <div class="stage">
+        <svg viewBox="0 0 170 120" aria-label="simple flat seal">
+          <ellipse cx="96" cy="111" rx="62" ry="6" fill="#000" opacity=".07"/>
+          <path d="M134 86 C 148 80, 162 80, 168 74 C 162 90, 153 99, 137 96 Z" fill="#bcb6ab" stroke="#49403a" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M66 42 C 88 26, 130 26, 150 48 C 162 62, 158 92, 132 98 C 112 103, 92 103, 80 99 C 70 95, 62 86, 60 73 C 59 61, 60 50, 66 42 Z" fill="#c6bfb4" stroke="#49403a" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M92 90 C 86 102, 90 112, 101 109 C 96 102, 96 93, 97 90 Z" fill="#bcb6ab" stroke="#49403a" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M52 30 C 30 32, 21 55, 26 77 C 30 94, 47 102, 64 97 C 78 93, 84 75, 81 58 C 78 41, 70 30, 52 30 Z" fill="#c6bfb4" stroke="#49403a" stroke-width="4" stroke-linejoin="round"/>
+          <circle cx="40" cy="53" r="4.6" fill="#36302a"/>
+          <circle cx="64" cy="50" r="4" fill="#36302a"/>
+          <path d="M34 86 Q46 92 57 85" fill="none" stroke="#49403a" stroke-width="3" stroke-linecap="round"/>
+          <g class="nose n1">
+            <path d="M50 58 C 42 58, 35 66, 35 77 C 35 88, 44 94, 53 92 C 62 90, 63 79, 61 69 C 59 60, 56 58, 50 58 Z" fill="#b4ada2" stroke="#49403a" stroke-width="4" stroke-linejoin="round"/>
+            <ellipse cx="45" cy="86" rx="2.4" ry="3" fill="#49403a"/><ellipse cx="53" cy="87" rx="2.4" ry="3" fill="#49403a"/>
+          </g>
+        </svg>
+      </div>
+      <h3>Option 1 — simple</h3>
+      <p>Flat fills, bold outline, dot eyes. The cleanest, most icon-like read.</p>
+    </div>
+
+    <!-- ============ 2: DETAILED CARTOON ============ -->
+    <div class="card">
+      <span class="tag">Realism 2</span>
+      <div class="stage">
+        <svg viewBox="0 0 170 120" aria-label="detailed cartoon seal">
+          <defs>
+            <linearGradient id="b-body" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#bdb4a6"/><stop offset="1" stop-color="#8f8679"/>
+            </linearGradient>
+            <linearGradient id="b-head" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#c3bbae"/><stop offset="1" stop-color="#978e80"/>
+            </linearGradient>
+            <radialGradient id="b-nose" cx="38%" cy="30%" r="80%">
+              <stop offset="0" stop-color="#b3a99b"/><stop offset="1" stop-color="#857c6e"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="96" cy="111" rx="60" ry="6" fill="#000" opacity=".08"/>
+          <path d="M130 88 C 145 82, 159 81, 166 74 C 161 90, 153 100, 136 97 Z" fill="#8c8375" stroke="#463d34" stroke-width="2.6" stroke-linejoin="round"/>
+          <path d="M64 42 C 84 27, 126 25, 147 47 C 160 62, 156 91, 131 97 C 112 102, 92 102, 80 98 C 69 94, 61 85, 59 72 C 58 60, 59 50, 64 42 Z" fill="url(#b-body)" stroke="#463d34" stroke-width="2.8" stroke-linejoin="round"/>
+          <path d="M80 97 C 100 102, 122 100, 134 92 C 123 99, 99 103, 82 99 Z" fill="#d6cfc2" opacity=".8"/>
+          <path d="M86 70 C 104 64, 124 66, 134 76" fill="none" stroke="#6f665a" stroke-width="1.6" opacity=".4" stroke-linecap="round"/>
+          <path d="M88 86 C 84 98, 88 109, 99 106 C 94 99, 94 91, 95 86 Z" fill="#8c8375" stroke="#463d34" stroke-width="2.6" stroke-linejoin="round"/>
+          <path d="M92 90 l2 12 M96 90 l1 12" stroke="#5f564b" stroke-width="1.2" opacity=".5"/>
+          <path d="M50 28 C 28 30, 19 53, 24 75 C 28 92, 46 100, 63 95 C 78 91, 84 73, 81 56 C 78 39, 69 28, 50 28 Z" fill="url(#b-head)" stroke="#463d34" stroke-width="2.8" stroke-linejoin="round"/>
+          <ellipse cx="45" cy="75" rx="22" ry="18" fill="#d6cfc2" opacity=".7"/>
+          <circle cx="28" cy="63" r="5" fill="#ef9e94" fill-opacity=".45"/><circle cx="68" cy="56" r="4" fill="#ef9e94" fill-opacity=".4"/>
+          <path d="M30 40 Q38 35 46 39" fill="none" stroke="#463d34" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M56 36 Q61 33 68 37" fill="none" stroke="#463d34" stroke-width="2" stroke-linecap="round"/>
+          <g>
+            <ellipse cx="37" cy="49" rx="7" ry="8.2" fill="#fff"/><circle cx="36.3" cy="50.5" r="4.7" fill="#2b2a33"/><circle cx="34.3" cy="48" r="1.9" fill="#fff"/><circle cx="38" cy="52.5" r=".9" fill="#fff" opacity=".8"/>
+            <ellipse cx="61" cy="46" rx="6" ry="7" fill="#fff"/><circle cx="61" cy="47.5" r="4" fill="#2b2a33"/><circle cx="59.3" cy="45" r="1.5" fill="#fff"/>
+          </g>
+          <path d="M34 86 Q46 93 57 85" fill="none" stroke="#463d34" stroke-width="2.4" stroke-linecap="round"/>
+          <g stroke="#463d34" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".5">
+            <path d="M30 75 q-11 0 -16 2"/><path d="M31 80 q-11 2 -15 6"/><path d="M32 85 q-10 3 -13 8"/><path d="M60 73 q9 -1 14 0"/><path d="M60 78 q9 1 13 4"/>
+          </g>
+          <g class="nose n2">
+            <path d="M48 57 C 40 57, 34 64, 33 74 C 32 84, 39 92, 49 91 C 59 90, 61 79, 59 69 C 57 61, 53 57, 48 57 Z" fill="url(#b-nose)" stroke="#463d34" stroke-width="2.8" stroke-linejoin="round"/>
+            <path d="M37 66 C 44 64, 52 65, 56 70" fill="none" stroke="#5f564b" stroke-width="1.3" opacity=".45" stroke-linecap="round"/>
+            <path d="M36 74 C 44 72, 52 73, 57 77" fill="none" stroke="#5f564b" stroke-width="1.3" opacity=".4" stroke-linecap="round"/>
+            <ellipse cx="39" cy="69" rx="2.5" ry="5" fill="#d6cfc2" fill-opacity=".5"/>
+            <ellipse cx="42" cy="85" rx="2.5" ry="3.2" fill="#2f2820"/><ellipse cx="50" cy="86" rx="2.5" ry="3.2" fill="#2f2820"/>
+          </g>
+        </svg>
+      </div>
+      <h3>Option 2 — detailed cartoon</h3>
+      <p>Soft volume shading, belly sheen, a few skin creases and flipper lines. Still friendly.</p>
+    </div>
+
+    <!-- ============ 3: NATURALISTIC ============ -->
+    <div class="card">
+      <span class="tag">Realism 3</span>
+      <div class="stage">
+        <svg viewBox="0 0 190 120" aria-label="naturalistic seal">
+          <defs>
+            <linearGradient id="c-body" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#8f8575"/><stop offset=".55" stop-color="#746a5b"/><stop offset="1" stop-color="#574e42"/>
+            </linearGradient>
+            <linearGradient id="c-head" x1="0" y1="0" x2="0.3" y2="1">
+              <stop offset="0" stop-color="#8c8272"/><stop offset="1" stop-color="#60574a"/>
+            </linearGradient>
+            <radialGradient id="c-nose" cx="35%" cy="25%" r="85%">
+              <stop offset="0" stop-color="#857a69"/><stop offset="1" stop-color="#4f463a"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="104" cy="112" rx="78" ry="6" fill="#000" opacity=".1"/>
+          <!-- hind flukes -->
+          <path d="M150 90 C 166 84, 182 82, 188 74 C 184 92, 176 103, 158 100 C 162 96, 160 92, 156 90 Z" fill="#5b5245" stroke="#352e26" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M152 94 C 166 92, 178 94, 184 100 C 172 104, 158 103, 150 98 Z" fill="#6b6253" stroke="#352e26" stroke-width="1.4" stroke-linejoin="round"/>
+          <!-- long body tapering to the rear -->
+          <path d="M60 44 C 78 24, 128 20, 158 42 C 176 56, 174 82, 156 94 C 140 103, 112 104, 92 99 C 76 95, 64 86, 60 73 C 57 63, 56 52, 60 44 Z" fill="url(#c-body)" stroke="#352e26" stroke-width="1.8" stroke-linejoin="round"/>
+          <!-- belly / underside sheen -->
+          <path d="M80 97 C 104 103, 134 101, 150 92 C 136 100, 106 105, 84 100 Z" fill="#9a9080" opacity=".5"/>
+          <!-- back highlight -->
+          <path d="M78 34 C 104 26, 138 28, 156 44" fill="none" stroke="#a89d8b" stroke-width="3" opacity=".3" stroke-linecap="round"/>
+          <!-- chest-shield scars (characteristic of bull seals) -->
+          <g stroke="#4a4236" stroke-width="1.1" opacity=".4" stroke-linecap="round" fill="none">
+            <path d="M70 62 l9 -5"/><path d="M72 68 l9 -4"/><path d="M74 74 l10 -4"/><path d="M78 80 l10 -3"/><path d="M84 85 l10 -2"/>
+          </g>
+          <!-- fore flipper -->
+          <path d="M98 86 C 93 99, 97 111, 109 108 C 103 100, 103 91, 104 86 Z" fill="#5f564a" stroke="#352e26" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M101 90 l2 14 M105 90 l1 13" stroke="#3b3329" stroke-width="1" opacity=".5"/>
+          <!-- head turned ~45 deg -->
+          <path d="M52 26 C 28 28, 18 52, 23 76 C 27 94, 46 103, 64 97 C 80 92, 86 72, 82 54 C 79 37, 70 26, 52 26 Z" fill="url(#c-head)" stroke="#352e26" stroke-width="1.8" stroke-linejoin="round"/>
+          <!-- forehead/crown shading -->
+          <path d="M40 30 C 56 26, 72 30, 80 44" fill="none" stroke="#9a8f7d" stroke-width="2.4" opacity=".3" stroke-linecap="round"/>
+          <!-- brow ridge -->
+          <path d="M30 44 C 36 39, 44 39, 49 43" fill="none" stroke="#352e26" stroke-width="1.8" stroke-linecap="round" opacity=".8"/>
+          <!-- eye (small, dark, naturalistic) -->
+          <ellipse cx="39" cy="50" rx="4.6" ry="5.2" fill="#2a251e"/>
+          <circle cx="37.6" cy="48.4" r="1.4" fill="#cfc6b5" opacity=".85"/>
+          <ellipse cx="62" cy="47" rx="3.5" ry="4" fill="#2a251e"/><circle cx="61" cy="45.8" r="1" fill="#cfc6b5" opacity=".8"/>
+          <!-- cheek crease -->
+          <path d="M54 62 C 60 66, 66 66, 70 62" fill="none" stroke="#4a4236" stroke-width="1.1" opacity=".4"/>
+          <!-- mouth line -->
+          <path d="M34 88 C 44 93, 56 92, 62 85" fill="none" stroke="#2f2820" stroke-width="1.8" stroke-linecap="round" opacity=".85"/>
+          <!-- big wrinkled pendulous proboscis -->
+          <g class="nose n3">
+            <path d="M60 50 C 48 50, 38 58, 36 72 C 34 85, 42 97, 56 95 C 70 93, 73 78, 70 64 C 68 55, 66 50, 60 50 Z" fill="url(#c-nose)" stroke="#352e26" stroke-width="1.8" stroke-linejoin="round"/>
+            <g stroke="#3b3329" stroke-width="1.2" opacity=".5" stroke-linecap="round" fill="none">
+              <path d="M40 60 C 50 57, 60 58, 66 64"/>
+              <path d="M38 69 C 49 66, 60 67, 68 73"/>
+              <path d="M39 78 C 49 76, 60 77, 67 82"/>
+              <path d="M43 87 C 50 86, 57 87, 61 90"/>
+            </g>
+            <path d="M42 56 C 48 54, 55 55, 60 59" fill="none" stroke="#9a8f7d" stroke-width="2" opacity=".3" stroke-linecap="round"/>
+            <ellipse cx="46" cy="90" rx="2.6" ry="3.4" fill="#211c16"/><ellipse cx="55" cy="90" rx="2.6" ry="3.4" fill="#211c16"/>
+          </g>
+        </svg>
+      </div>
+      <h3>Option 3 — naturalistic</h3>
+      <p>Tonal gradients, a long tapering body, chest-shield scars, and a big wrinkled proboscis. Reads as a real bull.</p>
+    </div>
+
+  </div>
+
+  <p class="note">Each proboscis swings gently (disabled if you have reduced-motion on). Tell me which option to adopt, or what to tweak — color, size, expression — and I'll wire it into the site.</p>
+</div>
+</body>
+</html>

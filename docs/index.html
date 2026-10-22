@@ -140,27 +140,6 @@
   .example .app .msg-note{margin:14px 0 0;padding:12px 14px;background:#f5f5ff;border:1px solid #e2e0f7;border-left:3px solid #4f46e5;border-radius:8px;font-size:14px;line-height:1.5;color:#2a2540}
   .example .app .msg-note .note-label{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;color:#4f46e5;margin-bottom:4px}
   .example .app .msg-note b{font-weight:700}
-
-  /* buddy (bee + speech bubble), sitting beside the pair */
-  .example .buddy{flex:0 1 280px;display:flex;flex-direction:column;align-items:center;gap:12px;margin:0;padding:0}
-  .example .buddy .bubble{position:relative;width:100%;padding:12px 14px;border-radius:14px;background:#fff;color:#1c1b19;border:2px solid #2f3340;font-size:14px;line-height:1.45;
-     opacity:0;transform:scale(.7) translateY(8px);transform-origin:50% 100%}
-  .example .buddy .bubble::before,.example .buddy .bubble::after{content:"";position:absolute;left:50%;margin-left:-8px;bottom:-10px;border:8px solid transparent;border-top-color:#2f3340;border-bottom:0}
-  .example .buddy .bubble::after{bottom:-7px;border-top-color:#fff}
-  .example .buddy .bot{flex:none;opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}
-  .example .buddy .bot svg{display:block;overflow:visible;width:128px;height:117px;filter:drop-shadow(0 8px 12px rgba(58,46,42,.18))}
-  .example .buddy .lucky-bee-wing{transform-box:view-box}
-  .example .buddy.on .bot{animation:flyin 1.3s cubic-bezier(.22,.9,.3,1) forwards}
-  .example .buddy.on .bot svg{animation:hover 2.6s ease-in-out 1.3s infinite}
-  .example .buddy.on .lucky-bee-wing{animation:beeflap .2s ease-in-out infinite alternate}
-  .example .buddy.on .bubble{animation:pop .5s cubic-bezier(.3,1.4,.5,1) 1.15s forwards}
-  @keyframes flyin{0%{opacity:0;transform:translateX(260px) translateY(-24px) rotate(10deg)}15%{opacity:1}60%{transform:translateX(-10px) translateY(6px) rotate(-5deg)}100%{opacity:1;transform:translateX(0) translateY(0) rotate(0)}}
-  @keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-  @keyframes beeflap{from{transform:scaleY(1)}to{transform:scaleY(.72)}}
-  @keyframes pop{from{opacity:0;transform:scale(.7) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
-  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .example .buddy .bubble{background:#23242a;color:#ebe8e1;border-color:#a39e94} :root:not([data-theme="light"]) .example .buddy .bubble::after{border-top-color:#23242a} :root:not([data-theme="light"]) .example .buddy .bubble::before{border-top-color:#a39e94}}
-  :root[data-theme="dark"] .example .buddy .bubble{background:#23242a;color:#ebe8e1;border-color:#a39e94} :root[data-theme="dark"] .example .buddy .bubble::after{border-top-color:#23242a} :root[data-theme="dark"] .example .buddy .bubble::before{border-top-color:#a39e94}
-  @media (prefers-reduced-motion: reduce){.example .buddy .bot,.example .buddy .bubble{opacity:1;transform:none;animation:none!important} .example .buddy .lucky-bee-wing,.example .buddy .bot svg{animation:none!important}}
 </style>
 </head>
 <body>
@@ -196,38 +175,6 @@
           </div>
           <p class="msg-note"><span class="note-label">What the tool flags</span>The reward function assigns higher return to a trajectory where the robot <b>doesn't</b> open the drawer over one where it does.</p>
         </article>
-        </div>
-        <div class="buddy on" aria-hidden="true">
-          <div class="bot"><svg viewBox="0 0 120 110" width="120" height="110" aria-hidden="true">
-  <defs><clipPath id="beebodyidx"><ellipse cx="60" cy="66" rx="34" ry="28"/></clipPath></defs>
-  <g class="lucky-bee-wing lucky-bee-wing--left" style="transform-origin: 52px 50px">
-    <ellipse cx="50" cy="34" rx="12" ry="17" fill="rgba(255,255,255,0.86)" stroke="#9ec5e8" stroke-width="2" transform="rotate(-22 50 34)"/>
-  </g>
-  <g class="lucky-bee-wing lucky-bee-wing--right" style="transform-origin: 70px 50px">
-    <ellipse cx="73" cy="32" rx="13" ry="18" fill="rgba(255,255,255,0.86)" stroke="#9ec5e8" stroke-width="2" transform="rotate(16 73 32)"/>
-  </g>
-  <path d="M46 41 C42 32 38 26 33 21" stroke="#4a3626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <path d="M58 39 C58 30 57 24 56 18" stroke="#4a3626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <circle cx="32" cy="20" r="3.2" fill="#4a3626"/>
-  <circle cx="56" cy="17" r="3.2" fill="#4a3626"/>
-  <path d="M92 64 L106 70 L92 76 Z" fill="#4a3626"/>
-  <ellipse cx="60" cy="66" rx="34" ry="28" fill="#f7cf5a"/>
-  <g clip-path="url(#beebodyidx)">
-    <rect x="70" y="30" width="9" height="72" fill="#4a3626"/>
-    <rect x="85" y="30" width="8" height="72" fill="#4a3626"/>
-  </g>
-  <ellipse cx="42" cy="61" rx="4.2" ry="4.8" fill="#2b1d14"/>
-  <ellipse cx="58" cy="59" rx="4.2" ry="4.8" fill="#2b1d14"/>
-  <circle cx="40.6" cy="59.2" r="1.5" fill="#fff"/>
-  <circle cx="56.6" cy="57.2" r="1.5" fill="#fff"/>
-  <ellipse cx="37" cy="70" rx="4.2" ry="2.4" fill="#f3a1a1" opacity="0.75"/>
-  <ellipse cx="63" cy="68" rx="4.2" ry="2.4" fill="#f3a1a1" opacity="0.75"/>
-  <path d="M45 69 Q50 74.5 55 69" stroke="#2b1d14" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-  <path d="M43 92 L38 104" stroke="#4a3626" stroke-width="4" stroke-linecap="round"/>
-  <path d="M53 96 L49 108" stroke="#4a3626" stroke-width="4" stroke-linecap="round"/>
-  <path d="M67 96 L71 108" stroke="#4a3626" stroke-width="4" stroke-linecap="round"/>
-  <path d="M77 92 L82 104" stroke="#4a3626" stroke-width="4" stroke-linecap="round"/>
-</svg></div>
         </div>
       </div>
     </div>

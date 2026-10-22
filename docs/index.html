@@ -137,6 +137,9 @@
   .example .app .cmp-viz img{width:100%;border-radius:8px;background:#000;display:block;aspect-ratio:1/1}
   .example .app .cmp-viz figcaption{font-size:12.5px;color:#6b7080;margin-top:4px}
   .example .app .viz-return{margin-top:4px;font-size:12.5px;font-weight:600;color:#2a2540}
+  .example .app .msg-note{margin:14px 0 0;padding:12px 14px;background:#f5f5ff;border:1px solid #e2e0f7;border-left:3px solid #4f46e5;border-radius:8px;font-size:14px;line-height:1.5;color:#2a2540}
+  .example .app .msg-note .note-label{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;color:#4f46e5;margin-bottom:4px}
+  .example .app .msg-note b{font-weight:700}
 
   /* buddy (bee + speech bubble), sitting beside the pair */
   .example .buddy{flex:0 1 280px;display:flex;flex-direction:column;align-items:center;gap:12px;margin:0;padding:0}
@@ -191,10 +194,10 @@
             <div class="viz-return">Return: 398.06</div>
           </figure>
           </div>
+          <p class="msg-note"><span class="note-label">What the tool flags</span>The reward function assigns higher return to a trajectory where the robot <b>doesn't</b> open the drawer over one where it does.</p>
         </article>
         </div>
-        <div class="buddy on" aria-live="polite">
-          <div class="bubble">Notice how the reward function assigns higher return to a trajectory where the robot doesn't open the drawer over one where it does.</div>
+        <div class="buddy on" aria-hidden="true">
           <div class="bot"><svg viewBox="0 0 120 110" width="120" height="110" aria-hidden="true">
   <defs><clipPath id="beebodyidx"><ellipse cx="60" cy="66" rx="34" ry="28"/></clipPath></defs>
   <g class="lucky-bee-wing lucky-bee-wing--left" style="transform-origin: 52px 50px">
